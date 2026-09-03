@@ -8,6 +8,7 @@ const navigation = [
   { label: 'Event Assessment', to: '/assessment' },
   { label: 'Change & Anomaly', to: '/anomaly' },
   { label: 'Intelligence Reports', to: '/reports' },
+  { label: 'Regional Analytics', to: '/analytics' },
   { label: 'Alerts', to: '/alerts' },
   { label: 'Data Layers', to: '/data-layers' },
   { label: 'System / Model', to: '/system' },
