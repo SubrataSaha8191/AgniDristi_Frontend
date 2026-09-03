@@ -1,4 +1,5 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+export const isApiConfigured = API_BASE_URL.length > 0
 
 function buildUrl(path: string) {
   if (/^https?:\/\//.test(path)) return path
