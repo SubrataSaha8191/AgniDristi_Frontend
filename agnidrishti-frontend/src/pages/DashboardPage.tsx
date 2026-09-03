@@ -1,5 +1,6 @@
 import { AlertTriangle, Factory, Flame, History, Plus, ShieldAlert } from 'lucide-react'
 import { KPICard } from '../components/kpi/KPICard'
+import { ThermalMap } from '../components/map/ThermalMap'
 import { useKPISummary } from '../services/kpiService'
 
 export default function DashboardPage() {
@@ -33,6 +34,9 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+      <div className="mt-6">
+        <ThermalMap />
+      </div>
     </div>
   )
 }
