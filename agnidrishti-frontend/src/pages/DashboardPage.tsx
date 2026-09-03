@@ -1,5 +1,6 @@
 import { AlertTriangle, Factory, Flame, History, Plus, ShieldAlert } from 'lucide-react'
 import { KPICard } from '../components/kpi/KPICard'
+import { FilterPanel } from '../components/filters/FilterPanel'
 import { ThermalMap } from '../components/map/ThermalMap'
 import { useKPISummary } from '../services/kpiService'
 
@@ -19,6 +20,7 @@ export default function DashboardPage() {
     <div>
       <h1 className="text-2xl font-semibold text-text-primary">Dashboard</h1>
       <p className="mt-1 text-sm text-text-secondary">Thermal source intelligence overview</p>
+      
       {isError ? (
         <p className="mt-8 text-danger">Unable to load KPI summary.</p>
       ) : (
@@ -36,6 +38,9 @@ export default function DashboardPage() {
       )}
       <div className="mt-6">
         <ThermalMap />
+      </div>
+      <div className="mt-6">
+        <FilterPanel />
       </div>
     </div>
   )

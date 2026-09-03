@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { useSourceStore } from '../../stores/sourceStore'
+import { useFilterStore } from '../../stores/filterStore'
 import { useSources } from '../../services/sourceService'
 import type { SourceSummary } from '../../types/source'
 import {
@@ -62,7 +63,17 @@ function ClusteredMarkers({ sources }: { sources: SourceSummary[] }) {
 
 export function ThermalMap() {
   const [isSatellite, setIsSatellite] = useState(false)
-  const { data: sources = [], isLoading, isError } = useSources()
+  const sourceId = useFilterStore((state) => state.sourceId)
+  const location = useFilterStore((state) => state.location)
+  const facility = useFilterStore((state) => state.facility)
+  const dateRange = useFilterStore((state) => state.dateRange)
+  const sourceType = useFilterStore((state) => state.sourceType)
+  const industryType = useFilterStore((state) => state.industryType)
+  const anomalyLevel = useFilterStore((state) => state.anomalyLevel)
+  const confidenceLevel = useFilterStore((state) => state.confidenceLevel)
+  const persistenceStatus = useFilterStore((state) => state.persistenceStatus)
+  const filters = { sourceId, location, facility, from: dateRange.from, to: dateRange.to, sourceType, industryType, anomalyLevel, confidenceLevel, persistenceStatus }
+  const { data: sources = [], isLoading, isError } = useSources(filters)
   const tileUrl = isSatellite ? satelliteTileUrl : mapTileUrl
 
   return (
