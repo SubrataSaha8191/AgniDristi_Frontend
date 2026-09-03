@@ -7,6 +7,8 @@ import { DataSourceBadge } from './DataSourceBadge'
 import { ActivityTimelineChart } from '../charts/ActivityTimelineChart'
 import { ThermalFingerprintChart } from '../charts/ThermalFingerprintChart'
 import { AnomalyDetectionChart } from '../charts/AnomalyDetectionChart'
+import { NearbyFacilitiesTable } from '../tables/NearbyFacilitiesTable'
+import { SatelliteContextViewer } from '../satellite/SatelliteContextViewer'
 
 function DetailField({ label, value }: { label: string; value: string | number }) {
   return (
@@ -87,6 +89,8 @@ export function SourceSnapshotPanel() {
                 <ActivityTimelineChart sourceId={source.id} />
                 <ThermalFingerprintChart sourceId={source.id} />
                 <AnomalyDetectionChart sourceId={source.id} />
+                <NearbyFacilitiesTable sourceId={source.id} />
+                <SatelliteContextViewer sourceId={source.id} />
               </div>
             </>
           )}
