@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useUIStore } from '../stores/uiStore'
 
 const navigation = [
   { label: 'Dashboard', to: '/dashboard', end: true },
@@ -13,6 +14,10 @@ const navigation = [
 ]
 
 export function Sidebar() {
+  const sidebarOpen = useUIStore((state) => state.sidebarOpen)
+
+  if (!sidebarOpen) return null
+
   return (
     <aside className="w-64 shrink-0 border-r border-border bg-surface p-4 max-md:hidden">
       <nav aria-label="Primary navigation" className="space-y-1">
