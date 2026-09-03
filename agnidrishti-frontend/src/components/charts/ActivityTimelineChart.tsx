@@ -17,7 +17,7 @@ export function ActivityTimelineChart({ sourceId }: { sourceId: string }) {
   return (
     <section aria-label="Historical activity">
       <h3 className="text-sm font-semibold text-text-primary">Historical activity</h3>
-      {isLoading && <p className="mt-3 text-xs text-text-secondary">Loading activity...</p>}
+       {isLoading && <div className="mt-3 h-48 animate-pulse rounded-lg bg-bg" role="status" aria-label="Loading activity" />}
       {isError && <p className="mt-3 text-xs text-danger">Unable to load activity.</p>}
       {!isLoading && !isError && (
         <div className="mt-3 h-48 w-full">

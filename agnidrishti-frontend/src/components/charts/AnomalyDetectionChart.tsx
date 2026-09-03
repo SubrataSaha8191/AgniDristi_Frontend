@@ -20,7 +20,7 @@ export function AnomalyDetectionChart({ sourceId }: { sourceId: string }) {
         {!isLoading && !isError && <span className={`rounded-full px-2 py-1 text-xs font-medium ${severity.className}`}>{severity.label} severity</span>}
       </div>
       {!isLoading && !isError && <p className="mt-1 text-xs text-text-secondary">Trend: {trend}</p>}
-      {isLoading && <p className="mt-3 text-xs text-text-secondary">Loading anomaly data...</p>}
+       {isLoading && <div className="mt-3 h-40 animate-pulse rounded-lg bg-bg" role="status" aria-label="Loading anomaly data" />}
       {isError && <p className="mt-3 text-xs text-danger">Unable to load anomaly data.</p>}
       {!isLoading && !isError && (
         <div className="mt-3 h-40 w-full">

@@ -67,7 +67,7 @@ export function AlertsList() {
   if (alerts.length === 0) return <p className="mt-6 rounded-lg border border-border bg-surface p-8 text-center text-sm text-text-secondary">No active alerts.</p>
 
   return (
-    <div className="mt-6 overflow-hidden rounded-lg border border-border bg-surface">
+    <div className="mt-6 overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div>
           <h2 className="text-sm font-semibold text-text-primary">Active alerts</h2>

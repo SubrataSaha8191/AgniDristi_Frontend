@@ -59,7 +59,7 @@ export function FilterPanel() {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-5" aria-label="Source filters">
+    <section className="rounded-lg border border-border bg-surface p-5 shadow-sm" aria-label="Source filters">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-text-primary">Search &amp; filters</h2>

@@ -11,7 +11,7 @@ export function ThermalFingerprintChart({ sourceId }: { sourceId: string }) {
         {data && <span className="text-xs text-text-secondary">Similarity: <strong className="text-text-primary">{data.similarityScore}%</strong></span>}
       </div>
       {data && <p className="mt-1 text-xs text-text-secondary">Best match: <span className="font-medium text-text-primary">{data.bestMatchIndustry}</span></p>}
-      {isLoading && <p className="mt-3 text-xs text-text-secondary">Loading fingerprint...</p>}
+       {isLoading && <div className="mt-3 h-40 animate-pulse rounded-lg bg-bg" role="status" aria-label="Loading fingerprint" />}
       {isError && <p className="mt-3 text-xs text-danger">Unable to load fingerprint.</p>}
       {data && !isError && (
         <div className="mt-3 h-40 w-full">
