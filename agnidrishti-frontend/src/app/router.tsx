@@ -8,7 +8,6 @@ import DataLayersPage from '../pages/DataLayersPage'
 import InvestigationPage from '../pages/InvestigationPage'
 import LoginPage from '../pages/LoginPage'
 import ReportsPage from '../pages/ReportsPage'
-import RegionalAnalyticsPage from '../pages/RegionalAnalyticsPage'
 import SearchPage from '../pages/SearchPage'
 import SystemPage from '../pages/SystemPage'
 
@@ -24,7 +23,6 @@ export const router = createBrowserRouter([
       { path: 'assessment', element: <AssessmentPage /> },
       { path: 'anomaly', element: <AnomalyPage /> },
       { path: 'reports', element: <ReportsPage /> },
-      { path: 'analytics', element: <RegionalAnalyticsPage /> },
       { path: 'alerts', element: <AlertsPage /> },
       { path: 'data-layers', element: <DataLayersPage /> },
       { path: 'system', element: <SystemPage /> },
