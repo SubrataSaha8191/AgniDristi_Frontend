@@ -43,7 +43,7 @@ export function Sidebar() {
   if (!sidebarOpen) return null
 
   return (
-    <aside className="w-64 shrink-0 border-r border-border bg-surface p-4 max-md:hidden">
+    <aside className="h-full w-64 shrink-0 border-r border-border bg-surface p-4 max-md:hidden">
       <nav aria-label="Primary navigation">
         {navigationSections.map(({ label: sectionLabel, items }) => (
           <section key={sectionLabel} className="mt-6 first:mt-0">

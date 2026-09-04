@@ -5,11 +5,13 @@ import { TopNav } from './TopNav'
 
 export function AppShell() {
   return (
-    <div className="min-h-screen bg-bg text-text-primary">
-      <TopNav />
-      <div className="flex min-h-[calc(100vh-4rem)]">
+    <div className="flex h-screen flex-col overflow-hidden bg-bg text-text-primary">
+      <div className="z-50 shrink-0">
+        <TopNav />
+      </div>
+      <div className="flex min-h-0 flex-1">
         <Sidebar />
-        <main className="min-w-0 flex-1 p-6 md:p-8">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-6 md:p-8">
           <Outlet />
         </main>
         <div id="source-snapshot-panel" aria-label="Source snapshot panel">
