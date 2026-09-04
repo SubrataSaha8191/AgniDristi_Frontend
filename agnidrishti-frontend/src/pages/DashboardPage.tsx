@@ -33,7 +33,7 @@ export default function DashboardPage() {
       {isError ? (
         <p className="mt-8 text-danger">Unable to load KPI summary.</p>
       ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {cards.map((card) => (
             <KPICard
               key={card.label}
