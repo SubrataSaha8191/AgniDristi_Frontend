@@ -36,7 +36,7 @@ export function SourceSnapshotPanel() {
           role="dialog"
           aria-modal="true"
           aria-label="Source snapshot"
-           className="fixed inset-y-0 right-0 z-[1100] w-full max-w-md overflow-y-auto border-l border-border bg-surface p-6 shadow-xl"
+           className="source-panel-scroll fixed inset-y-0 right-0 z-[1100] w-full max-w-md overflow-y-auto border-l border-border bg-surface p-6 shadow-xl"
         >
           <div className="flex items-start justify-between gap-4">
             <div>

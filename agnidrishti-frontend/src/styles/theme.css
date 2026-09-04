@@ -55,6 +55,50 @@ body {
   font-family: inherit;
 }
 
+.main-content-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.main-content-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-content-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+}
+
+.main-content-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+.source-panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.source-panel-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.source-panel-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.source-panel-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+}
+
+.source-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
 ::selection {
   background-color: var(--color-accent);
   color: var(--color-surface);
