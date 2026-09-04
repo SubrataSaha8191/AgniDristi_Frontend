@@ -4,11 +4,6 @@ import { Link } from 'react-router-dom'
 import { useSourceStore } from '../../stores/sourceStore'
 import { useSourceDetail } from '../../services/sourceService'
 import { DataSourceBadge } from './DataSourceBadge'
-import { ActivityTimelineChart } from '../charts/ActivityTimelineChart'
-import { ThermalFingerprintChart } from '../charts/ThermalFingerprintChart'
-import { AnomalyDetectionChart } from '../charts/AnomalyDetectionChart'
-import { NearbyFacilitiesTable } from '../tables/NearbyFacilitiesTable'
-import { SatelliteContextViewer } from '../satellite/SatelliteContextViewer'
 
 function DetailField({ label, value }: { label: string; value: string | number }) {
   return (
@@ -73,26 +68,24 @@ export function SourceSnapshotPanel() {
                 <DetailField label="Confidence score" value={`${source.confidence}%`} />
                 <DetailField label="Persistence status" value={source.status} />
                 <DetailField label="Anomaly level" value={source.anomalyLevel} />
-                <DetailField label="First detected" value={source.firstDetected} />
-                <DetailField label="Last detected" value={source.lastDetected} />
-                <DetailField label="Coordinates" value={`${source.lat.toFixed(4)}, ${source.lon.toFixed(4)}`} />
-                <DetailField label="District / state" value={`${source.district}, ${source.state}`} />
-              </dl>
-              <Link
+                 <DetailField label="First detected" value={source.firstDetected} />
+                 <DetailField label="Last detected" value={source.lastDetected} />
+                 <DetailField label="Location" value={`${source.district}, ${source.state}`} />
+                 <DetailField label="Coordinates" value={`${source.lat.toFixed(4)}, ${source.lon.toFixed(4)}`} />
+               </dl>
+               <div className="mt-4 flex flex-wrap gap-2" aria-label="Source classifications">
+                 <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">{source.category}</span>
+                 <span className="rounded-full bg-info/10 px-2.5 py-1 text-xs font-medium text-info">{source.status}</span>
+                 <span className="rounded-full bg-danger/10 px-2.5 py-1 text-xs font-medium text-danger">{source.anomalyLevel} anomaly</span>
+               </div>
+               <Link
                 to={`/investigation/${encodeURIComponent(source.id)}`}
                 onClick={handleClose}
                 className="mt-6 block rounded-lg bg-accent px-4 py-2.5 text-center text-sm font-medium text-white hover:opacity-90"
-              >
-                View Full Investigation
-              </Link>
-              <div className="mt-8 space-y-8 border-t border-border pt-6">
-                <ActivityTimelineChart sourceId={source.id} />
-                <ThermalFingerprintChart sourceId={source.id} />
-                <AnomalyDetectionChart sourceId={source.id} />
-                <NearbyFacilitiesTable sourceId={source.id} />
-                <SatelliteContextViewer sourceId={source.id} />
-              </div>
-            </>
+               >
+                 View Full Investigation
+               </Link>
+             </>
           )}
         </motion.aside>
       )}

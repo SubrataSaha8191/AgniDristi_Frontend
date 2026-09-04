@@ -2,10 +2,15 @@ import { AlertTriangle, Factory, Flame, History, Plus, ShieldAlert } from 'lucid
 import { KPICard } from '../components/kpi/KPICard'
 import { FilterPanel } from '../components/filters/FilterPanel'
 import { ThermalMap } from '../components/map/ThermalMap'
+import { ActivityTimelineChart } from '../components/charts/ActivityTimelineChart'
+import { ThermalFingerprintChart } from '../components/charts/ThermalFingerprintChart'
+import { AnomalyDetectionChart } from '../components/charts/AnomalyDetectionChart'
+import { useSourceStore } from '../stores/sourceStore'
 import { useKPISummary } from '../services/kpiService'
 
 export default function DashboardPage() {
   const { data: kpis, isLoading, isError } = useKPISummary()
+  const selectedSourceId = useSourceStore((state) => state.selectedSourceId)
 
   const cards = [
     { label: 'Total Sources', value: kpis?.totalSources, deltaPct: kpis?.totalSourcesDeltaPct ?? 0, icon: Flame },
@@ -38,6 +43,32 @@ export default function DashboardPage() {
       )}
       <div className="mt-6">
         <ThermalMap />
+      </div>
+      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-lg border border-border bg-surface p-5 shadow-sm">
+          {selectedSourceId ? <ActivityTimelineChart sourceId={selectedSourceId} /> : (
+            <section aria-label="Historical activity">
+              <h2 className="text-sm font-semibold text-text-primary">Historical activity</h2>
+              <p className="mt-3 text-sm text-text-secondary">Select a source on the map to see its activity.</p>
+            </section>
+          )}
+        </div>
+        <div className="rounded-lg border border-border bg-surface p-5 shadow-sm">
+          {selectedSourceId ? <ThermalFingerprintChart sourceId={selectedSourceId} /> : (
+            <section aria-label="Thermal fingerprint">
+              <h2 className="text-sm font-semibold text-text-primary">Thermal fingerprint</h2>
+              <p className="mt-3 text-sm text-text-secondary">Select a source on the map to see its fingerprint.</p>
+            </section>
+          )}
+        </div>
+        <div className="rounded-lg border border-border bg-surface p-5 shadow-sm">
+          {selectedSourceId ? <AnomalyDetectionChart sourceId={selectedSourceId} /> : (
+            <section aria-label="Anomaly detection">
+              <h2 className="text-sm font-semibold text-text-primary">Anomaly detection</h2>
+              <p className="mt-3 text-sm text-text-secondary">Select a source on the map to see its anomaly trend.</p>
+            </section>
+          )}
+        </div>
       </div>
       <div className="mt-6">
         <FilterPanel />

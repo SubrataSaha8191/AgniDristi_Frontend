@@ -2,6 +2,9 @@ import { Link, useParams } from 'react-router-dom'
 import { NearbyFacilitiesTable } from '../components/tables/NearbyFacilitiesTable'
 import { SatelliteContextViewer } from '../components/satellite/SatelliteContextViewer'
 import { SourceHistoryTimeline } from '../components/timeline/SourceHistoryTimeline'
+import { ActivityTimelineChart } from '../components/charts/ActivityTimelineChart'
+import { ThermalFingerprintChart } from '../components/charts/ThermalFingerprintChart'
+import { AnomalyDetectionChart } from '../components/charts/AnomalyDetectionChart'
 import { useSourceDetail } from '../services/sourceService'
 
 const DEFAULT_SOURCE_ID = 'AGNI-IND-004821'
@@ -26,6 +29,11 @@ export default function InvestigationPage() {
       {isError && <p className="mt-8 text-sm text-danger">Unable to load source details.</p>}
       {source && (
         <>
+          <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            <div className="rounded-lg border border-border bg-surface p-5 shadow-sm"><ActivityTimelineChart sourceId={source.id} /></div>
+            <div className="rounded-lg border border-border bg-surface p-5 shadow-sm"><ThermalFingerprintChart sourceId={source.id} /></div>
+            <div className="rounded-lg border border-border bg-surface p-5 shadow-sm"><AnomalyDetectionChart sourceId={source.id} /></div>
+          </div>
           <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,1fr)]">
             <div className="rounded-lg border border-border bg-surface p-5 shadow-sm"><SatelliteContextViewer sourceId={source.id} /></div>
             <div className="rounded-lg border border-border bg-surface p-5 shadow-sm"><NearbyFacilitiesTable sourceId={source.id} /></div>

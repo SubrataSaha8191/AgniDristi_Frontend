@@ -292,16 +292,121 @@ Step-by-step implementation plan derived from `PRD.md`, `TECHSTACK.md`, and `ARC
 
 ---
 
-### Step 19 — Backend Integration (when available)
+### Step 19 — Restructure Source Snapshot Panel to Match Reference UI
 
-**Goal:** Replace mock data with real Backend API calls.
+**Goal:** Match the reference dashboard image exactly: the slide-in Source Snapshot panel stays lightweight (core fields only), while Historical Thermal Activity, Thermal Fingerprint, and Anomaly Analysis move out of the panel and become their own cards directly on the Dashboard page (below the map), updating based on whichever source is currently selected. Only Nearby Industrial Facilities and Satellite Context move to being Investigation-page-only (they do not appear on the Dashboard in the reference image at all).
+
+**Files:** `src/components/source/SourceSnapshotPanel.tsx`, `src/pages/DashboardPage.tsx`, new Dashboard-level chart card components (can reuse the existing `ActivityTimelineChart`, `ThermalFingerprintChart`, `AnomalyDetectionChart` components — just render them on the Dashboard page instead of inside the panel).
+
+**Implementation:**
+- **`SourceSnapshotPanel.tsx`** — after this change, contains only: the `DataSourceBadge` (Live: FIRMS · Trained on: VNF), the core fields (Source ID, Classification, Industry Subtype, Confidence Score, Persistence Status, Anomaly Level, First Detected, Last Detected, Location, Coordinates), the classification badges row, and the "View Full Investigation →" button. Remove Historical Activity, Thermal Fingerprint, Anomaly Detection, Nearby Industrial Facilities, and Satellite Context from this file entirely.
+- **`DashboardPage.tsx`** — add three new cards below the map, in a row (matching the reference layout: Historical Thermal Activity | Thermal Fingerprint | Anomaly Analysis), reusing the exact same `ActivityTimelineChart`, `ThermalFingerprintChart`, and `AnomalyDetectionChart` components already built in Step 13. These cards read `sourceStore.selectedSourceId` and call the same `useSourceHistory`, `useSourceFingerprint`, `useSourceAnomaly` hooks the panel used to call — so they update automatically to show data for whichever source is currently selected on the map. If no source is selected yet, show a sensible default/empty state (e.g., "Select a source on the map to see its activity").
+- **Nearby Industrial Facilities and Satellite Context** — remain Investigation-page-only, exactly as `InvestigationPage.tsx` already renders them (built in Step 14). Do not add these two to the Dashboard.
+
+**CRITICAL constraints:**
+- Do NOT duplicate the chart components — reuse the existing `ActivityTimelineChart`, `ThermalFingerprintChart`, `AnomalyDetectionChart` components as-is, just changing where they're rendered from (panel → Dashboard page).
+- Do NOT modify `InvestigationPage.tsx` or the underlying chart/table/viewer components' internal logic — only change where three of them are mounted.
+- Do NOT touch the map, KPI cards, Filters, or the four below-the-map widgets from Step 20 (Recent Alerts, Regional Thermal Sources, Industrial vs Natural, Source Trend) — those are separate, unrelated to this step.
+- The "View Full Investigation" button in the panel must still navigate to `/investigation/:sourceId` and that page must still show all five original sections (Historical Activity, Thermal Fingerprint, Anomaly Detection, Nearby Facilities, Satellite Context) in full, unaffected.
+
+**Dependency:** Steps 11, 13, 14.
+
+**Verification:** Clicking a map marker opens a short Source Snapshot panel (core fields + button only, no charts). The Dashboard page itself, below the map, now shows Historical Thermal Activity, Thermal Fingerprint, and Anomaly Analysis cards that update to reflect whichever source was just clicked. Clicking "View Full Investigation" still shows the complete picture including Nearby Facilities and Satellite Context on the Investigation page.
+
+**Expected Result:** Dashboard matches the reference image exactly — map, KPI cards, Source Snapshot panel (lightweight), and three chart cards below the map, all visible together on one screen.
+
+---
+
+## Dashboard Widget Drill-Down Navigation
+
+Added once the full dashboard (Steps 1–19) was verified working. Goal: keep the Dashboard's visual layout and functionality exactly as-is (it already matches the target UI closely), and add navigation only to the widgets **below the map** — Recent Alerts, Regional Thermal Sources, Industrial vs Natural donut, Source Trend table — so each links through to its own dedicated sidebar page for full detail. **KPI cards and the map itself are explicitly excluded from this — they stay exactly as they are, not clickable**, since a KPI count alone doesn't carry enough specific information to justify a dedicated destination page. Backend Integration remains the final step, Step 23.
+
+**Important correction after verification:** a walkthrough of the actual running app found that the Dashboard page currently ends right after the map (and, once Step 19 is done, the three source-scoped chart cards) — it does **not** yet have standalone Recent Alerts, Regional Thermal Sources, Industrial vs Natural, or Source Trend widgets below that. These are separate, always-visible aggregate widgets (not tied to a selected source) and must be built, as Step 20, before any "View details" links can be added to them.
+
+**Guiding rule for Steps 21–22 below:** once Step 20 builds the widgets, adding their links is wrapping/linking changes only. Do not modify any existing data-fetching logic, hooks, chart internals, component props, KPI cards, the map, or the Source Snapshot panel. Do one step at a time; verify the app works exactly as before, plus the new addition, before moving to the next step.
+
+### Widget → Destination Page Mapping (below-the-map widgets only)
+
+| Dashboard widget | Links to |
+|---|---|
+| Recent Alerts widget | `/alerts` (Alerts Center) |
+| Regional Thermal Sources chart | `/assessment` (Event Assessment) |
+| Industrial vs Natural donut | `/assessment` (Event Assessment) |
+| Source Trend (30 Days) table | `/assessment` (Event Assessment) or dedicated trend view |
+
+---
+
+### Step 20 — Build Dashboard-Level Aggregate Widgets
+
+**Goal:** Build the four below-the-map widgets as standalone, always-visible Dashboard components — aggregating across *all* sources, not scoped to any single selected source. This is new component work, not a wrapping/linking change.
+
+**Files:** `src/pages/DashboardPage.tsx`, new widget components (e.g., `src/components/dashboard/RecentAlertsWidget.tsx`, `RegionalSourcesChart.tsx`, `IndustrialVsNaturalChart.tsx`, `SourceTrendTable.tsx`)
+
+**Implementation:**
+- **Recent Alerts widget** — reuse the existing `useAlerts()` hook (from Step 15); render the latest 4 alerts as a compact list with severity badge, source ID, and timestamp, plus a "View All" link to `/alerts`.
+- **Regional Thermal Sources chart** — new aggregate bar chart (Recharts), grouping all mock sources by state/region (derive region the same way `sourceService.ts` already does for `district`/`state` in `useSourceDetail`), with one bar cluster per region broken down by category (Industrial/Natural/Persistent/Abnormal/Unknown/FIRMS).
+- **Industrial vs Natural donut chart** — new aggregate donut (Recharts), summarizing the full `useSources()` dataset into Industrial / Natural-Biomass / Unknown proportions.
+- **Source Trend (30 Days) table** — new aggregate table listing each source type (Industrial, Natural/Biomass, Persistent, Abnormal, Unknown, FIRMS Detections) with a count and a simple trend indicator (reuse the deterministic mock-generator pattern from `mockGenerators.ts` to produce a plausible sparkline/trend and % change per type, seeded by category name so it's consistent across reloads).
+
+Place all four in a row below the map, matching the reference layout (Recent Alerts | Regional Thermal Sources | Industrial vs Natural in one row, Source Trend below or alongside per the reference image). Do not touch the map, KPI cards, or Source Snapshot panel while building these — they are new, separate components.
+
+**Dependency:** Steps 8, 13, 15, 16.
+
+**Verification:** Dashboard now shows all four widgets below the map, populated with real aggregate mock data (not tied to any single selected source); values are plausible and internally consistent (e.g., category counts across Regional Thermal Sources and Industrial vs Natural roughly agree with the KPI card totals).
+
+**Expected Result:** Dashboard visually and functionally matches the target reference image in full — map, KPI cards, and all four below-the-map widgets present and populated.
+
+---
+
+### Step 21 — Remaining Widget Links (Regional Chart, Analytics Table)
+
+**Goal:** Add "View details →" links to the two below-map Dashboard widgets that don't already have one — Regional Thermal Sources chart and Industrial vs Natural donut chart — matching the exact visual style of the "View All" links on Recent Alerts and Source Trend (30 Days), so all four bottom-row cards look visually consistent.
+
+**Files:** `src/pages/DashboardPage.tsx` (or the specific widget card components built in Step 20) — widget card headers only, no chart internals touched.
+
+**Implementation:** Add a "View details →" link into each card's header, styled identically to the "View All" links (same font size, color, position — small accent-colored text aligned to the top-right of the card header), alongside any existing (i) info icon. Both new links navigate to `/assessment`.
+
+**CRITICAL constraints:**
+- Only edit `DashboardPage.tsx` (or its Regional Thermal Sources / Industrial vs Natural widget components).
+- Do **NOT** add, modify, or reference these links inside `SourceSnapshotPanel.tsx` in any way — that component is unrelated and must not be touched.
+- Do **NOT** modify the map, KPI cards, Source Snapshot panel, or any of the three charts inside the Source Snapshot panel (Historical Activity, Thermal Fingerprint, Anomaly Analysis) — those already have their own navigation via "View Full Investigation."
+- Do **NOT** change any existing chart logic, data fetching, or info icons already present.
+- Keep the overall Dashboard layout, spacing, and every other element pixel-for-pixel identical to how it renders after Step 20.
+
+**Dependency:** Step 20.
+
+**Verification:** The Dashboard looks exactly as it does after Step 20, except Regional Thermal Sources and Industrial vs Natural now also show a "View details →" link in their header. Clicking it navigates to `/assessment`. Confirm the Source Snapshot panel is completely untouched.
+
+**Expected Result:** All four below-the-map widgets (Recent Alerts, Regional Thermal Sources, Industrial vs Natural, Source Trend) consistently link through to their detail pages; Dashboard's map, KPI row, and Source Snapshot panel remain untouched.
+
+---
+
+### Step 22 — Event Assessment Page Content
+
+**Goal:** Build out `/assessment` (Event Assessment page) to show the expanded/full-size version of the Regional Thermal Sources chart and Industrial vs Natural breakdown that the Dashboard links to.
+
+**Files:** `src/pages/AssessmentPage.tsx`
+
+**Implementation:** Reuse the same chart components built in Step 20 (Regional Thermal Sources bar chart, Industrial vs Natural donut) at a larger size, with more detail/more sources listed than the compact Dashboard preview. No new chart logic — just a fuller render of what already exists.
+
+**Dependency:** Step 21.
+
+**Verification:** Navigating to `/assessment` (via the new "View details" links or directly) shows a working, larger version of these charts, not a blank placeholder.
+
+**Expected Result:** Event Assessment page has real content instead of a stub.
+
+---
+
+### Step 23 — Backend Integration (when available)
+
+**Goal:** Replace mock data with real Backend API calls. This is now the final step — done last, after the entire frontend (including the Dashboard widgets and drill-down navigation above) is complete and working end-to-end in mock-data mode.
 
 **Files:** `src/services/*`, `.env.local`
 
 **Implementation:** Set `VITE_API_BASE_URL` to the real backend. Reconcile placeholder types in `types/source.ts` against the actual OpenAPI schema; adjust field names/shapes as needed. Remove mock-data fallback logic once confidence in the real API is established.
 
-**Dependency:** Backend API must exist (out of scope of this document).
+**Dependency:** Backend API must exist (out of scope of this document). All prior steps (1–22) must be complete.
 
-**Verification:** Dashboard shows real data end-to-end; no console errors; all P0/P1 features function against live data.
+**Verification:** Dashboard shows real data end-to-end; no console errors; all P0/P1 features function against live data, including the Dashboard widgets and Event Assessment page built in Steps 20–22.
 
 **Expected Result:** Fully integrated, demo-ready AgniDrishti dashboard.
