@@ -44,7 +44,7 @@ function findMockSource(sourceId: string): SourceSummary {
 
 // Deterministic district/state assignment so the same source always shows the
 // same location details, without needing a hand-written entry per source.
-const REGIONS: { district: string; state: string }[] = [
+export const REGIONS: { district: string; state: string }[] = [
   { district: 'Ranchi', state: 'Jharkhand' },
   { district: 'Dhanbad', state: 'Jharkhand' },
   { district: 'Patna', state: 'Bihar' },
@@ -64,7 +64,7 @@ function seedFromString(str: string): number {
   return Math.abs(hash)
 }
 
-function regionForSource(source: SourceSummary) {
+export function regionForSource(source: SourceSummary) {
   return REGIONS[seedFromString(source.id) % REGIONS.length]
 }
 
