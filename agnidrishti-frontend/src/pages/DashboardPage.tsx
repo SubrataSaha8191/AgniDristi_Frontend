@@ -48,14 +48,6 @@ export default function DashboardPage() {
       <div className="mt-6">
         <ThermalMap />
       </div>
-      <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.8fr)_minmax(0,1.4fr)]">
-        <RecentAlertsWidget />
-        <RegionalSourcesChart />
-        <IndustrialVsNaturalChart />
-      </div>
-      <div className="mt-6">
-        <SourceTrendTable />
-      </div>
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-border bg-surface p-5 shadow-sm">
           {selectedSourceId ? <ActivityTimelineChart sourceId={selectedSourceId} /> : (
@@ -81,6 +73,14 @@ export default function DashboardPage() {
             </section>
           )}
         </div>
+      </div>
+      <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.8fr)_minmax(0,1.4fr)]">
+        <RecentAlertsWidget />
+        <RegionalSourcesChart />
+        <IndustrialVsNaturalChart />
+      </div>
+      <div className="mt-6">
+        <SourceTrendTable />
       </div>
       <div className="mt-6">
         <FilterPanel />
