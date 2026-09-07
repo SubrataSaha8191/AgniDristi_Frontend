@@ -10,8 +10,15 @@ type TimelineEvent = {
   tone: string
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' }).format(new Date(value))
+function formatDate(value?: string | null) {
+  if (!value || typeof value !== 'string' || !value.trim()) return 'N/A'
+  const date = new Date(value)
+  if (isNaN(date.getTime())) return value
+  try {
+    return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' }).format(date)
+  } catch {
+    return value
+  }
 }
 
 export function SourceHistoryTimeline({ source }: { source: SourceDetail }) {
@@ -19,37 +26,41 @@ export function SourceHistoryTimeline({ source }: { source: SourceDetail }) {
   const latestActivity = history[history.length - 1]
   const statusLabel = source.status === 'persistent' ? 'Persistence confirmed' : `Status marked ${source.status}`
 
+  const latestDate = latestActivity?.month
+    ? (latestActivity.month.length === 7 ? `${latestActivity.month}-01` : latestActivity.month)
+    : (source.lastDetected || new Date().toISOString())
+
   const events: TimelineEvent[] = [
     {
-      date: source.firstDetected,
+      date: source.firstDetected || new Date().toISOString(),
       title: 'First detected',
       detail: `Thermal source identified at ${source.lat.toFixed(4)}, ${source.lon.toFixed(4)}.`,
       icon: Radio,
       tone: 'bg-info text-white',
     },
     {
-      date: source.firstDetected,
+      date: source.firstDetected || new Date().toISOString(),
       title: 'Source classified',
       detail: `${source.industrySubtype ?? 'Unclassified source'} · ${source.confidence}% confidence`,
       icon: ScanSearch,
       tone: 'bg-accent text-white',
     },
     {
-      date: source.lastDetected,
+      date: source.lastDetected || new Date().toISOString(),
       title: statusLabel,
       detail: `${source.anomalyLevel} anomaly level recorded in the current assessment.`,
       icon: CheckCircle2,
       tone: 'bg-success text-white',
     },
     ...(latestActivity ? [{
-      date: `${latestActivity.month}-01`,
+      date: latestDate,
       title: 'Latest activity observation',
       detail: `${latestActivity.detections} detections · average temperature ${latestActivity.avgTempK} K`,
       icon: Clock3,
       tone: 'bg-warning text-white',
     }] : []),
     {
-      date: source.lastDetected,
+      date: source.lastDetected || new Date().toISOString(),
       title: 'Last detected',
       detail: 'Most recent observation in the selected source record.',
       icon: Radio,

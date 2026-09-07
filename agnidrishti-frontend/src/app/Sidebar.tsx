@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AlertCircle, Bell, FileSearch, FileText, Layers, LayoutDashboard, Search, Settings, TrendingUp, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import gsap from 'gsap'
+import { useThemeStore } from '../stores/themeStore'
 import { useUIStore } from '../stores/uiStore'
 
 const sections = [
@@ -11,6 +12,7 @@ const sections = [
 ]
 
 export function Sidebar() {
+  const theme = useThemeStore((state) => state.theme)
   const sidebarOpen = useUIStore((state) => state.sidebarOpen)
   const toggleSidebar = useUIStore((state) => state.toggleSidebar)
   const [shouldRender, setShouldRender] = useState(sidebarOpen)
@@ -56,10 +58,14 @@ export function Sidebar() {
           <div className="space-y-1">
             {items.map(({ label, to, end, icon: Icon }) => (
               <NavLink key={to} to={to} end={end} onClick={() => { if (isMobile) toggleSidebar() }}
-                className={({ isActive }) => `sidebar-nav-item flex items-center gap-3 rounded-none border-2 px-4 py-2.5 text-xs font-black uppercase tracking-wide transition-all ${isActive ? 'border-black bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'border-transparent text-text-secondary hover:border-black hover:bg-zinc-100 hover:text-text-primary'}`}>
+                className={({ isActive }) => `sidebar-nav-item flex items-center gap-3 rounded-none border-2 px-4 py-2.5 text-xs font-black uppercase tracking-wide transition-all ${
+                  isActive
+                    ? theme === 'dark' ? 'border-[#d8f5a9] bg-[#d8f5a9] text-black shadow-[3px_3px_0px_0px_rgba(216,245,169,0.3)]' : 'border-black bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
+                    : theme === 'dark' ? 'border-transparent text-text-secondary hover:bg-zinc-800 hover:border-zinc-500 hover:text-white' : 'border-transparent text-text-secondary hover:bg-transparent hover:border-black hover:text-black'
+                }`}>
                 {({ isActive }) => (
                   <>
-                    <Icon size={18} className={isActive ? 'text-[#d8f5a9]' : 'text-text-primary'} aria-hidden="true" />
+                    <Icon size={18} className={isActive ? (theme === 'dark' ? 'text-black' : 'text-[#d8f5a9]') : 'text-text-primary'} aria-hidden="true" />
                     {label}
                   </>
                 )}

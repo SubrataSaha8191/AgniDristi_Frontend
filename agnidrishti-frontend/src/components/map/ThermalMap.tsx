@@ -28,7 +28,7 @@ export function ThermalMap() {
   const tileUrl = isSatellite ? satelliteTileUrl : mapTileUrl
 
   return (
-    <section className="group relative overflow-hidden rounded-none border-2 border-black bg-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-500 hover:-translate-y-0.5" aria-label="Thermal source map">
+    <section className="group relative overflow-hidden rounded-none border-2 border-text-primary bg-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(216,245,169,0.25)] transition-all duration-500 hover:-translate-y-0.5" aria-label="Thermal source map">
       <MapContainer center={mapCenter} zoom={6} scrollWheelZoom className="h-[32rem] w-full transition-transform duration-700 ease-out group-hover:scale-[1.008]">
         <TileLayer key={tileUrl} url={tileUrl} attribution={isSatellite ? 'Tiles &copy; Esri' : '&copy; OpenStreetMap contributors'} />
         {!isLoading && !isError && sources.length > 0 && <ClusteredMarkers sources={sources} />}
@@ -41,14 +41,14 @@ export function ThermalMap() {
       </div>
 
       <MapLegend />
-      {isLoading && <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-surface/65 backdrop-blur-[1px]"><div className="w-56 border-2 border-black bg-surface p-4 shadow" role="status"><div className="h-3 w-28 animate-pulse rounded-none bg-black/20" /><div className="mt-3 h-2 w-full animate-pulse rounded-none bg-black/20" /><div className="mt-2 h-2 w-4/5 animate-pulse rounded-none bg-black/20" /></div></div>}
-      {isError && <p className="absolute left-1/2 top-1/2 z-[1000] -translate-x-1/2 border-2 border-black bg-surface px-3 py-2 text-sm font-bold text-danger shadow">Unable to load sources.</p>}
+      {isLoading && <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-surface/65 backdrop-blur-[1px]"><div className="w-56 border-2 border-text-primary bg-surface p-4 shadow" role="status"><div className="h-3 w-28 animate-pulse rounded-none bg-text-primary/20" /><div className="mt-3 h-2 w-full animate-pulse rounded-none bg-text-primary/20" /><div className="mt-2 h-2 w-4/5 animate-pulse rounded-none bg-text-primary/20" /></div></div>}
+      {isError && <p className="absolute left-1/2 top-1/2 z-[1000] -translate-x-1/2 border-2 border-text-primary bg-surface px-3 py-2 text-sm font-bold text-danger shadow">Unable to load sources.</p>}
       {!isLoading && !isError && sources.length === 0 && (
         <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-surface/80 p-6 text-center">
-          <div className="border-2 border-black bg-surface p-5 shadow">
+          <div className="border-2 border-text-primary bg-surface p-5 shadow">
             <p className="text-sm font-bold text-text-primary uppercase">No thermal sources found</p>
             <p className="mt-1 text-xs text-text-secondary">Try broadening the current filters.</p>
-            <button type="button" onClick={resetFilters} className="mt-3 border-2 border-black bg-black px-3 py-2 text-xs font-black uppercase text-white hover:bg-zinc-800">Reset filters</button>
+            <button type="button" onClick={resetFilters} className="mt-3 border-2 border-text-primary bg-black dark:bg-[#d8f5a9] px-3 py-2 text-xs font-black uppercase text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors">Reset filters</button>
           </div>
         </div>
       )}

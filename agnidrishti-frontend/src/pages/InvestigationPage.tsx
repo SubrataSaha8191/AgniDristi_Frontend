@@ -13,7 +13,7 @@ export default function InvestigationPage() {
   const { sourceId: routeSourceId } = useParams()
   const selectedSourceId = useSourceStore((state) => state.selectedSourceId)
   const { data: sources = [] } = useSources()
-  const sourceId = routeSourceId ? decodeURIComponent(routeSourceId) : selectedSourceId ?? sources[0]?.id
+  const sourceId = routeSourceId ? decodeURIComponent(routeSourceId) : selectedSourceId ?? sources[0]?.id ?? 'THERM_0DE3BA3A11F1'
   const { data: source, isLoading, isError } = useSourceDetail(sourceId)
 
   return (
@@ -27,7 +27,7 @@ export default function InvestigationPage() {
         </div>
         {source && <span className="rounded-full bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent">{source.category} · {source.confidence}% confidence</span>}
       </div>
-      {!sourceId && <p className="mt-8 text-sm text-text-secondary">Loading sources from the backend...</p>}
+      {!sourceId && <p className="mt-8 text-sm text-text-secondary">Loading thermal source intelligence...</p>}
       {isLoading && <p className="mt-8 text-sm text-text-secondary">Loading source details...</p>}
       {isError && <p className="mt-8 text-sm text-danger">Unable to load source details.</p>}
       {source && (

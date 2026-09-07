@@ -35,15 +35,15 @@ export function FilterPanel() {
   }
 
   return (
-    <section className="rounded-none border-2 border-black bg-surface p-5 shadow-sm" aria-label="Source filters">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-black pb-3">
+    <section className="rounded-none border-2 border-text-primary bg-surface p-5 shadow-sm" aria-label="Source filters">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-text-primary pb-3">
         <div>
           <h2 className="text-base font-black uppercase tracking-wider text-text-primary">Search &amp; Filters</h2>
           <p className="mt-0.5 text-xs text-text-secondary font-medium">Narrow down spatial objects and filter query parameters</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={reset} className="rounded-none border-2 border-black bg-surface px-3.5 py-1.5 text-xs font-black uppercase text-text-primary hover:bg-zinc-100 transition-colors">Reset</button>
-          <button type="button" onClick={apply} className="rounded-none border-2 border-black bg-black px-4 py-1.5 text-xs font-black uppercase text-white hover:bg-zinc-800 transition-colors">Apply Filters</button>
+          <button type="button" onClick={reset} className="rounded-none border-2 border-text-primary bg-surface px-3.5 py-1.5 text-xs font-black uppercase text-text-primary hover:bg-black hover:text-white dark:hover:bg-[#d8f5a9] dark:hover:text-black transition-colors">Reset</button>
+          <button type="button" onClick={apply} className="rounded-none border-2 border-text-primary bg-black dark:bg-[#d8f5a9] px-4 py-1.5 text-xs font-black uppercase text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors">Apply Filters</button>
         </div>
 
       </div>

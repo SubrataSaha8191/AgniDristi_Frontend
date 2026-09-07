@@ -1,4 +1,4 @@
-const inputCls = 'mt-1 w-full rounded-none border-2 border-black bg-surface px-3 py-2 text-xs font-bold font-mono text-text-primary outline-none focus:bg-zinc-100 transition-colors'
+const inputCls = 'mt-1 w-full rounded-none border-2 border-black dark:border-zinc-700 bg-surface px-3 py-2 text-xs font-bold font-mono text-text-primary outline-none focus:bg-zinc-100 dark:focus:bg-zinc-800 transition-colors'
 
 type FilterInputProps = {
   label: string
