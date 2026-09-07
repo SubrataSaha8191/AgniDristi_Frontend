@@ -13,7 +13,7 @@ export function NearbyFacilitiesTable({ sourceId }: { sourceId?: string }) {
             Nearby industrial facilities
           </h3>
           <p className="mt-1 text-xs text-text-secondary">
-            Within 15 km of {sourceId ?? 'the selected source'} · mock reference data
+            Derived from backend detections near {sourceId ?? 'the selected source'}
           </p>
         </div>
         <span className="shrink-0 rounded-full bg-bg px-2 py-1 text-xs font-medium text-text-secondary">
