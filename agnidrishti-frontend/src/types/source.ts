@@ -21,18 +21,17 @@ export interface SourceSummary {
 export interface SourceDetail extends SourceSummary {
   firstDetected: string
   lastDetected: string
-  district: string
-  state: string
+  district?: string
+  state?: string
 }
 
 export interface KPISummary {
-  totalSources: number
-  persistentSources: number
-  newSources: number
-  abnormalSources: number
-  industrialSources: number
-  highRiskAlerts: number
-  totalSourcesDeltaPct: number
+  thermalObjects: number
+  firmsDetections: number
+  matchedFirms: number
+  unmatchedFirms: number
+  alerts: number
+  latestMonitoringStatus: string | null
 }
 
 export interface ActivityPoint {
@@ -54,9 +53,13 @@ export interface AnomalyPoint {
 }
 
 export interface Alert {
-  id: string
-  sourceId: string
-  type: 'high_anomaly' | 'new_persistent' | 'unusual_pattern' | 'new_industrial' | 'low_confidence'
-  severity: 'low' | 'medium' | 'high'
-  timestamp: string
+  id: number
+  alert_type: string
+  firms_uid: string | null
+  object_uid: string | null
+  latitude: number | null
+  longitude: number | null
+  severity: string | null
+  message: string | null
+  created_at: string | null
 }
