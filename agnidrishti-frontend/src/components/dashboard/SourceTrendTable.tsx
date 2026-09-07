@@ -16,21 +16,21 @@ export function SourceTrendTable() {
   const { data: sources = [], isLoading } = useSources()
 
   return (
-    <section className="rounded-none border-2 border-black bg-surface p-5 shadow-sm" aria-labelledby="source-trend-heading">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-black pb-3">
+    <section className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm" aria-labelledby="source-trend-heading">
+      <div className="flex items-center justify-between gap-3 border-b-2 border-black dark:border-zinc-700 pb-3">
         <h2 id="source-trend-heading" className="text-sm font-black uppercase tracking-wider text-text-primary">Source Trend (30 Days)</h2>
         <Link to="/assessment" className="text-xs font-bold uppercase tracking-wider text-text-primary hover:underline">View All →</Link>
       </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-black text-[10px] uppercase tracking-wide text-text-secondary font-black">
+          <thead className="border-b border-black dark:border-zinc-700 text-[10px] uppercase tracking-wide text-text-secondary font-black">
             <tr>
               <th className="pb-2 font-black">Source Type</th>
               <th className="pb-2 text-right font-black">Count</th>
               <th className="pb-2 text-right font-black">Change</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/20">
+          <tbody className="divide-y divide-black/20 dark:divide-zinc-800">
             {trendRows.map((row) => (
               <tr key={row.category}>
                 <td className="py-2.5 font-bold uppercase text-text-primary">{row.label}</td>

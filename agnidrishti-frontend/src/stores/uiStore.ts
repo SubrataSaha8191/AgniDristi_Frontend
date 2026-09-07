@@ -6,15 +6,8 @@ interface UIStore {
   setSidebarOpen: (open: boolean) => void
 }
 
-const getInitialSidebarState = () => {
-  if (typeof window !== 'undefined') {
-    return window.innerWidth >= 768
-  }
-  return true
-}
-
 export const useUIStore = create<UIStore>((set) => ({
-  sidebarOpen: getInitialSidebarState(),
+  sidebarOpen: false,
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
 }))

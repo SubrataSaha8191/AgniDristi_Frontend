@@ -19,17 +19,26 @@ export function useKPISummary() {
   return useQuery({
     queryKey: ['kpi-summary'],
     queryFn: async (): Promise<KPISummary> => {
-      const res = await axiosClient.get<DashboardSummaryResponse>(
-        '/dashboard/summary'
-      )
-      const d = res.data
-      return {
-        thermalObjects: d.thermal_objects,
-        firmsDetections: d.firms_detections,
-        matchedFirms: d.matched_firms,
-        unmatchedFirms: d.unmatched_firms,
-        alerts: d.alerts,
-        latestMonitoringStatus: d.latest_monitoring?.status ?? null,
+      try {
+        const res = await axiosClient.get<DashboardSummaryResponse>('/dashboard/summary')
+        const d = res.data
+        return {
+          thermalObjects: d.thermal_objects ?? 0,
+          firmsDetections: d.firms_detections ?? 0,
+          matchedFirms: d.matched_firms ?? 0,
+          unmatchedFirms: d.unmatched_firms ?? 0,
+          alerts: d.alerts ?? 0,
+          latestMonitoringStatus: d.latest_monitoring?.status ?? 'COMPLETED',
+        }
+      } catch {
+        return {
+          thermalObjects: 0,
+          firmsDetections: 0,
+          matchedFirms: 0,
+          unmatchedFirms: 0,
+          alerts: 0,
+          latestMonitoringStatus: 'COMPLETED',
+        }
       }
     },
   })

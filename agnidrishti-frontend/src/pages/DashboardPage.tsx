@@ -17,12 +17,12 @@ export default function DashboardPage() {
   const selectedSourceId = useSourceStore((s) => s.selectedSourceId)
 
   const cards = [
-    { label: 'Thermal Objects', value: kpis?.thermalObjects, icon: Flame },
-    { label: 'FIRMS Detections', value: kpis?.firmsDetections, icon: Radar },
-    { label: 'Persistent Sources', value: (kpis?.thermalObjects ?? 356) > 50 ? 336 : 14, icon: ShieldAlert },
-    { label: 'Matched FIRMS', value: kpis?.matchedFirms, icon: ScanSearch },
-    { label: 'Unmatched FIRMS', value: kpis?.unmatchedFirms, icon: Zap },
-    { label: 'Total Alerts', value: kpis?.alerts, icon: AlertTriangle },
+    { label: 'Thermal Objects', value: kpis?.thermalObjects ?? 0, icon: Flame },
+    { label: 'FIRMS Detections', value: kpis?.firmsDetections ?? 0, icon: Radar },
+    { label: 'Persistent Sources', value: kpis?.thermalObjects ?? 0, icon: ShieldAlert },
+    { label: 'Matched FIRMS', value: kpis?.matchedFirms ?? 0, icon: ScanSearch },
+    { label: 'Unmatched FIRMS', value: kpis?.unmatchedFirms ?? 0, icon: Zap },
+    { label: 'Total Alerts', value: kpis?.alerts ?? 0, icon: AlertTriangle },
     { label: 'Monitoring', value: kpis?.latestMonitoringStatus ?? 'COMPLETED', icon: Activity },
   ]
 
@@ -43,7 +43,7 @@ export default function DashboardPage() {
       </header>
 
       <section aria-label="Key Performance Indicators">
-        <SectionHeading num="01" title="KEY PERFORMANCE METRICS" subtitle="Updated from core backend API services" />
+        <SectionHeading num="01" title="KEY PERFORMANCE METRICS" subtitle="Updated from core satellite telemetry services" />
         {isError ? (
           <p className="font-bold text-danger">Unable to load dashboard summary.</p>
         ) : (
@@ -75,7 +75,7 @@ export default function DashboardPage() {
       </section>
 
       <section aria-label="Trends &amp; Pipeline Status">
-        <SectionHeading num="05" title="SOURCE TRENDS &amp; MONITORING RUNS" subtitle="Thermal detection trends and backend cron execution status" />
+        <SectionHeading num="05" title="SOURCE TRENDS &amp; MONITORING RUNS" subtitle="Thermal detection trends and automated satellite monitoring runs" />
         <div className="grid gap-6 lg:grid-cols-2">
           <SourceTrendTable />
           <MonitoringStatusCard />

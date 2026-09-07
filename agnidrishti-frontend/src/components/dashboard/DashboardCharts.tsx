@@ -12,13 +12,13 @@ export function DashboardCharts({ sourceId }: { sourceId: string | null }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
-      <div className="rounded-none border-2 border-black bg-surface p-5 shadow-sm">
+      <div className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm">
         {sourceId ? <ActivityTimelineChart sourceId={sourceId} /> : placeholder('Historical activity')}
       </div>
-      <div className="rounded-none border-2 border-black bg-surface p-5 shadow-sm">
+      <div className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm">
         {sourceId ? <ThermalFingerprintChart sourceId={sourceId} /> : placeholder('Thermal fingerprint')}
       </div>
-      <div className="rounded-none border-2 border-black bg-surface p-5 shadow-sm">
+      <div className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm">
         {sourceId ? <AnomalyDetectionChart sourceId={sourceId} /> : placeholder('Anomaly detection')}
       </div>
     </div>

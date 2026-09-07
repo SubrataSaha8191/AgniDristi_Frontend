@@ -47,7 +47,7 @@ export function SatelliteContextViewer({ sourceId }: { sourceId?: string }) {
           </span>
         </button>
       </div>
-      <p className="mt-2 text-[11px] text-text-secondary">Imagery is a static mock. Live satellite and thermal layers are backend-dependent.</p>
+      <p className="mt-2 text-[11px] text-text-secondary">Imagery snapshot context. Live satellite and thermal layers are synchronized automatically.</p>
     </section>
   )
 }

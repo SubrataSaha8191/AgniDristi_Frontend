@@ -9,9 +9,15 @@ const SEVERITY_STYLES: Record<string, string> = {
   LOW: 'border-black bg-zinc-200 text-black font-bold',
 }
 
-function formatTimestamp(ts: string | null) {
+function formatTimestamp(ts?: string | null) {
   if (!ts) return '—'
-  return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ts))
+  const d = new Date(ts)
+  if (isNaN(d.getTime())) return ts
+  try {
+    return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(d)
+  } catch {
+    return ts
+  }
 }
 
 function AlertRow({ alert }: { alert: Alert }) {

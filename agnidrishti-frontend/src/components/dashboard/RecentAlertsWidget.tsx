@@ -6,11 +6,17 @@ function formatAlertType(type: string) {
   return type.replaceAll('_', ' ').toLowerCase()
 }
 
-function formatTimestamp(ts: string | null) {
+function formatTimestamp(ts?: string | null) {
   if (!ts) return '—'
-  return new Intl.DateTimeFormat('en-IN', {
-    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-  }).format(new Date(ts))
+  const d = new Date(ts)
+  if (isNaN(d.getTime())) return ts
+  try {
+    return new Intl.DateTimeFormat('en-IN', {
+      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+    }).format(d)
+  } catch {
+    return ts
+  }
 }
 
 function severityStyle(severity: string | null) {
@@ -48,12 +54,12 @@ export function RecentAlertsWidget() {
     .slice(0, 5)
 
   return (
-    <section className="rounded-none border-2 border-black bg-surface p-5 shadow-sm" aria-labelledby="recent-alerts-heading">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-black pb-3">
+    <section className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm" aria-labelledby="recent-alerts-heading">
+      <div className="flex items-center justify-between gap-3 border-b-2 border-black dark:border-zinc-700 pb-3">
         <h2 id="recent-alerts-heading" className="text-sm font-black uppercase tracking-wider text-text-primary">Recent Alerts</h2>
         <Link to="/alerts" className="text-xs font-bold uppercase tracking-wider text-text-primary hover:underline">View All →</Link>
       </div>
-      <div className="mt-4 divide-y divide-black/20">
+      <div className="mt-4 divide-y divide-black/20 dark:divide-zinc-800">
         {isLoading && <p className="py-3 text-xs font-bold text-text-secondary">Loading…</p>}
         {!isLoading && sorted.map((a) => <AlertRow key={a.id} alert={a} />)}
         {!isLoading && alerts.length === 0 && (

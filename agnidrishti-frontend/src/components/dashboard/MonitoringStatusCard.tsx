@@ -32,23 +32,27 @@ function useMonitoringDashboard() {
   })
 }
 
-function formatDt(iso: string | null) {
+function formatDt(iso?: string | null) {
   if (!iso) return '—'
-  return new Intl.DateTimeFormat('en-IN', {
-    dateStyle: 'medium', timeStyle: 'short',
-  }).format(new Date(iso))
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return iso
+  try {
+    return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(d)
+  } catch {
+    return iso
+  }
 }
 
 export function MonitoringStatusCard() {
   const { data, isLoading, isError } = useMonitoringDashboard()
 
   return (
-    <section className="rounded-none border-2 border-black bg-surface p-5 shadow-sm">
-      <div className="flex items-center gap-2 border-b-2 border-black pb-3">
-        <Activity size={18} className="text-text-primary" />
-        <h2 className="text-sm font-black uppercase tracking-wider text-text-primary">Monitoring Status</h2>
+    <section className="rounded-none border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900/50 p-5 shadow-sm">
+      <div className="flex items-center gap-2 border-b-2 border-black dark:border-zinc-700 pb-3">
+        <Activity size={18} className="text-black dark:text-white" />
+        <h2 className="text-sm font-black uppercase tracking-wider text-black dark:text-white">Monitoring Status</h2>
       </div>
-      {isLoading && <div className="mt-4 h-24 animate-pulse bg-zinc-200" />}
+      {isLoading && <div className="mt-4 h-24 animate-pulse bg-zinc-200 dark:bg-zinc-800" />}
       {isError && <p className="mt-4 text-xs font-bold text-danger">Unable to load monitoring data.</p>}
       {data && (
         <div className="mt-4 space-y-3 text-xs">
@@ -58,12 +62,12 @@ export function MonitoringStatusCard() {
             <Stat label="Failed" value={data.failed_runs} icon={<XCircle size={14} className="text-danger" />} />
           </div>
           {data.latest && (
-            <div className="border border-black bg-zinc-100 p-3 space-y-1 text-black font-semibold">
-              <p className="font-bold uppercase text-text-primary">Latest Status: {data.latest.status}</p>
-              <p className="text-[11px]">Trigger: {data.latest.trigger_type} · {formatDt(data.latest.started_at)}</p>
-              <p className="text-[11px]">Fetched {data.latest.fetched} · Inserted {data.latest.inserted} · Matched {data.latest.matched}</p>
-              <p className="text-[11px]">Unmatched {data.latest.unmatched} · Alerts {data.latest.alerts_created}</p>
-              {data.latest.duration_seconds != null && <p className="text-[11px]">Duration: {data.latest.duration_seconds.toFixed(1)}s</p>}
+            <div className="border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-1 font-semibold text-black dark:text-white">
+              <p className="font-bold uppercase text-black dark:text-white">Latest Status: {data.latest.status}</p>
+              <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Trigger: {data.latest.trigger_type} · {formatDt(data.latest.started_at)}</p>
+              <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Fetched {data.latest.fetched} · Inserted {data.latest.inserted} · Matched {data.latest.matched}</p>
+              <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Unmatched {data.latest.unmatched} · Alerts {data.latest.alerts_created}</p>
+              {data.latest.duration_seconds != null && <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Duration: {data.latest.duration_seconds.toFixed(1)}s</p>}
             </div>
           )}
         </div>
@@ -74,9 +78,9 @@ export function MonitoringStatusCard() {
 
 function Stat({ label, value, icon }: { label: string; value: number; icon?: React.ReactNode }) {
   return (
-    <div className="border border-black bg-zinc-100 p-2.5 text-center">
-      <p className="flex items-center justify-center gap-1 font-bold uppercase text-xs text-text-primary">{icon}{label}</p>
-      <p className="mt-1 font-mono text-lg font-black text-text-primary">{value}</p>
+    <div className="border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 p-2.5 text-center text-black dark:text-white">
+      <p className="flex items-center justify-center gap-1 font-bold uppercase text-xs text-black dark:text-white">{icon}{label}</p>
+      <p className="mt-1 font-mono text-xl font-black text-black dark:text-white">{value}</p>
     </div>
   )
 }
