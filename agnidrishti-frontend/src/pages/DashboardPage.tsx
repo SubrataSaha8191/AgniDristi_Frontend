@@ -29,12 +29,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-9 pb-12">
       <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-text-primary pb-5">
-        <div><div className="inline-flex items-center gap-2 border-2 border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-widest text-[#d8f5a9]"><span className="h-2 w-2 bg-[#d8f5a9]" />System intelligence</div><h1 className="mt-3 text-3xl font-black uppercase tracking-[0.12em] text-text-primary sm:text-4xl">Thermal source intelligence</h1><p className="mt-2 text-xs font-bold uppercase tracking-widest text-text-secondary">Backend-reported thermal objects, FIRMS detections, and flare assessments</p></div>
+        <div><div className="inline-flex items-center gap-2 border-2 border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-widest text-[#d8f5a9]"><span className="h-2 w-2 bg-[#d8f5a9]" />System intelligence</div><h1 className="mt-3 text-3xl font-black uppercase tracking-[0.12em] text-text-primary sm:text-4xl">Thermal source intelligence</h1><p className="mt-2 text-xs font-bold uppercase tracking-widest text-text-secondary">Telemetry thermal objects, FIRMS detections, and flare assessments</p></div>
         {summary.isFetching && <span role="status" className="text-xs font-black uppercase text-text-secondary">Refreshing…</span>}
       </header>
 
       <section aria-label="Dashboard summary">
-        <SectionHeading num="01" title="Operational summary" subtitle="Latest values reported by the Agni-Drishti API" />
+        <SectionHeading num="01" title="Operational summary" subtitle="Latest telemetry values reported by Agni-Drishti" />
         {summary.isError ? <div className="border-2 border-black bg-surface p-5"><p className="text-sm font-bold text-danger">Dashboard summary could not be loaded.</p><button type="button" onClick={() => summary.refetch()} className="mt-3 border-2 border-black bg-black px-3 py-1.5 text-xs font-black uppercase text-white">Retry</button></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">{cards.map((card) => <KPICard key={card.label} label={card.label} value={summary.isLoading ? '…' : card.value ?? 'Not available'} icon={card.icon} />)}</div>}
       </section>
 

@@ -5,7 +5,7 @@ export function IndustryDistributionChart() {
   const query = useClassDistribution()
   return (
     <section className="border-2 border-text-primary bg-surface p-5" aria-labelledby="industry-distribution-heading">
-      <div className="border-b-2 border-text-primary pb-3"><h2 id="industry-distribution-heading" className="text-sm font-black uppercase tracking-wider">Industry distribution</h2><p className="mt-1 text-xs text-text-secondary">Backend classification labels, {query.data?.count ?? '…'} classes</p></div>
+      <div className="border-b-2 border-text-primary pb-3"><h2 id="industry-distribution-heading" className="text-sm font-black uppercase tracking-wider">Industry distribution</h2><p className="mt-1 text-xs text-text-secondary">Spatial classification labels, {query.data?.count ?? '…'} classes</p></div>
       {query.isLoading && <div className="mt-5 h-64 animate-pulse bg-text-primary/10" role="status"><span className="sr-only">Loading industry distribution</span></div>}
       {query.isError && <div className="grid h-64 place-items-center text-center"><div><p className="text-xs font-bold text-danger">Class distribution could not be loaded.</p><button type="button" onClick={() => query.refetch()} className="mt-3 border-2 border-black px-3 py-1 text-xs font-black uppercase">Retry</button></div></div>}
       {query.data?.classes.length === 0 && <div className="grid h-64 place-items-center text-xs font-bold text-text-secondary">No classifications have been reported.</div>}

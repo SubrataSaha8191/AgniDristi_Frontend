@@ -54,7 +54,7 @@ const initialFilters = {
   temporalSource: '',
   gasFlareLikelihood: '' as GasFlareLikelihood | '',
   likelyFlaresOnly: false,
-  objectLimit: 50,
+  objectLimit: 10,
   objectOffset: 0,
 }
 

@@ -1,10 +1,11 @@
 import { IndustrialVsNaturalChart } from '../components/dashboard/IndustrialVsNaturalChart'
 import { RegionalSourcesChart } from '../components/dashboard/RegionalSourcesChart'
 import { SectionHeading } from '../components/common/SectionHeading'
-import { useMonitoringSummary, useMonitoringUnmatched } from '../services/monitoringRunService'
+import { useMonitoringUnmatched } from '../services/monitoringRunService'
+import { useKPISummary } from '../services/kpiService'
 
 export default function AssessmentPage() {
-  const { data: summary } = useMonitoringSummary()
+  const { data: summary } = useKPISummary()
   const { data: unmatchedData } = useMonitoringUnmatched(10)
   const unmatchedList = Array.isArray(unmatchedData) ? unmatchedData : (unmatchedData?.detections ?? unmatchedData?.unmatched ?? [])
 
@@ -24,15 +25,15 @@ export default function AssessmentPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="border-2 border-black bg-surface p-4">
             <p className="text-[10px] font-black uppercase tracking-wider text-text-secondary">TOTAL DETECTIONS</p>
-            <p className="mt-2 font-mono text-2xl font-black">{summary?.total_detections ?? summary?.total ?? '916'}</p>
+            <p className="mt-2 font-mono text-2xl font-black">{summary?.firmsDetections ?? 0}</p>
           </div>
           <div className="border-2 border-black bg-surface p-4">
             <p className="text-[10px] font-black uppercase tracking-wider text-text-secondary">MATCHED TO SOURCES</p>
-            <p className="mt-2 font-mono text-2xl font-black text-emerald-700">{summary?.matched_persistent ?? summary?.matched_detections ?? summary?.matched ?? '20'}</p>
+            <p className="mt-2 font-mono text-2xl font-black text-emerald-700">{summary?.matchedFirms ?? 0}</p>
           </div>
           <div className="border-2 border-black bg-surface p-4">
             <p className="text-[10px] font-black uppercase tracking-wider text-text-secondary">UNMATCHED DETECTIONS</p>
-            <p className="mt-2 font-mono text-2xl font-black text-red-600">{summary?.unmatched ?? summary?.unmatched_detections ?? '896'}</p>
+            <p className="mt-2 font-mono text-2xl font-black text-red-600">{summary?.unmatchedFirms ?? 0}</p>
           </div>
         </div>
       </section>

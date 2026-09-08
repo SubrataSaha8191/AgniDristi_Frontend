@@ -3,55 +3,74 @@ import L from 'leaflet'
 import 'leaflet.markercluster'
 import { useMap } from 'react-leaflet'
 import { useSourceStore } from '../../stores/sourceStore'
-import type { GasFlareLikelihood, RecentFirmsDetection, ThermalObject } from '../../types/dashboard'
+import type { RecentFirmsDetection, ThermalObject } from '../../types/dashboard'
 
-const flareColors: Record<GasFlareLikelihood, string> = { LIKELY: '#dc2626', POSSIBLE: '#d97706', UNLIKELY: '#2563eb' }
-const objectColor = (object: ThermalObject) => object.gas_flare_likelihood ? flareColors[object.gas_flare_likelihood] : '#64748b'
+export function getIndustryCategory(label: string | null | undefined): string {
+  if (!label) return 'Other Industrial'
+  const u = label.toUpperCase()
+  if (u.includes('OIL') || u.includes('GAS') || u.includes('FLARE')) return 'Oil & Gas'
+  if (u.includes('METAL') || u.includes('STEEL')) return 'Metallurgical'
+  if (u.includes('MINING') || u.includes('EXTRACT')) return 'Mining & Extraction'
+  return 'Other Industrial'
+}
 
-function objectIcon(object: ThermalObject) {
-  const likely = object.gas_flare_likelihood === 'LIKELY'
-  const color = objectColor(object)
-  const size = likely ? 30 : 22
+const industryColors: Record<string, string> = { 'Oil & Gas': '#dc2626', Metallurgical: '#ea580c', 'Mining & Extraction': '#9333ea', 'Other Industrial': '#2563eb' }
+const objectColor = (object: ThermalObject) => industryColors[getIndustryCategory(object.classification_label)] || '#2563eb'
+const value = (input: string | number | null | undefined) => input == null || input === '' ? 'Not available' : String(input)
+
+function pointIcon(color: string) {
   return L.divIcon({
-    className: 'thermal-marker', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
-    html: `<span style="display:block;width:${size}px;height:${size}px;border:2px solid #111827;border-radius:50%;background:${color};box-shadow:${likely ? '0 0 0 6px rgba(220,38,38,.24),3px 3px 0 #111827' : '2px 2px 0 #111827'}"></span>`,
+    className: 'thermal-marker-dot', iconSize: [12, 12], iconAnchor: [6, 6],
+    html: `<span style="display:block;width:12px;height:12px;border-radius:50%;background:${color};border:2px solid #111827;box-shadow:1.5px 1.5px 0 #111827"></span>`,
   })
 }
 
-const value = (input: string | number | null | undefined) => input == null || input === '' ? 'Not available' : String(input)
-
-export function ClusteredMarkers({ objects, detections }: { objects: ThermalObject[]; detections: RecentFirmsDetection[] }) {
+export function ClusteredMarkers({ objects, detections }: { objects: ThermalObject[]; detections?: RecentFirmsDetection[] }) {
   const map = useMap()
   const openPanel = useSourceStore((state) => state.openPanel)
 
   useEffect(() => {
-    const clusters = (L as unknown as { markerClusterGroup: (options?: unknown) => L.LayerGroup }).markerClusterGroup({
-      showCoverageOnHover: false,
-      iconCreateFunction: (cluster: { getChildCount: () => number }) => L.divIcon({
-        className: 'custom-cluster-icon', iconSize: [34, 34],
-        html: `<span style="display:flex;width:34px;height:34px;align-items:center;justify-content:center;border:2px solid #111827;border-radius:50%;background:#d8f5a9;color:#111827;font:800 11px monospace;box-shadow:3px 3px 0 #111827">${cluster.getChildCount()}</span>`,
-      }),
+    const radialLayer = L.layerGroup()
+    const syncRadialVisibility = () => { if (map.getZoom() >= 11) { if (!map.hasLayer(radialLayer)) map.addLayer(radialLayer) } else { if (map.hasLayer(radialLayer)) map.removeLayer(radialLayer) } }
+    map.on('zoomend', syncRadialVisibility)
+
+    const clustersGroup = (L as unknown as { markerClusterGroup: (options?: unknown) => L.LayerGroup }).markerClusterGroup({
+      showCoverageOnHover: false, disableClusteringAtZoom: 0, zoomToBoundsOnClick: false,
     })
 
     objects.forEach((object) => {
-      const marker = L.marker([object.latitude, object.longitude], { icon: objectIcon(object), title: `Thermal object ${object.object_uid}`, zIndexOffset: object.gas_flare_likelihood === 'LIKELY' ? 1000 : 0 })
+      const color = objectColor(object)
+      radialLayer.addLayer(L.circle([object.latitude, object.longitude], { radius: 1400, color, fillColor: color, fillOpacity: 0.1, weight: 1.5, dashArray: '4,4' }))
+      radialLayer.addLayer(L.circle([object.latitude, object.longitude], { radius: 450, color, fillColor: color, fillOpacity: 0.2, weight: 2 }))
+
       const score = object.gas_flare_score == null ? 'Not available' : `${Math.round(object.gas_flare_score * 100)}%`
-      marker.bindTooltip(`<strong>${object.object_uid}</strong><br>${value(object.classification_label)}<br>Flare likelihood: ${value(object.gas_flare_likelihood)}<br>Flare score: ${score}`, { className: 'thermal-tooltip' })
+      const tooltip = `<strong>${object.object_uid}</strong><br>Category: ${getIndustryCategory(object.classification_label)}<br>Label: ${value(object.classification_label)}<br>Detections: ${value(object.detection_count)}<br>Flare score: ${score}`
+
+      const marker = L.marker([object.latitude, object.longitude], { icon: pointIcon(color), title: `Thermal object ${object.object_uid}`, zIndexOffset: 1000 })
+      marker.bindTooltip(tooltip, { className: 'thermal-tooltip' })
       marker.on('click', () => openPanel(object.object_uid))
-      clusters.addLayer(marker)
+      clustersGroup.addLayer(marker)
     })
 
-    const firmsLayer = L.layerGroup()
-    detections.forEach((detection) => {
-      const matched = detection.known_source === true
-      const marker = L.circleMarker([detection.latitude, detection.longitude], { radius: matched ? 5 : 6, color: '#111827', weight: 1.5, fillColor: matched ? '#16a34a' : '#a855f7', fillOpacity: 0.82 })
-      marker.bindTooltip(`<strong>FIRMS ${detection.firms_uid}</strong><br>${matched ? 'Matched detection' : 'Unmatched detection'}<br>FRP: ${value(detection.frp)}`, { className: 'thermal-tooltip' })
-      if (detection.matched_object_uid) marker.on('click', () => openPanel(detection.matched_object_uid!))
-      firmsLayer.addLayer(marker)
-    })
+    if (detections?.length) {
+      detections.forEach((d) => {
+        const marker = L.marker([d.latitude, d.longitude], { icon: pointIcon('#ef4444'), title: `FIRMS detection ${d.firms_uid}` })
+        marker.bindTooltip(`<strong>FIRMS ${d.firms_uid}</strong><br>Date: ${value(d.acq_date)}<br>FRP: ${value(d.frp)}`, { className: 'thermal-tooltip' })
+        if (d.matched_object_uid) marker.on('click', () => openPanel(d.matched_object_uid!))
+        clustersGroup.addLayer(marker)
+      })
+    }
+
+    map.addLayer(clustersGroup)
+    syncRadialVisibility()
+    return () => { map.off('zoomend', syncRadialVisibility); if (map.hasLayer(radialLayer)) map.removeLayer(radialLayer); map.removeLayer(clustersGroup) }
+  }, [map, objects, detections, openPanel])
 
     map.addLayer(clusters); map.addLayer(firmsLayer)
     return () => { map.removeLayer(clusters); map.removeLayer(firmsLayer) }
   }, [detections, map, objects, openPanel])
   return null
 }
+
+
+

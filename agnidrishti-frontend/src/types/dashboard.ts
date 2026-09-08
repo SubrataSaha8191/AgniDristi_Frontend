@@ -1,23 +1,5 @@
-export type GasFlareLikelihood = 'LIKELY' | 'POSSIBLE' | 'UNLIKELY'
-
-export interface MonitoringRun {
-  id?: number
-  run_uid: string
-  trigger_type: string
-  attempt?: number | null
-  retry_of_run_uid?: string | null
-  status: string
-  started_at: string | null
-  finished_at: string | null
-  duration_seconds: number | null
-  fetched: number | null
-  inserted: number | null
-  duplicates?: number | null
-  matched: number | null
-  unmatched: number | null
-  alerts_created: number | null
-  error_message?: string | null
-}
+import type { GasFlareLikelihood, MonitoringRun } from './monitoring'
+export type { GasFlareLikelihood, LatestRunResponse, MonitoringRun, MonitoringRunsResponse, MonitoringState } from './monitoring'
 
 export interface DashboardSummary {
   thermal_objects: number
@@ -57,12 +39,7 @@ export interface ThermalObject {
   gas_flare_source?: string | null
 }
 
-export interface ThermalObjectsResponse {
-  total: number
-  limit: number
-  offset: number
-  objects: ThermalObject[]
-}
+export interface ThermalObjectsResponse { total: number; limit: number; offset: number; objects: ThermalObject[] }
 
 export interface RecentFirmsDetection {
   firms_uid: string
@@ -82,75 +59,24 @@ export interface RecentFirmsDetection {
 }
 
 export interface RecentFirmsResponse { count: number; detections: RecentFirmsDetection[] }
-
-export interface DashboardAlert {
-  id: number
-  alert_type: string
-  firms_uid: string | null
-  object_uid: string | null
-  latitude: number | null
-  longitude: number | null
-  severity: string | null
-  message: string | null
-  created_at: string | null
-}
-
+export interface DashboardAlert { id: number; alert_type: string; firms_uid: string | null; object_uid: string | null; latitude: number | null; longitude: number | null; severity: string | null; message: string | null; created_at: string | null }
 export interface AlertsResponse { count: number; alerts: DashboardAlert[] }
 
-export interface MonitoringState {
-  total_runs: number
-  completed_runs: number
-  failed_runs: number
-  latest: MonitoringRun | null
-}
-
-export interface MonitoringRunsResponse { count: number; runs: MonitoringRun[] }
-export type LatestRunResponse = MonitoringRun | { status: 'no_runs'; message: string }
-
-export interface GasFlareEvidence {
-  reasons: string[]
-  signal_contributions: Record<string, number>
-  gem_facility_name: string | null
-  gem_industry_exact_type: string | null
-}
+export interface GasFlareEvidence { reasons: string[]; signal_contributions: Record<string, number>; gem_facility_name: string | null; gem_industry_exact_type: string | null }
 
 export interface ThermalObjectDetail {
   object_uid: string
   stage3_object_id: string | null
   location: { latitude: number; longitude: number }
   classification: { label: string | null; source: string | null; confidence: number | null }
-  temporal: {
-    detection_count: number | null; active_months: number | null; persistence_ratio: number | null
-    source_persistence_ratio?: number | null; longest_active_run: number | null; max_inactive_gap: number | null
-    source_hint?: string | null; tci?: number | null; seasonal_concentration?: number | null
-  }
+  temporal: { detection_count: number | null; active_months: number | null; persistence_ratio: number | null; source_persistence_ratio?: number | null; longest_active_run: number | null; max_inactive_gap: number | null; source_hint?: string | null; tci?: number | null; seasonal_concentration?: number | null }
   temperature: { mean: number | null; median: number | null; min: number | null; max: number | null; std: number | null; range: number | null; cv: number | null }
   area: { mean: number | null; std: number | null; cv: number | null }
   radiant_heat: { mean: number | null; std: number | null; cv: number | null }
-  gas_flare_assessment?: {
-    candidate: boolean | null; likelihood: GasFlareLikelihood | null; score: number | null; source: string | null; evidence: GasFlareEvidence | null
-  } | null
+  gas_flare_assessment?: { candidate: boolean | null; likelihood: GasFlareLikelihood | null; score: number | null; source: string | null; evidence: GasFlareEvidence | null } | null
   thermal_fingerprint: Record<string, number> | null
   object_radius_m: number | null
-  recent_firms: Array<{
-    firms_uid: string; latitude: number; longitude: number; bright_ti4: number | null; bright_ti5: number | null
-    frp: number | null; acq_date: string | null; acq_time: string | null; satellite: string | null
-    confidence: string | number | null; match_distance_km: number | null
-  }>
+  recent_firms: Array<{ firms_uid: string; latitude: number; longitude: number; bright_ti4: number | null; bright_ti5: number | null; frp: number | null; acq_date: string | null; acq_time: string | null; satellite: string | null; confidence: string | number | null; match_distance_km: number | null }>
 }
 
-export interface VnfUploadResult {
-  filename: string
-  status?: string
-  mode?: string
-  batch_id?: string
-  input_detections?: number
-  inserted_detections?: number
-  duplicates?: number
-  matched_existing?: number
-  new_candidates?: number
-  objects_found?: number
-  new_objects?: number
-  processing_time_seconds?: number
-  [key: string]: unknown
-}
+export interface VnfUploadResult { filename: string; status?: string; mode?: string; batch_id?: string; input_detections?: number; inserted_detections?: number; duplicates?: number; matched_existing?: number; new_candidates?: number; objects_found?: number; new_objects?: number; processing_time_seconds?: number; [key: string]: unknown }
