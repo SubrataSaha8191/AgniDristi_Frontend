@@ -42,7 +42,7 @@ export default function AnomalyPage() {
         <div className="flex gap-2">
           {['ALL', 'HIGH', 'MEDIUM', 'LOW'].map((lvl) => (
             <button key={lvl} type="button" onClick={() => setLevel(lvl)}
-              className={`border-2 border-black dark:border-zinc-700 px-3 py-1 text-xs font-black uppercase transition-all ${level === lvl ? 'bg-black dark:bg-[#d8f5a9] text-white dark:text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-surface text-text-primary hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+              className={`border-2 border-black dark:border-zinc-700 px-3 py-1 text-xs font-black uppercase transition-all ${level === lvl ? 'bg-black dark:bg-[#d8f5a9] text-white dark:text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-surface text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white'}`}>
               {lvl}
             </button>
           ))}

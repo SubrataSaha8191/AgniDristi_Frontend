@@ -45,7 +45,7 @@ export function SatelliteContextViewer({ sourceId }: { sourceId?: string }) {
         <button
           type="button"
           onClick={() => setShowThermalOverlay((v) => !v)}
-          className="inline-flex items-center gap-2 border-2 border-black dark:border-zinc-700 bg-surface px-3 py-1.5 text-xs font-black uppercase text-text-primary hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+          className="inline-flex items-center gap-2 border-2 border-black dark:border-zinc-700 bg-surface px-3 py-1.5 text-xs font-black uppercase text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
         >
           <Thermometer size={14} aria-hidden="true" />
           {showThermalOverlay ? 'Hide Thermal Circle' : 'Show Thermal Circle'}

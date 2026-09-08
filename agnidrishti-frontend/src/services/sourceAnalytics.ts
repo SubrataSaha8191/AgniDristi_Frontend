@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { axiosClient } from '../lib/axiosClient'
 import type { ActivityPoint, AnomalyPoint, ThermalFingerprint } from '../types/source'
-import { generateMockAnomaly, generateMockFingerprint, generateMockHistory } from './sourceMockAnalytics'
+import { generateMockAnomaly, generateMockFingerprint, generateMockHistory, parseBackendFingerprint } from './sourceMockAnalytics'
 import { useSourceDetail } from './sourceQuery'
 
 interface BackendObjectDetail {
@@ -47,22 +47,7 @@ export function useSourceFingerprint(sourceId?: string | null) {
       if (!sourceId) return generateMockFingerprint('THERM_DEFAULT', subtype)
       try {
         const res = await axiosClient.get<BackendObjectDetail>(`/dashboard/objects/${encodeURIComponent(sourceId)}`)
-        const d = res.data
-        const cls = d.classification?.label ?? subtype
-        const conf = Math.round((d.classification?.confidence ?? 0.85) * 100)
-        const tMean = d.temperature?.mean ?? 400
-        const mock = generateMockFingerprint(sourceId, cls)
-        return {
-          bestMatchIndustry: cls || mock.bestMatchIndustry,
-          similarityScore: conf > 0 ? conf : mock.similarityScore,
-          bins: [
-            { tempK: Math.round(tMean * 0.8), normalizedFreq: 25 },
-            { tempK: Math.round(tMean * 0.9), normalizedFreq: 55 },
-            { tempK: Math.round(tMean), normalizedFreq: 95 },
-            { tempK: Math.round(tMean * 1.1), normalizedFreq: 60 },
-            { tempK: Math.round(tMean * 1.2), normalizedFreq: 30 },
-          ],
-        }
+        return parseBackendFingerprint(sourceId, res.data, subtype)
       } catch {
         return generateMockFingerprint(sourceId, subtype)
       }

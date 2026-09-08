@@ -51,6 +51,10 @@ html, body {
   font-family: 'Urbanist', ui-sans-serif, system-ui, sans-serif;
 }
 
+.source-panel-scroll {
+  overscroll-behavior: contain;
+}
+
 .main-content-scroll, .source-panel-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;

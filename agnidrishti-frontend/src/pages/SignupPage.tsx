@@ -20,7 +20,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="relative -m-6 md:-m-8 flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 overflow-hidden">
+    <div className="relative flex min-h-screen w-screen items-center justify-center bg-bg text-text-primary p-4 overflow-hidden">
       <FireBackground />
       <div className="relative z-10 w-full max-w-md border-2 border-text-primary bg-surface p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(216,245,169,0.25)]">
         <div className="flex items-center justify-between border-b-2 border-text-primary pb-4">
@@ -31,7 +31,7 @@ export default function SignupPage() {
               <p className="text-[10px] font-black uppercase text-text-secondary">Request Operator Credentials</p>
             </div>
           </div>
-          <Link to="/dashboard" className="flex items-center gap-1 border border-text-primary bg-surface px-2.5 py-1 text-xs font-black uppercase text-text-primary hover:bg-zinc-200 dark:hover:bg-zinc-800">
+          <Link to="/dashboard" className="flex items-center gap-1 border border-text-primary bg-surface px-2.5 py-1 text-xs font-black uppercase text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white transition-colors">
             <ArrowLeft size={13} /> Back
           </Link>
         </div>

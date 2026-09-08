@@ -25,6 +25,7 @@ function AlertRow({ alert }: { alert: Alert }) {
   const openPanel = useSourceStore((s) => s.openPanel)
   const sev = alert.severity?.toUpperCase() ?? 'LOW'
   const style = SEVERITY_STYLES[sev] ?? SEVERITY_STYLES.LOW
+  const targetId = alert.object_uid || alert.firms_uid
 
   return (
     <li className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -40,7 +41,7 @@ function AlertRow({ alert }: { alert: Alert }) {
             </span>
           </div>
           <p className="mt-1 font-mono text-xs text-text-secondary font-bold">
-            {alert.object_uid ?? alert.firms_uid ?? `Alert #${alert.id}`}
+            {targetId ?? `Alert #${alert.id}`}
           </p>
           {alert.message && <p className="mt-1 text-xs text-text-secondary">{alert.message}</p>}
           <p className="mt-1 flex items-center gap-1 text-xs text-text-secondary font-semibold">
@@ -49,9 +50,9 @@ function AlertRow({ alert }: { alert: Alert }) {
           </p>
         </div>
       </div>
-      {alert.object_uid && (
-        <button type="button" onClick={() => openPanel(alert.object_uid!)}
-          className="inline-flex shrink-0 items-center gap-2 self-start border-2 border-black bg-black px-3 py-1.5 text-xs font-black uppercase text-white hover:bg-zinc-800 sm:self-auto">
+      {targetId && (
+        <button type="button" onClick={() => openPanel(targetId)}
+          className="inline-flex shrink-0 items-center gap-2 self-start border-2 border-black bg-black dark:bg-[#d8f5a9] px-3 py-1.5 text-xs font-black uppercase text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors cursor-pointer sm:self-auto">
           Investigate <ArrowRight size={14} aria-hidden="true" />
         </button>
       )}
@@ -71,7 +72,7 @@ export function AlertsList() {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black px-4 py-3">
         <div>
           <h2 className="text-sm font-black uppercase tracking-wider text-text-primary">Active Alerts Stream</h2>
-          <p className="mt-0.5 text-xs text-text-secondary font-medium">Thermal source alerts fetched from /dashboard/alerts API.</p>
+          <p className="mt-0.5 text-xs text-text-secondary font-medium">Real-time thermal source detection and satellite anomaly alerts.</p>
         </div>
         <div className="text-right text-xs text-text-secondary font-bold">
           <span className="font-mono text-text-primary">{alerts.length}</span> ALERTS · POLLING 30S

@@ -7,8 +7,8 @@ const categoryDetails: { category: SourceCategory; label: string; color: string 
   { category: 'natural_biomass', label: 'Natural / Biomass', color: '#22c55e' },
   { category: 'persistent', label: 'Persistent', color: '#a855f7' },
   { category: 'abnormal', label: 'Abnormal', color: '#ef4444' },
-  { category: 'unknown', label: 'Unknown', color: '#f59e0b' },
-  { category: 'gas_flare', label: 'Gas Flare / FIRMS', color: '#3b82f6' },
+  { category: 'unknown', label: 'Unknown / Unclassified', color: '#f59e0b' },
+  { category: 'gas_flare', label: 'Gas Flare', color: '#3b82f6' },
 ]
 
 export function IndustrialVsNaturalChart({ expanded = false, showDetailsLink = true }: { expanded?: boolean; showDetailsLink?: boolean }) {

@@ -14,7 +14,7 @@ export default function AlertsPage() {
       </header>
 
       <section aria-label="System Alerts Stream">
-        <SectionHeading num="01" title="SYSTEM ALERTS STREAM" subtitle="Live data from /dashboard/alerts API" />
+        <SectionHeading num="01" title="SYSTEM ALERTS STREAM" subtitle="Real-time thermal anomaly alerts stream" />
         <AlertsList />
       </section>
     </div>
