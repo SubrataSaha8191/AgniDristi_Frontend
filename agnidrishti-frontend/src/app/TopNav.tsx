@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import agniDrishtiLogo from '../assets/SIH_tech_invaders (3).png'
 import { CheckCircle2, Loader2, Menu, Moon, Radio, Sun, User, UserPlus, XCircle, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useSourceStore } from '../stores/sourceStore'
@@ -39,6 +40,18 @@ export function TopNav() {
           className="flex items-center justify-center p-2 text-white border cursor-pointer border-zinc-700 bg-zinc-900 hover:bg-zinc-800">
           <Menu size={20} aria-hidden="true" />
         </button>
+        <img
+          src={agniDrishtiLogo}
+          alt="AGNI-DRISHTI"
+          className="object-contain"
+          style={{
+            height: '350px',
+            width: 'auto',
+            maxHeight: '45px',
+            display: 'block',
+            paddingLeft:'10px'
+          }}
+        />
         <span className="text-lg font-black tracking-widest uppercase sm:text-xl">AGNI<span className="text-[#d8f5a9]">DRISHTI</span></span>
       </div>
 
