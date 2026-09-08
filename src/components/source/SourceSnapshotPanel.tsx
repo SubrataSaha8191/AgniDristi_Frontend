@@ -34,20 +34,20 @@ export function SourceSnapshotPanel() {
         </motion.div>
       ) : (
         <motion.aside initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.2 }}
-          role="dialog" aria-modal="true" aria-label="Source snapshot"
-          className="source-panel-scroll fixed inset-y-0 right-0 z-[1100] w-full max-w-md overflow-y-auto border-l-2 border-black dark:border-zinc-700 bg-surface p-6 shadow-2xl">
-          <div className="flex items-center justify-between gap-4 border-b-2 border-black dark:border-zinc-700 pb-4">
+          role="dialog" aria-modal="true" aria-label="Source snapshot" onWheel={(e) => e.stopPropagation()}
+          className="source-panel-scroll overscroll-contain fixed inset-y-0 right-0 z-[1100] w-full max-w-md overflow-y-auto border-l-2 border-black dark:border-zinc-700 bg-surface p-6 shadow-2xl">
+          <div className="flex items-center justify-between gap-4 pb-4 border-b-2 border-black dark:border-zinc-700">
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Source snapshot</p>
               <h2 className="mt-0.5 text-lg font-black uppercase tracking-wider text-text-primary">{selectedSourceId}</h2>
             </div>
             <div className="flex items-center gap-1">
               <button type="button" onClick={toggleCollapse} aria-label="Collapse panel" title="Collapse panel to unblock view"
-                className="rounded-none border border-black dark:border-zinc-700 p-1.5 text-text-primary hover:bg-zinc-200 dark:hover:bg-zinc-800">
+                className="rounded-none border border-black dark:border-zinc-700 p-1.5 text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white transition-colors cursor-pointer">
                 <ChevronRight size={18} />
               </button>
               <button type="button" onClick={handleClose} aria-label="Close source snapshot"
-                className="rounded-none border border-black dark:border-zinc-700 p-1.5 text-text-primary hover:bg-zinc-200 dark:hover:bg-zinc-800">
+                className="rounded-none border border-black dark:border-zinc-700 p-1.5 text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white transition-colors cursor-pointer">
                 <X size={18} />
               </button>
             </div>

@@ -15,14 +15,15 @@ function mapToSource(obj: BackendObject): SourceSummary {
   const label = (obj.classification_label ?? '').toLowerCase()
   const hint = (obj.temporal_source_hint ?? '').toLowerCase()
 
-  let category: SourceCategory = 'industrial'
+  let category: SourceCategory = 'unknown'
   if (label.includes('biomass') || label.includes('natural') || hint.includes('biomass')) category = 'natural_biomass'
-  else if (label.includes('flare') || label.includes('gas') || hint.includes('flare')) category = 'gas_flare'
-  else if (label.includes('abnormal') || conf < 55) category = 'abnormal'
+  else if (label.includes('industrial') || label.includes('steel') || label.includes('cement') || label.includes('mining') || label.includes('power') || label.includes('flare') || label.includes('gas') || label.includes('oil')) category = 'industrial'
+  else if (label.includes('abnormal') || (conf < 50 && label.length > 0)) category = 'abnormal'
   else if ((obj.persistence_ratio ?? 0) > 0.5 || hint.includes('persistent')) category = 'persistent'
 
   return {
-    id: obj.object_uid, category, industrySubtype: obj.classification_label || obj.temporal_source_hint || 'Thermal Source',
+    id: obj.object_uid, category,
+    industrySubtype: obj.classification_label || (category === 'unknown' ? 'Unclassified Object' : obj.temporal_source_hint) || 'Thermal Object',
     confidence: conf, status: (obj.persistence_ratio ?? 0) > 0.5 ? 'persistent' : 'new',
     anomalyLevel: conf < 50 ? 'high' : conf < 75 ? 'medium' : 'low', lat: obj.latitude, lon: obj.longitude,
   }
@@ -64,7 +65,7 @@ export function useSourceDetail(sourceId?: string | null) {
         const conf = Math.round((cls?.confidence ?? 0.85) * 100)
         const label = cls?.label ?? 'Thermal Source'
         const catLabel = label.toLowerCase()
-        const category: SourceCategory = catLabel.includes('biomass') ? 'natural_biomass' : catLabel.includes('flare') ? 'gas_flare' : (temp?.persistence_ratio ?? 0.8) > 0.5 ? 'persistent' : 'industrial'
+        const category: SourceCategory = catLabel.includes('biomass') ? 'natural_biomass' : (temp?.persistence_ratio ?? 0.8) > 0.5 ? 'persistent' : 'industrial'
         return {
           id: String(d.object_uid ?? sourceId), category, industrySubtype: label,
           confidence: conf, status: (temp?.persistence_ratio ?? 0.8) > 0.5 ? 'persistent' : 'new',

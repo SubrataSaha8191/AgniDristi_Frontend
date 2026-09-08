@@ -30,6 +30,7 @@ export interface KPISummary {
   firmsDetections: number
   matchedFirms: number
   unmatchedFirms: number
+  ambiguousObjects: number
   alerts: number
   latestMonitoringStatus: string | null
 }

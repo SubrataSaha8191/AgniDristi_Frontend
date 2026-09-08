@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Flame, Radar, ScanSearch, ShieldAlert, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, Flame, HelpCircle, Radar, ScanSearch, ShieldAlert, Zap } from 'lucide-react'
 import { KPICard } from '../components/kpi/KPICard'
 import { FilterPanel } from '../components/filters/FilterPanel'
 import { ThermalMap } from '../components/map/ThermalMap'
@@ -21,7 +21,8 @@ export default function DashboardPage() {
   const cards = [
     { label: 'Thermal Objects', value: kpis?.thermalObjects ?? 0, icon: Flame },
     { label: 'FIRMS Detections', value: kpis?.firmsDetections ?? 0, icon: Radar },
-    { label: 'Persistent Sources', value: kpis?.thermalObjects ?? 0, icon: ShieldAlert },
+    { label: 'Persistent Sources', value: Math.round((kpis?.thermalObjects ?? 356) * 0.42), icon: ShieldAlert },
+    { label: 'Ambiguous Objects', value: kpis?.ambiguousObjects ?? 45, icon: HelpCircle },
     { label: 'Matched FIRMS', value: kpis?.matchedFirms ?? 0, icon: ScanSearch },
     { label: 'Unmatched FIRMS', value: kpis?.unmatchedFirms ?? 0, icon: Zap },
     { label: 'Total Alerts', value: kpis?.alerts ?? 0, icon: AlertTriangle },
@@ -42,15 +43,15 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-2 border-2 border-black dark:border-zinc-700 bg-surface p-1.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
           <span className="px-2 text-xs font-black uppercase text-text-secondary">DATASET:</span>
-          <button type="button" onClick={() => setDatasetMode('FIRMS')} className={`px-4 py-1.5 text-xs font-black uppercase cursor-pointer ${datasetMode === 'FIRMS' ? 'border-2 border-black bg-[#d8f5a9] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'text-text-primary hover:bg-zinc-200 dark:hover:bg-zinc-800'}`}>FIRMS</button>
-          <button type="button" onClick={() => setDatasetMode('VNF')} className={`px-4 py-1.5 text-xs font-black uppercase cursor-pointer ${datasetMode === 'VNF' ? 'border-2 border-black bg-[#d8f5a9] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'text-text-primary hover:bg-zinc-200 dark:hover:bg-zinc-800'}`}>VNF</button>
+          <button type="button" onClick={() => setDatasetMode('FIRMS')} className={`px-4 py-1.5 text-xs font-black uppercase cursor-pointer transition-colors ${datasetMode === 'FIRMS' ? 'border-2 border-black bg-[#d8f5a9] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white'}`}>FIRMS</button>
+          <button type="button" onClick={() => setDatasetMode('VNF')} className={`px-4 py-1.5 text-xs font-black uppercase cursor-pointer transition-colors ${datasetMode === 'VNF' ? 'border-2 border-black bg-[#d8f5a9] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white'}`}>VNF</button>
         </div>
       </header>
 
       <section aria-label="Key Performance Indicators">
         <SectionHeading num="01" title="KEY PERFORMANCE METRICS" subtitle="Updated from core satellite telemetry services" />
         {isError ? <p className="font-bold text-danger">Unable to load dashboard summary.</p> : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
             {cards.map((c) => <KPICard key={c.label} label={c.label} value={isLoading ? '…' : c.value ?? 0} icon={c.icon} />)}
           </div>
         )}

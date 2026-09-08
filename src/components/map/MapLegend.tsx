@@ -10,7 +10,7 @@ export function MapLegend({ sources = [] }: { sources?: SourceSummary[] }) {
   const setSourceType = useFilterStore((s) => s.setSourceType)
 
   const counts: Record<MapCategory, number> = {
-    industrial: 0, natural_biomass: 0, persistent: 0, abnormal: 0, unknown: 0, firms_detection: 0,
+    industrial: 0, natural_biomass: 0, persistent: 0, abnormal: 0, unknown: 0,
   }
   sources.forEach((s) => {
     const cat = getMapCategory(s.category)
@@ -46,7 +46,7 @@ export function MapLegend({ sources = [] }: { sources?: SourceSummary[] }) {
               <FilterX size={12} /> Clear
             </button>
           )}
-          <button type="button" onClick={() => setIsCollapsed(true)} className="p-1 text-text-primary hover:bg-zinc-200 dark:hover:bg-zinc-800" aria-label="Minimize categories">
+          <button type="button" onClick={() => setIsCollapsed(true)} className="p-1 text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white transition-colors" aria-label="Minimize categories">
             <ChevronDown size={14} />
           </button>
         </div>
@@ -58,12 +58,12 @@ export function MapLegend({ sources = [] }: { sources?: SourceSummary[] }) {
           return (
             <li key={cat}>
               <button type="button" onClick={() => handleCategoryClick(cat)}
-                className={`w-full flex items-center justify-between px-2 py-1 text-xs font-mono transition-colors cursor-pointer border ${isActive ? 'border-black bg-[#d8f5a9] text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'border-transparent text-text-primary hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+                className={`group w-full flex items-center justify-between px-2 py-1 text-xs font-mono transition-colors cursor-pointer border ${isActive ? 'border-black bg-[#d8f5a9] text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'border-transparent text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white'}`}>
                 <div className="flex items-center gap-2 truncate">
                   <span aria-hidden="true" className="h-3 w-3 shrink-0" style={{ backgroundColor: MAP_CATEGORY_COLORS[cat], clipPath: getShapeClipPath(MAP_CATEGORY_SHAPES[cat]) }} />
                   <span className="truncate">{MAP_CATEGORY_LABELS[cat]}</span>
                 </div>
-                <span className={`px-1.5 py-0.5 text-[10px] font-black rounded-none border ${isActive ? 'border-black bg-black text-[#d8f5a9]' : 'border-black/20 dark:border-zinc-700 bg-bg text-text-primary'}`}>
+                <span className={`px-1.5 py-0.5 text-[10px] font-black rounded-none border ${isActive ? 'border-black bg-black text-[#d8f5a9]' : 'border-black/20 dark:border-zinc-700 bg-bg text-text-primary group-hover:border-white group-hover:bg-zinc-800 group-hover:text-white'}`}>
                   {counts[cat]}
                 </span>
               </button>

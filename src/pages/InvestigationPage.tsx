@@ -6,15 +6,30 @@ import { ActivityTimelineChart } from '../components/charts/ActivityTimelineChar
 import { ThermalFingerprintChart } from '../components/charts/ThermalFingerprintChart'
 import { AnomalyDetectionChart } from '../components/charts/AnomalyDetectionChart'
 import { useSourceDetail } from '../services/sourceService'
-import { useSources } from '../services/sourceService'
 import { useSourceStore } from '../stores/sourceStore'
 
 export default function InvestigationPage() {
   const { sourceId: routeSourceId } = useParams()
   const selectedSourceId = useSourceStore((state) => state.selectedSourceId)
-  const { data: sources = [] } = useSources()
-  const sourceId = routeSourceId ? decodeURIComponent(routeSourceId) : selectedSourceId ?? sources[0]?.id ?? 'THERM_0DE3BA3A11F1'
+  const sourceId = routeSourceId ? decodeURIComponent(routeSourceId) : selectedSourceId
   const { data: source, isLoading, isError } = useSourceDetail(sourceId)
+
+  if (!sourceId) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6">
+        <Link to="/dashboard" className="text-xs font-black uppercase text-text-primary hover:underline">← Back to dashboard</Link>
+        <div className="border-2 border-dashed border-black dark:border-zinc-700 bg-surface p-12 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <h2 className="text-lg font-black uppercase tracking-wider text-text-primary">No Thermal Source Selected</h2>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-text-secondary max-w-md mx-auto">
+            Select a thermal source object on the spatial map or search list to inspect detail timelines, thermal fingerprints, and spatial imagery.
+          </p>
+          <Link to="/dashboard" className="mt-6 inline-block border-2 border-black bg-black dark:bg-[#d8f5a9] px-5 py-2.5 text-xs font-black uppercase tracking-widest text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+            Go to Spatial Map
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -33,7 +48,6 @@ export default function InvestigationPage() {
           </div>
         )}
       </div>
-      {!sourceId && <p className="mt-8 text-xs font-bold uppercase text-text-secondary">Loading thermal source intelligence...</p>}
       {isLoading && <p className="mt-8 text-xs font-bold uppercase text-text-secondary">Loading source details...</p>}
       {isError && <p className="mt-8 text-xs font-bold uppercase text-danger">Unable to load source details.</p>}
       {source && (
