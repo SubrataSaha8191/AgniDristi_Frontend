@@ -4,9 +4,10 @@ import { useSourceStore } from '../../stores/sourceStore'
 import type { Alert } from '../../types/source'
 
 const SEVERITY_STYLES: Record<string, string> = {
-  HIGH: 'border-black bg-red-600 text-white font-bold',
-  MEDIUM: 'border-black bg-amber-500 text-black font-bold',
-  LOW: 'border-black bg-zinc-200 text-black font-bold',
+  CRITICAL: 'border-2 border-black bg-red-600 text-white font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+  HIGH: 'border-2 border-black bg-red-600 text-white font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+  MEDIUM: 'border-2 border-black bg-amber-500 text-black font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
+  LOW: 'border-2 border-black bg-emerald-500 text-black font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
 }
 
 function formatTimestamp(ts?: string | null) {

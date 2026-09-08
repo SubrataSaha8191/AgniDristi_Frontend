@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { axiosClient } from '../lib/axiosClient'
+import { useSourceStore } from '../stores/sourceStore'
 import type { KPISummary } from '../types/source'
 
 interface DashboardSummaryResponse {
@@ -16,11 +17,14 @@ interface DashboardSummaryResponse {
 }
 
 export function useKPISummary() {
+  const datasetMode = useSourceStore((s) => s.datasetMode)
   return useQuery({
-    queryKey: ['kpi-summary'],
+    queryKey: ['kpi-summary', datasetMode],
     queryFn: async (): Promise<KPISummary> => {
       try {
-        const res = await axiosClient.get<DashboardSummaryResponse>('/dashboard/summary')
+        const res = await axiosClient.get<DashboardSummaryResponse>('/dashboard/summary', {
+          params: { dataset_type: datasetMode.toLowerCase() },
+        })
         const d = res.data
         return {
           thermalObjects: d.thermal_objects ?? 0,

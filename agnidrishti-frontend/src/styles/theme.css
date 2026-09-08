@@ -68,5 +68,27 @@ html, body {
   color: #d8f5a9;
 }
 
+@keyframes thermal-ping {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.thermal-pulse-ring {
+  animation: thermal-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.leaflet-tooltip.thermal-tooltip {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  border: 2px solid var(--color-border) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+  border-radius: 0px !important;
+  padding: 8px 10px !important;
+}
+
+.leaflet-tooltip.thermal-tooltip::before {
+  border-top-color: var(--color-border) !important;
+}
+
 
 
