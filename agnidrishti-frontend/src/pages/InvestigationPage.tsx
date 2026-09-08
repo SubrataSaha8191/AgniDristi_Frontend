@@ -1,5 +1,4 @@
 import { Link, useParams } from 'react-router-dom'
-import { NearbyFacilitiesTable } from '../components/tables/NearbyFacilitiesTable'
 import { SatelliteContextViewer } from '../components/satellite/SatelliteContextViewer'
 import { SourceHistoryTimeline } from '../components/timeline/SourceHistoryTimeline'
 import { ActivityTimelineChart } from '../components/charts/ActivityTimelineChart'
@@ -57,10 +56,7 @@ export default function InvestigationPage() {
             <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><ThermalFingerprintChart sourceId={source.id} /></div>
             <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><AnomalyDetectionChart sourceId={source.id} anomalyLevel={source.anomalyLevel} /></div>
           </div>
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,1fr)]">
-            <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><SatelliteContextViewer sourceId={source.id} /></div>
-            <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><NearbyFacilitiesTable sourceId={source.id} /></div>
-          </div>
+          <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><SatelliteContextViewer sourceId={source.id} /></div>
           <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><SourceHistoryTimeline source={source} /></div>
         </>
       )}
