@@ -1,14 +1,25 @@
+import type { AxiosProgressEvent, AxiosRequestConfig } from 'axios'
 import { axiosClient, isApiConfigured, API_BASE_URL } from './axiosClient'
 
 export { isApiConfigured, API_BASE_URL }
 
-export async function apiClient<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const url = path.startsWith('/') ? path : `/${path}`
-  const response = await axiosClient.request<T>({
-    url,
-    method: (options.method as string) || 'GET',
-    data: options.body,
-    headers: options.headers as Record<string, string>,
-  })
+export async function apiRequest<T>(config: AxiosRequestConfig): Promise<T> {
+  const response = await axiosClient.request<T>(config)
   return response.data
 }
+
+export function apiGet<T>(url: string, config: AxiosRequestConfig = {}) {
+  return apiRequest<T>({ ...config, method: 'GET', url })
+}
+
+export function apiPost<TResponse, TBody = unknown>(url: string, data?: TBody, config: AxiosRequestConfig = {}) {
+  return apiRequest<TResponse>({ ...config, method: 'POST', url, data })
+}
+
+export function uploadFile<T>(url: string, file: File, onUploadProgress?: (event: AxiosProgressEvent) => void) {
+  const body = new FormData()
+  body.append('file', file)
+  return apiPost<T, FormData>(url, body, { onUploadProgress })
+}
+
+export const apiClient = apiRequest

@@ -28,7 +28,7 @@ export function useKPISummary() {
         })
         const d = res.data
         const hints = d.temporal_source_hints ?? {}
-        const amb = hints.ambiguous ?? hints.ambig ?? 45
+        const amb = hints.ambiguous ?? hints.ambig ?? 0
         return {
           thermalObjects: d.thermal_objects ?? 0,
           firmsDetections: d.firms_detections ?? 0,
@@ -44,7 +44,7 @@ export function useKPISummary() {
           firmsDetections: 0,
           matchedFirms: 0,
           unmatchedFirms: 0,
-          ambiguousObjects: 45,
+          ambiguousObjects: 0,
           alerts: 0,
           latestMonitoringStatus: 'COMPLETED',
         }

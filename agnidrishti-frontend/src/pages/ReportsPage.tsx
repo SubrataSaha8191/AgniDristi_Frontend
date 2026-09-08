@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Download, FileBarChart, FileText, Map, CheckCircle2 } from 'lucide-react'
-import { useMonitoringSummary } from '../services/monitoringRunService'
+import { useKPISummary } from '../services/kpiService'
 import { useAlerts } from '../services/alertService'
 import { useSources } from '../services/sourceService'
 
 export default function ReportsPage() {
   const [downloadMsg, setDownloadMsg] = useState('')
-  const { data: summary } = useMonitoringSummary()
+  const { data: summary } = useKPISummary()
   const { data: alerts = [] } = useAlerts()
   const { data: sources = [] } = useSources()
 
@@ -27,7 +27,7 @@ export default function ReportsPage() {
       title: 'Executive Satellite Thermal Digest',
       type: 'Real-time Telemetry Brief',
       date: new Date().toLocaleDateString('en-IN', { dateStyle: 'medium' }),
-      description: `Summary payload: ${summary?.total_objects ?? 356} thermal objects registered, ${summary?.matched_firms ?? 20} matched sources, ${summary?.unmatched_firms ?? 904} unmatched FIRMS detections.`,
+      description: `Summary payload: ${summary?.thermalObjects ?? 0} thermal objects registered, ${summary?.matchedFirms ?? 0} matched sources, ${summary?.unmatchedFirms ?? 0} unmatched FIRMS detections.`,
       icon: Map,
       payload: summary,
     },

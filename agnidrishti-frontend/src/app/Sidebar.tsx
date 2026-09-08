@@ -18,29 +18,28 @@ export function Sidebar() {
   const [shouldRender, setShouldRender] = useState(sidebarOpen)
   const mobileRef = useRef<HTMLElement>(null)
   const desktopRef = useRef<HTMLElement>(null)
-  const isFirstRender = useRef(true)
 
   useEffect(() => {
-    if (sidebarOpen) setShouldRender(true)
-    else {
-      if (isFirstRender.current) { isFirstRender.current = false; setShouldRender(false); return }
-      let done = 0
-      const finish = () => { done++; if (done >= ((desktopRef.current ? 1 : 0) + (mobileRef.current ? 1 : 0) || 1)) setShouldRender(false) }
-      if (desktopRef.current) gsap.to(desktopRef.current, { x: '-100%', opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: finish })
-      if (mobileRef.current) gsap.to(mobileRef.current, { y: '-100%', opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: finish })
+    if (sidebarOpen) {
+      setShouldRender(true)
+    } else {
+      let count = 0
+      const onDone = () => {
+        count++
+        if (count >= 2) setShouldRender(false)
+      }
+      if (desktopRef.current) gsap.to(desktopRef.current, { x: '-100%', opacity: 0, duration: 0.25, ease: 'power2.in', onComplete: onDone })
+      else onDone()
+
+      if (mobileRef.current) gsap.to(mobileRef.current, { y: '-100%', opacity: 0, duration: 0.25, ease: 'power2.in', onComplete: onDone })
+      else onDone()
     }
   }, [sidebarOpen])
 
   useEffect(() => {
     if (shouldRender && sidebarOpen) {
-      const animate = (el: HTMLElement | null, axis: 'x' | 'y') => {
-        if (!el) return
-        gsap.fromTo(el, { [axis]: '-100%', opacity: 0 }, { [axis]: '0%', opacity: 1, duration: 0.35, ease: 'power3.out' })
-        const items = el.querySelectorAll('.sidebar-nav-item')
-        if (items.length > 0) gsap.fromTo(items, { [axis]: -15, opacity: 0 }, { [axis]: 0, opacity: 1, duration: 0.25, stagger: 0.02, ease: 'power2.out' })
-      }
-      animate(desktopRef.current, 'x')
-      animate(mobileRef.current, 'y')
+      if (desktopRef.current) gsap.fromTo(desktopRef.current, { x: '-100%', opacity: 0 }, { x: '0%', opacity: 1, duration: 0.25, ease: 'power2.out' })
+      if (mobileRef.current) gsap.fromTo(mobileRef.current, { y: '-100%', opacity: 0 }, { y: '0%', opacity: 1, duration: 0.25, ease: 'power2.out' })
     }
   }, [shouldRender, sidebarOpen])
 
@@ -58,7 +57,7 @@ export function Sidebar() {
           <div className="space-y-1">
             {items.map(({ label, to, end, icon: Icon }) => (
               <NavLink key={to} to={to} end={end} onClick={() => { if (isMobile) toggleSidebar() }}
-                className={({ isActive }) => `sidebar-nav-item flex items-center gap-3 rounded-none border-2 px-4 py-2.5 text-xs font-black uppercase tracking-wide transition-all ${
+                className={({ isActive }) => `flex items-center gap-3 rounded-none border-2 px-4 py-2.5 text-xs font-black uppercase tracking-wide transition-colors ${
                   isActive
                     ? theme === 'dark' ? 'border-[#d8f5a9] bg-[#d8f5a9] text-black shadow-[3px_3px_0px_0px_rgba(216,245,169,0.3)]' : 'border-black bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
                     : theme === 'dark' ? 'border-transparent text-text-secondary hover:bg-zinc-800 hover:border-zinc-500 hover:text-white' : 'border-transparent text-text-secondary hover:bg-transparent hover:border-black hover:text-black'
@@ -90,7 +89,3 @@ export function Sidebar() {
     </>
   )
 }
-
-
-
-

@@ -1,92 +1,22 @@
-import { useQuery } from '@tanstack/react-query'
-import { axiosClient } from '../../lib/axiosClient'
 import { Activity, CheckCircle2, XCircle } from 'lucide-react'
+import { useMonitoringState } from '../../services/dashboardService'
 
-interface MonitoringResponse {
-  total_runs: number
-  completed_runs: number
-  failed_runs: number
-  latest: {
-    run_uid: string
-    trigger_type: string
-    status: string
-    started_at: string
-    finished_at: string | null
-    duration_seconds: number | null
-    fetched: number
-    inserted: number
-    matched: number
-    unmatched: number
-    alerts_created: number
-  } | null
-}
-
-function useMonitoringDashboard() {
-  return useQuery({
-    queryKey: ['dashboard-monitoring'],
-    queryFn: async () => {
-      const res = await axiosClient.get<MonitoringResponse>('/dashboard/monitoring')
-      return res.data
-    },
-    refetchInterval: 60_000,
-  })
-}
-
-function formatDt(iso?: string | null) {
-  if (!iso) return '—'
-  const d = new Date(iso)
-  if (isNaN(d.getTime())) return iso
-  try {
-    return new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(d)
-  } catch {
-    return iso
-  }
-}
+const value = (input: string | number | null | undefined) => input == null ? 'Not available' : String(input)
+const formatTime = (input: string | null) => input ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(input)) : 'Not available'
 
 export function MonitoringStatusCard() {
-  const { data, isLoading, isError } = useMonitoringDashboard()
-
+  const query = useMonitoringState()
+  const latest = query.data?.latest
   return (
-    <section className="rounded-none border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900/50 p-5 shadow-sm">
-      <div className="flex items-center gap-2 border-b-2 border-black dark:border-zinc-700 pb-3">
-        <Activity size={18} className="text-black dark:text-white" />
-        <h2 className="text-sm font-black uppercase tracking-wider text-black dark:text-white">Monitoring Status</h2>
-      </div>
-      {isLoading && <div className="mt-4 h-24 animate-pulse bg-zinc-200 dark:bg-zinc-800" />}
-      {isError && <p className="mt-4 text-xs font-bold text-danger">Unable to load monitoring data.</p>}
-      {data && (() => {
-        const total = data.total_runs ?? 0
-        const failed = data.failed_runs ?? 0
-        const completed = Math.max(0, total - failed)
-        return (
-          <div className="mt-4 space-y-3 text-xs">
-            <div className="grid grid-cols-3 gap-3">
-              <Stat label="Total Runs" value={total} />
-              <Stat label="Completed" value={completed} icon={<CheckCircle2 size={14} className="text-success" />} />
-              <Stat label="Failed" value={failed} icon={<XCircle size={14} className="text-danger" />} />
-            </div>
-            {data.latest && (
-              <div className="border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-1 font-semibold text-black dark:text-white">
-                <p className="font-bold uppercase text-black dark:text-white">Latest Status: {data.latest.status}</p>
-                <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Trigger: {data.latest.trigger_type} · {formatDt(data.latest.started_at)}</p>
-                <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Fetched {data.latest.fetched} · Inserted {data.latest.inserted} · Matched {data.latest.matched}</p>
-                <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Unmatched {data.latest.unmatched} · Alerts {data.latest.alerts_created}</p>
-                {data.latest.duration_seconds != null && <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Duration: {data.latest.duration_seconds.toFixed(1)}s</p>}
-              </div>
-            )}
-          </div>
-        )
-      })()}
+    <section className="border-2 border-text-primary bg-surface p-5" aria-labelledby="monitoring-heading">
+      <div className="flex items-center gap-2 border-b-2 border-text-primary pb-3"><Activity size={18} /><h2 id="monitoring-heading" className="text-sm font-black uppercase tracking-wider">Monitoring status</h2></div>
+      {query.isLoading && <div className="mt-4 h-24 animate-pulse bg-text-primary/10" role="status"><span className="sr-only">Loading monitoring state</span></div>}
+      {query.isError && <div className="mt-4"><p className="text-xs font-bold text-danger">Monitoring state could not be loaded.</p><button type="button" onClick={() => query.refetch()} className="mt-3 border-2 border-black px-3 py-1 text-xs font-black uppercase">Retry</button></div>}
+      {query.data && <div className="mt-4 space-y-4"><div className="grid gap-3 sm:grid-cols-3"><Stat label="Total runs" value={query.data.total_runs} /><Stat label="Completed" value={query.data.completed_runs} icon={<CheckCircle2 size={14} className="text-success" />} /><Stat label="Failed" value={query.data.failed_runs} icon={<XCircle size={14} className="text-danger" />} /></div>{latest ? <div className="border-2 border-text-primary p-3 text-xs"><p className="font-black uppercase">Latest: {latest.status}</p><p className="mt-1 text-text-secondary">{latest.trigger_type} · {formatTime(latest.started_at)}</p><p className="mt-1 font-mono text-text-secondary">Fetched {value(latest.fetched)} · Inserted {value(latest.inserted)} · Matched {value(latest.matched)} · Unmatched {value(latest.unmatched)} · Alerts {value(latest.alerts_created)}</p>{latest.error_message && <p className="mt-2 font-bold text-danger">{latest.error_message}</p>}</div> : <p className="text-xs text-text-secondary">No monitoring runs have been recorded.</p>}</div>}
     </section>
   )
 }
 
-function Stat({ label, value, icon }: { label: string; value: number; icon?: React.ReactNode }) {
-  return (
-    <div className="border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 p-2.5 text-center text-black dark:text-white">
-      <p className="flex items-center justify-center gap-1 font-bold uppercase text-xs text-black dark:text-white">{icon}{label}</p>
-      <p className="mt-1 font-mono text-xl font-black text-black dark:text-white">{value}</p>
-    </div>
-  )
+function Stat({ label, value: input, icon }: { label: string; value: number; icon?: React.ReactNode }) {
+  return <div className="border-2 border-text-primary p-3"><p className="flex items-center gap-1 text-[10px] font-black uppercase text-text-secondary">{icon}{label}</p><p className="mt-1 font-mono text-xl font-black">{input}</p></div>
 }
-

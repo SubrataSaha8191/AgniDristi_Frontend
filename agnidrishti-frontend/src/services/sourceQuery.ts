@@ -8,6 +8,7 @@ interface BackendObject {
   classification_label: string | null; classification_source: string | null
   confidence: number | null; detection_count: number | null; persistence_ratio: number | null
   temporal_source_hint?: string | null; temp_mean?: number | null
+  gas_flare_likelihood?: string | null; gas_flare_score?: number | null
 }
 
 function mapToSource(obj: BackendObject): SourceSummary {
@@ -21,11 +22,15 @@ function mapToSource(obj: BackendObject): SourceSummary {
   else if (label.includes('abnormal') || (conf < 50 && label.length > 0)) category = 'abnormal'
   else if ((obj.persistence_ratio ?? 0) > 0.5 || hint.includes('persistent')) category = 'persistent'
 
+  const flareLvl = (obj.gas_flare_likelihood ?? '').toUpperCase()
+  const flareScore = obj.gas_flare_score ?? 0
+  const anomalyLevel = flareLvl === 'LIKELY' || flareScore >= 0.7 ? 'high' : flareLvl === 'POSSIBLE' || flareScore >= 0.3 ? 'medium' : 'low'
+
   return {
     id: obj.object_uid, category,
     industrySubtype: obj.classification_label || (category === 'unknown' ? 'Unclassified Object' : obj.temporal_source_hint) || 'Thermal Object',
     confidence: conf, status: (obj.persistence_ratio ?? 0) > 0.5 ? 'persistent' : 'new',
-    anomalyLevel: conf < 50 ? 'high' : conf < 75 ? 'medium' : 'low', lat: obj.latitude, lon: obj.longitude,
+    anomalyLevel, lat: obj.latitude, lon: obj.longitude,
   }
 }
 
@@ -62,14 +67,20 @@ export function useSourceDetail(sourceId?: string | null) {
         const loc = d.location as { latitude: number; longitude: number } | undefined
         const cls = d.classification as { label?: string; confidence?: number } | undefined
         const temp = d.temporal as { persistence_ratio?: number; source_hint?: string } | undefined
+        const flare = d.gas_flare_assessment as { likelihood?: string; score?: number } | undefined
         const conf = Math.round((cls?.confidence ?? 0.85) * 100)
         const label = cls?.label ?? 'Thermal Source'
         const catLabel = label.toLowerCase()
         const category: SourceCategory = catLabel.includes('biomass') ? 'natural_biomass' : (temp?.persistence_ratio ?? 0.8) > 0.5 ? 'persistent' : 'industrial'
+
+        const flareLvl = (flare?.likelihood ?? '').toUpperCase()
+        const flareScore = flare?.score ?? 0
+        const anomalyLevel = flareLvl === 'LIKELY' || flareScore >= 0.7 ? 'high' : flareLvl === 'POSSIBLE' || flareScore >= 0.3 ? 'medium' : 'low'
+
         return {
           id: String(d.object_uid ?? sourceId), category, industrySubtype: label,
           confidence: conf, status: (temp?.persistence_ratio ?? 0.8) > 0.5 ? 'persistent' : 'new',
-          anomalyLevel: conf < 50 ? 'high' : conf < 75 ? 'medium' : 'low',
+          anomalyLevel,
           lat: loc?.latitude ?? 23.3441, lon: loc?.longitude ?? 85.6096, firstDetected: now, lastDetected: now,
         }
       } catch {

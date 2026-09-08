@@ -67,13 +67,12 @@ export function generateAnomalyTrend(source: SourceSummary): AnomalyPoint[] {
   const isHigh = source.anomalyLevel === 'high'
   const isMedium = source.anomalyLevel === 'medium'
 
-  let baseline = 8
-  let current = 8
+  let baseline = 380
 
   return ANOMALY_DATES.map((date) => {
-    baseline += rand() * 2
-    const drift = isHigh ? 2.2 : isMedium ? 1.1 : 0.4
-    current += drift + (rand() - 0.4) * 1.5
+    baseline += (rand() - 0.5) * 4
+    const drift = isHigh ? 65 + rand() * 25 : isMedium ? 20 + rand() * 10 : 2 + rand() * 3
+    const current = baseline + drift
     return {
       date,
       baseline: Math.round(baseline * 10) / 10,

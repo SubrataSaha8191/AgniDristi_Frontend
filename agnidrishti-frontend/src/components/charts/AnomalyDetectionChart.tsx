@@ -1,17 +1,20 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { useSourceAnomaly } from '../../services/sourceService'
+import { useSourceAnomaly, useSourceDetail } from '../../services/sourceService'
 
-function getSeverity(maxDelta: number) {
-  if (maxDelta >= 25) return { label: 'High', className: 'border border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400' }
-  if (maxDelta >= 10) return { label: 'Medium', className: 'border border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400' }
+function getSeverityStyle(level: string) {
+  const norm = level.toLowerCase()
+  if (norm === 'high') return { label: 'High', className: 'border border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400' }
+  if (norm === 'medium') return { label: 'Medium', className: 'border border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400' }
   return { label: 'Low', className: 'border border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400' }
 }
 
-export function AnomalyDetectionChart({ sourceId }: { sourceId: string }) {
+export function AnomalyDetectionChart({ sourceId, anomalyLevel }: { sourceId: string; anomalyLevel?: string }) {
   const { data = [], isLoading, isError } = useSourceAnomaly(sourceId)
-  const maxDelta = data.reduce((max, point) => Math.max(max, point.current - point.baseline), 0)
-  const severity = getSeverity(maxDelta)
-  const trend = data.length > 0 && data[data.length - 1].current >= data[data.length - 1].baseline ? 'Above Baseline' : 'Normal Baseline'
+  const { data: detail } = useSourceDetail(sourceId)
+  const activeLevel = anomalyLevel ?? detail?.anomalyLevel ?? 'low'
+  const severity = getSeverityStyle(activeLevel)
+  const isElevated = activeLevel === 'high' || activeLevel === 'medium'
+  const trend = data.length > 0 && isElevated ? 'Above Baseline' : 'Normal Baseline'
 
   return (
     <section aria-label="Anomaly detection">
@@ -32,7 +35,7 @@ export function AnomalyDetectionChart({ sourceId }: { sourceId: string }) {
               <Tooltip contentStyle={{ backgroundColor: '#18181b', color: '#fff', border: '1px solid #3f3f46', fontSize: '11px', borderRadius: '0px' }} />
               <Legend wrapperStyle={{ fontSize: 10, fontWeight: 700 }} />
               <Line type="monotone" dataKey="baseline" name="Baseline" stroke="#71717a" strokeWidth={2} strokeDasharray="4 4" dot={false} />
-              <Line type="monotone" dataKey="current" name="Current" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 3, fill: '#ef4444' }} />
+              <Line type="monotone" dataKey="current" name="Current" stroke={activeLevel === 'high' ? '#ef4444' : activeLevel === 'medium' ? '#f59e0b' : '#22c55e'} strokeWidth={2.5} dot={{ r: 3, fill: activeLevel === 'high' ? '#ef4444' : activeLevel === 'medium' ? '#f59e0b' : '#22c55e' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
