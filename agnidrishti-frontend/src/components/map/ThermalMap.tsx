@@ -1,75 +1,37 @@
 import { useState } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
-import { useShallow } from 'zustand/react/shallow'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import { useFilterStore } from '../../stores/filterStore'
 import { useThemeStore } from '../../stores/themeStore'
-import { useSources } from '../../services/sourceService'
+import type { RecentFirmsDetection, ThermalObject } from '../../types/dashboard'
 import { ClusteredMarkers } from './ClusteredMarkers'
-import { MapLegend } from './MapLegend'
-import { MapSearchControl } from './MapSearchControl'
 
 type MapMode = 'carto' | 'osm' | 'satellite'
-
 const mapCenter: [number, number] = [24.15, 87.6]
-const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_30q5_1_290c23ee4af7e917bbff005e'
+const cartoKey = import.meta.env.VITE_CARTO_API_KEY || ''
 const keyQuery = cartoKey ? `?key=${cartoKey}` : ''
 
-const cartoLightUrl = `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png${keyQuery}`
-const cartoDarkUrl = `https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png${keyQuery}`
-const osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-const satelliteUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-
-export function ThermalMap() {
+export function ThermalMap({ objects, detections, isLoading, error, onRetry }: { objects: ThermalObject[]; detections: RecentFirmsDetection[]; isLoading: boolean; error: boolean; onRetry: () => void }) {
   const [mapMode, setMapMode] = useState<MapMode>('carto')
-  const theme = useThemeStore((s) => s.theme)
-  const filters = useFilterStore(
-    useShallow((s) => ({
-      sourceId: s.sourceId, location: s.location, facility: s.facility,
-      from: s.dateRange.from, to: s.dateRange.to, sourceType: s.sourceType,
-      industryType: s.industryType, anomalyLevel: s.anomalyLevel,
-      confidenceLevel: s.confidenceLevel, persistenceStatus: s.persistenceStatus,
-    }))
-  )
-  const resetFilters = useFilterStore((s) => s.reset)
-  const { data: sources = [], isLoading, isError } = useSources(filters)
-
-  const tileUrl = mapMode === 'satellite' ? satelliteUrl : mapMode === 'osm' ? osmUrl : (theme === 'dark' ? cartoDarkUrl : cartoLightUrl)
-  const attribution = mapMode === 'satellite' ? 'Tiles &copy; Esri' : mapMode === 'osm' ? '&copy; OpenStreetMap contributors' : '&copy; CARTO'
+  const theme = useThemeStore((state) => state.theme)
+  const tileUrl = mapMode === 'satellite' ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' : mapMode === 'osm' ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' : `https://basemaps.cartocdn.com/rastertiles/${theme === 'dark' ? 'dark_all' : 'voyager'}/{z}/{x}/{y}.png${keyQuery}`
 
   return (
-    <section className="group relative overflow-hidden rounded-none border-2 border-text-primary bg-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(216,245,169,0.25)] transition-all duration-500 hover:-translate-y-0.5" aria-label="Thermal source map">
-      <MapContainer center={mapCenter} zoom={6} scrollWheelZoom className="h-[32rem] w-full transition-transform duration-700 ease-out group-hover:scale-[1.008]">
-        <TileLayer key={tileUrl} url={tileUrl} attribution={attribution} />
-        <MapSearchControl />
-        {!isLoading && !isError && sources.length > 0 && <ClusteredMarkers sources={sources} />}
+    <section className="relative overflow-hidden border-2 border-text-primary bg-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" aria-label="Thermal objects and FIRMS detections map">
+      <MapContainer center={mapCenter} zoom={6} scrollWheelZoom className="h-[30rem] w-full" aria-label="Interactive thermal source map">
+        <TileLayer key={tileUrl} url={tileUrl} attribution={mapMode === 'satellite' ? 'Tiles &copy; Esri' : mapMode === 'osm' ? '&copy; OpenStreetMap contributors' : '&copy; CARTO'} />
+        {!isLoading && !error && <ClusteredMarkers objects={objects} detections={detections} />}
       </MapContainer>
-
-      <div className="absolute right-4 top-4 z-[1000] flex border-2 border-black bg-black p-0.5 shadow-md">
-        <button type="button" onClick={() => setMapMode('carto')} aria-pressed={mapMode === 'carto'}
-          className={`px-3 py-1 text-[11px] font-black uppercase tracking-wider transition-colors ${mapMode === 'carto' ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>CARTO</button>
-        <button type="button" onClick={() => setMapMode('osm')} aria-pressed={mapMode === 'osm'}
-          className={`px-3 py-1 text-[11px] font-black uppercase tracking-wider transition-colors ${mapMode === 'osm' ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>OSM</button>
-        <button type="button" onClick={() => setMapMode('satellite')} aria-pressed={mapMode === 'satellite'}
-          className={`px-3 py-1 text-[11px] font-black uppercase tracking-wider transition-colors ${mapMode === 'satellite' ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>Satellite</button>
+      <div className="absolute right-3 top-3 z-[1000] flex border-2 border-black bg-black p-0.5" aria-label="Base map style">
+        {(['carto', 'osm', 'satellite'] as MapMode[]).map((mode) => <button key={mode} type="button" onClick={() => setMapMode(mode)} aria-pressed={mapMode === mode} className={`px-3 py-1 text-[10px] font-black uppercase ${mapMode === mode ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>{mode}</button>)}
       </div>
-
-      <MapLegend sources={sources} />
-      {isLoading && <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-surface/65 backdrop-blur-[1px]"><div className="w-56 border-2 border-text-primary bg-surface p-4 shadow" role="status"><div className="h-3 w-28 animate-pulse rounded-none bg-text-primary/20" /><div className="mt-3 h-2 w-full animate-pulse rounded-none bg-text-primary/20" /><div className="mt-2 h-2 w-4/5 animate-pulse rounded-none bg-text-primary/20" /></div></div>}
-      {isError && <p className="absolute left-1/2 top-1/2 z-[1000] -translate-x-1/2 border-2 border-text-primary bg-surface px-3 py-2 text-sm font-bold text-danger shadow">Unable to load sources.</p>}
-      {!isLoading && !isError && sources.length === 0 && (
-        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-surface/80 p-6 text-center">
-          <div className="border-2 border-text-primary bg-surface p-5 shadow">
-            <p className="text-sm font-bold text-text-primary uppercase">No thermal sources found</p>
-            <p className="mt-1 text-xs text-text-secondary">Try broadening the current filters.</p>
-            <button type="button" onClick={resetFilters} className="mt-3 border-2 border-text-primary bg-black dark:bg-[#d8f5a9] px-3 py-2 text-xs font-black uppercase text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors">Reset filters</button>
-          </div>
-        </div>
-      )}
+      <div className="absolute bottom-3 left-3 z-[1000] max-w-[calc(100%-1.5rem)] border-2 border-black bg-surface p-2 text-[10px] font-bold uppercase text-text-primary shadow-[3px_3px_0_#111827]">
+        <span className="mr-3"><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-red-600" />Likely flare</span><span className="mr-3"><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-amber-600" />Possible</span><span className="mr-3"><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-blue-600" />Unlikely</span><span className="mr-3"><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-green-600" />Matched FIRMS</span><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-purple-600" />Unmatched FIRMS</span>
+      </div>
+      {isLoading && <div className="absolute inset-0 z-[1001] grid place-items-center bg-surface/75"><p role="status" className="border-2 border-black bg-surface p-4 text-xs font-black uppercase">Loading spatial data…</p></div>}
+      {error && <div className="absolute inset-0 z-[1001] grid place-items-center bg-surface/85"><div className="border-2 border-black bg-surface p-5 text-center"><p className="text-xs font-bold text-danger">Spatial data could not be loaded.</p><button type="button" onClick={onRetry} className="mt-3 border-2 border-black bg-black px-3 py-1.5 text-xs font-black uppercase text-white">Retry</button></div></div>}
+      {!isLoading && !error && objects.length === 0 && detections.length === 0 && <div className="pointer-events-none absolute inset-0 z-[999] grid place-items-center"><p className="border-2 border-black bg-surface p-4 text-xs font-black uppercase shadow-[3px_3px_0_#111827]">No spatial records match this view</p></div>}
     </section>
   )
 }
-
-

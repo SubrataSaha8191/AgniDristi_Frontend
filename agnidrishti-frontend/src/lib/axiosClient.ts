@@ -1,13 +1,12 @@
 import axios from 'axios'
 
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000').replace(/\/$/, '')
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 export const isApiConfigured = Boolean(API_BASE_URL)
 
 export const axiosClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 })
@@ -15,8 +14,10 @@ export const axiosClient = axios.create({
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.detail ?? error.response?.data?.message ?? error.message
-    return Promise.reject(new Error(message))
+    if (axios.isCancel(error)) return Promise.reject(error)
+    const message = error.response?.data?.detail ?? error.response?.data?.message
+    if (message) error.message = message
+    return Promise.reject(error)
   }
 )
 

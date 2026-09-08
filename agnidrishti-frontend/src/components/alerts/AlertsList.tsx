@@ -25,7 +25,7 @@ function AlertRow({ alert }: { alert: Alert }) {
   const openPanel = useSourceStore((s) => s.openPanel)
   const sev = alert.severity?.toUpperCase() ?? 'LOW'
   const style = SEVERITY_STYLES[sev] ?? SEVERITY_STYLES.LOW
-  const targetId = alert.object_uid || alert.firms_uid
+  const targetId = alert.object_uid
 
   return (
     <li className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -44,6 +44,7 @@ function AlertRow({ alert }: { alert: Alert }) {
             {targetId ?? `Alert #${alert.id}`}
           </p>
           {alert.message && <p className="mt-1 text-xs text-text-secondary">{alert.message}</p>}
+          {alert.latitude != null && alert.longitude != null && <p className="mt-1 font-mono text-xs text-text-secondary">{alert.latitude.toFixed(4)}, {alert.longitude.toFixed(4)}</p>}
           <p className="mt-1 flex items-center gap-1 text-xs text-text-secondary font-semibold">
             <Clock3 size={12} aria-hidden="true" />
             {formatTimestamp(alert.created_at)}
@@ -61,10 +62,10 @@ function AlertRow({ alert }: { alert: Alert }) {
 }
 
 export function AlertsList() {
-  const { data: alerts = [], isLoading, isError, dataUpdatedAt } = useAlerts()
+  const { data: alerts = [], isLoading, isError, dataUpdatedAt, refetch } = useAlerts()
 
   if (isLoading) return <p className="mt-6 text-sm font-bold text-text-secondary">Loading alerts…</p>
-  if (isError) return <p className="mt-6 text-sm font-bold text-danger">Unable to load alerts.</p>
+  if (isError) return <div className="mt-6 border-2 border-black bg-surface p-6 text-center"><p className="text-sm font-bold text-danger">Unable to load alerts.</p><button type="button" onClick={() => refetch()} className="mt-3 border-2 border-black px-3 py-1.5 text-xs font-black uppercase">Retry</button></div>
   if (alerts.length === 0) return <p className="mt-6 border-2 border-black bg-surface p-8 text-center text-sm font-bold text-text-secondary">No active alerts.</p>
 
   return (

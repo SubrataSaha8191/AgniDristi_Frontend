@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { GasFlareLikelihood } from '../types/dashboard'
 
 export type DateRange = {
   from: string
@@ -15,6 +16,12 @@ export type FilterState = {
   anomalyLevel: string
   confidenceLevel: string
   persistenceStatus: string
+  classification: string
+  temporalSource: string
+  gasFlareLikelihood: GasFlareLikelihood | ''
+  likelyFlaresOnly: boolean
+  objectLimit: number
+  objectOffset: number
   setSourceId: (sourceId: string) => void
   setLocation: (location: string) => void
   setFacility: (facility: string) => void
@@ -24,6 +31,12 @@ export type FilterState = {
   setAnomalyLevel: (anomalyLevel: string) => void
   setConfidenceLevel: (confidenceLevel: string) => void
   setPersistenceStatus: (persistenceStatus: string) => void
+  setClassification: (classification: string) => void
+  setTemporalSource: (temporalSource: string) => void
+  setGasFlareLikelihood: (gasFlareLikelihood: GasFlareLikelihood | '') => void
+  setLikelyFlaresOnly: (likelyFlaresOnly: boolean) => void
+  setObjectLimit: (objectLimit: number) => void
+  setObjectOffset: (objectOffset: number) => void
   reset: () => void
 }
 
@@ -37,6 +50,12 @@ const initialFilters = {
   anomalyLevel: '',
   confidenceLevel: '',
   persistenceStatus: '',
+  classification: '',
+  temporalSource: '',
+  gasFlareLikelihood: '' as GasFlareLikelihood | '',
+  likelyFlaresOnly: false,
+  objectLimit: 50,
+  objectOffset: 0,
 }
 
 export const useFilterStore = create<FilterState>((set) => ({
@@ -50,5 +69,11 @@ export const useFilterStore = create<FilterState>((set) => ({
   setAnomalyLevel: (anomalyLevel) => set({ anomalyLevel }),
   setConfidenceLevel: (confidenceLevel) => set({ confidenceLevel }),
   setPersistenceStatus: (persistenceStatus) => set({ persistenceStatus }),
+  setClassification: (classification) => set({ classification }),
+  setTemporalSource: (temporalSource) => set({ temporalSource }),
+  setGasFlareLikelihood: (gasFlareLikelihood) => set({ gasFlareLikelihood }),
+  setLikelyFlaresOnly: (likelyFlaresOnly) => set({ likelyFlaresOnly }),
+  setObjectLimit: (objectLimit) => set({ objectLimit }),
+  setObjectOffset: (objectOffset) => set({ objectOffset }),
   reset: () => set(initialFilters),
 }))
