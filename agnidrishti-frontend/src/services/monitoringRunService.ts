@@ -49,7 +49,18 @@ export function useMonitoringRecent(limit = 10) {
 export function useMonitoringUnmatched(limit = 10) {
   return useQuery({
     queryKey: ['monitoring-unmatched', limit],
-    queryFn: async () => (await axiosClient.get('/monitoring/unmatched', { params: { limit } })).data,
+    queryFn: async () => {
+      try {
+        const res = await axiosClient.get('/monitoring/unmatched', { params: { limit } })
+        const raw = Array.isArray(res.data) ? res.data : (res.data?.unmatched ?? res.data?.detections ?? [])
+        if (raw.length > 0) return raw
+        const recentRes = await axiosClient.get<{ detections: Array<Record<string, unknown>> }>('/dashboard/firms/recent', { params: { limit } })
+        const detections = recentRes.data?.detections ?? []
+        return detections.filter((d) => !d.known_source && !d.is_known_persistent_source)
+      } catch {
+        return []
+      }
+    },
   })
 }
 

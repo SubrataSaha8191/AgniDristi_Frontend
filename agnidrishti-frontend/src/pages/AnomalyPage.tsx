@@ -23,26 +23,26 @@ export default function AnomalyPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="border-2 border-black bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-          <p className="flex items-center gap-1.5 text-xs font-black uppercase text-red-600"><ShieldAlert size={16} /> High Risk Anomalies</p>
-          <p className="mt-2 font-mono text-2xl font-black text-black">{highCount}</p>
+        <div className="border-2 border-black dark:border-zinc-700 bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <p className="flex items-center gap-1.5 text-xs font-black uppercase text-red-600 dark:text-red-400"><ShieldAlert size={16} /> High Risk Anomalies</p>
+          <p className="mt-2 font-mono text-2xl font-black text-text-primary">{highCount}</p>
         </div>
-        <div className="border-2 border-black bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-          <p className="flex items-center gap-1.5 text-xs font-black uppercase text-amber-600"><AlertCircle size={16} /> Moderate Anomalies</p>
-          <p className="mt-2 font-mono text-2xl font-black text-black">{medCount}</p>
+        <div className="border-2 border-black dark:border-zinc-700 bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <p className="flex items-center gap-1.5 text-xs font-black uppercase text-amber-600 dark:text-amber-400"><AlertCircle size={16} /> Moderate Anomalies</p>
+          <p className="mt-2 font-mono text-2xl font-black text-text-primary">{medCount}</p>
         </div>
-        <div className="border-2 border-black bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+        <div className="border-2 border-black dark:border-zinc-700 bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
           <p className="flex items-center gap-1.5 text-xs font-black uppercase text-text-primary"><TrendingUp size={16} /> Total Alerts Logged</p>
-          <p className="mt-2 font-mono text-2xl font-black text-black">{alerts.length}</p>
+          <p className="mt-2 font-mono text-2xl font-black text-text-primary">{alerts.length}</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-b-2 border-black pb-3">
-        <h2 className="text-sm font-black uppercase tracking-wider">Detected Anomaly Sources ({filteredSources.length})</h2>
+      <div className="flex items-center justify-between border-b-2 border-text-primary pb-3">
+        <h2 className="text-sm font-black uppercase tracking-wider text-text-primary">Detected Anomaly Sources ({filteredSources.length})</h2>
         <div className="flex gap-2">
           {['ALL', 'HIGH', 'MEDIUM', 'LOW'].map((lvl) => (
             <button key={lvl} type="button" onClick={() => setLevel(lvl)}
-              className={`border-2 border-black px-3 py-1 text-xs font-black uppercase transition-all ${level === lvl ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-surface text-text-primary hover:bg-zinc-100'}`}>
+              className={`border-2 border-black dark:border-zinc-700 px-3 py-1 text-xs font-black uppercase transition-all ${level === lvl ? 'bg-black dark:bg-[#d8f5a9] text-white dark:text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-surface text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white'}`}>
               {lvl}
             </button>
           ))}
@@ -54,20 +54,20 @@ export default function AnomalyPage() {
       {!loadingSources && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredSources.map((s) => (
-            <div key={s.id} className="border-2 border-black bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex items-center justify-between border-b border-black/20 pb-2">
-                <span className="font-mono text-xs font-black">{s.id}</span>
+            <div key={s.id} className="border-2 border-black dark:border-zinc-700 bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-center justify-between border-b border-black/20 dark:border-zinc-700 pb-2">
+                <span className="font-mono text-xs font-black text-text-primary">{s.id}</span>
                 <span className={`border border-black px-2 py-0.5 font-mono text-[10px] font-black uppercase ${s.anomalyLevel === 'high' ? 'bg-red-600 text-white' : s.anomalyLevel === 'medium' ? 'bg-amber-500 text-black' : 'bg-zinc-200 text-black'}`}>
                   {s.anomalyLevel} risk
                 </span>
               </div>
               <div className="mt-3 space-y-1 text-xs font-bold text-text-secondary">
                 <p className="uppercase text-text-primary">{s.industrySubtype ?? 'Thermal Source'}</p>
-                <p className="font-mono text-[11px]">{s.lat.toFixed(4)}° N, {s.lon.toFixed(4)}° E</p>
-                <p className="text-[10px] uppercase font-semibold">Confidence: <span className="text-black">{s.confidence}%</span> · Status: <span className="text-black">{s.status}</span></p>
+                <p className="font-mono text-[11px] text-text-primary">{s.lat.toFixed(4)}° N, {s.lon.toFixed(4)}° E</p>
+                <p className="text-[10px] uppercase font-semibold text-text-secondary">Confidence: <span className="text-text-primary font-bold">{s.confidence}%</span> · Status: <span className="text-text-primary font-bold">{s.status}</span></p>
               </div>
               <Link to={`/investigation/${encodeURIComponent(s.id)}`}
-                className="mt-4 flex items-center justify-center gap-1.5 border-2 border-black bg-black py-2 text-xs font-black uppercase text-white hover:bg-zinc-800">
+                className="mt-4 flex items-center justify-center gap-1.5 border-2 border-black bg-black dark:bg-[#d8f5a9] py-2 text-xs font-black uppercase text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors">
                 Inspect Anomaly Telemetry <ArrowRight size={14} />
               </Link>
             </div>

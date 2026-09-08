@@ -5,16 +5,26 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { useFilterStore } from '../../stores/filterStore'
+import { useThemeStore } from '../../stores/themeStore'
 import { useSources } from '../../services/sourceService'
 import { ClusteredMarkers } from './ClusteredMarkers'
 import { MapLegend } from './MapLegend'
+import { MapSearchControl } from './MapSearchControl'
+
+type MapMode = 'carto' | 'osm' | 'satellite'
 
 const mapCenter: [number, number] = [24.15, 87.6]
-const mapTileUrl = import.meta.env.VITE_MAP_TILE_URL || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-const satelliteTileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_30q5_1_290c23ee4af7e917bbff005e'
+const keyQuery = cartoKey ? `?key=${cartoKey}` : ''
+
+const cartoLightUrl = `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png${keyQuery}`
+const cartoDarkUrl = `https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png${keyQuery}`
+const osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+const satelliteUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 
 export function ThermalMap() {
-  const [isSatellite, setIsSatellite] = useState(false)
+  const [mapMode, setMapMode] = useState<MapMode>('carto')
+  const theme = useThemeStore((s) => s.theme)
   const filters = useFilterStore(
     useShallow((s) => ({
       sourceId: s.sourceId, location: s.location, facility: s.facility,
@@ -25,22 +35,28 @@ export function ThermalMap() {
   )
   const resetFilters = useFilterStore((s) => s.reset)
   const { data: sources = [], isLoading, isError } = useSources(filters)
-  const tileUrl = isSatellite ? satelliteTileUrl : mapTileUrl
+
+  const tileUrl = mapMode === 'satellite' ? satelliteUrl : mapMode === 'osm' ? osmUrl : (theme === 'dark' ? cartoDarkUrl : cartoLightUrl)
+  const attribution = mapMode === 'satellite' ? 'Tiles &copy; Esri' : mapMode === 'osm' ? '&copy; OpenStreetMap contributors' : '&copy; CARTO'
 
   return (
     <section className="group relative overflow-hidden rounded-none border-2 border-text-primary bg-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(216,245,169,0.25)] transition-all duration-500 hover:-translate-y-0.5" aria-label="Thermal source map">
       <MapContainer center={mapCenter} zoom={6} scrollWheelZoom className="h-[32rem] w-full transition-transform duration-700 ease-out group-hover:scale-[1.008]">
-        <TileLayer key={tileUrl} url={tileUrl} attribution={isSatellite ? 'Tiles &copy; Esri' : '&copy; OpenStreetMap contributors'} />
+        <TileLayer key={tileUrl} url={tileUrl} attribution={attribution} />
+        <MapSearchControl />
         {!isLoading && !isError && sources.length > 0 && <ClusteredMarkers sources={sources} />}
       </MapContainer>
+
       <div className="absolute right-4 top-4 z-[1000] flex border-2 border-black bg-black p-0.5 shadow-md">
-        <button type="button" onClick={() => setIsSatellite(false)} aria-pressed={!isSatellite}
-          className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${!isSatellite ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>Map</button>
-        <button type="button" onClick={() => setIsSatellite(true)} aria-pressed={isSatellite}
-          className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${isSatellite ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>Satellite</button>
+        <button type="button" onClick={() => setMapMode('carto')} aria-pressed={mapMode === 'carto'}
+          className={`px-3 py-1 text-[11px] font-black uppercase tracking-wider transition-colors ${mapMode === 'carto' ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>CARTO</button>
+        <button type="button" onClick={() => setMapMode('osm')} aria-pressed={mapMode === 'osm'}
+          className={`px-3 py-1 text-[11px] font-black uppercase tracking-wider transition-colors ${mapMode === 'osm' ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>OSM</button>
+        <button type="button" onClick={() => setMapMode('satellite')} aria-pressed={mapMode === 'satellite'}
+          className={`px-3 py-1 text-[11px] font-black uppercase tracking-wider transition-colors ${mapMode === 'satellite' ? 'bg-[#d8f5a9] text-black' : 'text-white hover:bg-zinc-800'}`}>Satellite</button>
       </div>
 
-      <MapLegend />
+      <MapLegend sources={sources} />
       {isLoading && <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-surface/65 backdrop-blur-[1px]"><div className="w-56 border-2 border-text-primary bg-surface p-4 shadow" role="status"><div className="h-3 w-28 animate-pulse rounded-none bg-text-primary/20" /><div className="mt-3 h-2 w-full animate-pulse rounded-none bg-text-primary/20" /><div className="mt-2 h-2 w-4/5 animate-pulse rounded-none bg-text-primary/20" /></div></div>}
       {isError && <p className="absolute left-1/2 top-1/2 z-[1000] -translate-x-1/2 border-2 border-text-primary bg-surface px-3 py-2 text-sm font-bold text-danger shadow">Unable to load sources.</p>}
       {!isLoading && !isError && sources.length === 0 && (

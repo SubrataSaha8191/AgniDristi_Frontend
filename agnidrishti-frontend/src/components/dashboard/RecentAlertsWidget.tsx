@@ -21,9 +21,9 @@ function formatTimestamp(ts?: string | null) {
 
 function severityStyle(severity: string | null) {
   const s = severity?.toUpperCase()
-  if (s === 'HIGH') return 'bg-red-600 text-white font-bold'
-  if (s === 'MEDIUM') return 'bg-amber-500 text-black font-bold'
-  return 'bg-zinc-200 text-black font-bold'
+  if (s === 'HIGH' || s === 'CRITICAL') return 'border-2 border-black bg-red-600 text-white font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+  if (s === 'MEDIUM') return 'border-2 border-black bg-amber-500 text-black font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+  return 'border-2 border-black bg-emerald-500 text-black font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
 }
 
 function AlertRow({ alert }: { alert: Alert }) {
@@ -33,15 +33,15 @@ function AlertRow({ alert }: { alert: Alert }) {
         <p className="truncate text-xs font-bold uppercase text-text-primary">
           {formatAlertType(alert.alert_type)}
         </p>
-        <p className="mt-1 truncate font-mono text-[10px] text-text-secondary">
+        <p className="mt-1 truncate font-mono text-[10px] text-text-secondary font-bold">
           {alert.object_uid ?? alert.firms_uid ?? `Alert #${alert.id}`}
         </p>
         <p className="mt-1 text-[10px] text-text-secondary">
           {formatTimestamp(alert.created_at)}
         </p>
       </div>
-      <span className={`shrink-0 border border-black px-2 py-0.5 font-mono text-[10px] uppercase ${severityStyle(alert.severity)}`}>
-        {alert.severity ?? 'info'}
+      <span className={`shrink-0 px-2 py-0.5 font-mono text-[10px] uppercase ${severityStyle(alert.severity)}`}>
+        {alert.severity ?? 'INFO'}
       </span>
     </div>
   )
@@ -49,9 +49,7 @@ function AlertRow({ alert }: { alert: Alert }) {
 
 export function RecentAlertsWidget() {
   const { data: alerts = [], isLoading } = useAlerts()
-  const sorted = [...alerts]
-    .sort((a, b) => Date.parse(b.created_at ?? '') - Date.parse(a.created_at ?? ''))
-    .slice(0, 5)
+  const displayAlerts = alerts.slice(0, 5)
 
   return (
     <section className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm" aria-labelledby="recent-alerts-heading">
@@ -60,10 +58,10 @@ export function RecentAlertsWidget() {
         <Link to="/alerts" className="text-xs font-bold uppercase tracking-wider text-text-primary hover:underline">View All →</Link>
       </div>
       <div className="mt-4 divide-y divide-black/20 dark:divide-zinc-800">
-        {isLoading && <p className="py-3 text-xs font-bold text-text-secondary">Loading…</p>}
-        {!isLoading && sorted.map((a) => <AlertRow key={a.id} alert={a} />)}
+        {isLoading && <p className="py-3 text-xs font-bold text-text-secondary animate-pulse">Loading alerts...</p>}
+        {!isLoading && displayAlerts.map((a) => <AlertRow key={a.id} alert={a} />)}
         {!isLoading && alerts.length === 0 && (
-          <p className="py-3 text-xs text-text-secondary">No recent alerts.</p>
+          <p className="py-3 text-xs text-text-secondary">No active alerts.</p>
         )}
       </div>
     </section>

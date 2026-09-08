@@ -6,7 +6,6 @@ export const MAP_CATEGORY_COLORS = {
   persistent: '#A855F7',
   abnormal: '#EF4444',
   unknown: '#F59E0B',
-  firms_detection: '#3B82F6',
 } as const
 
 export const MAP_CATEGORY_LABELS = {
@@ -15,7 +14,6 @@ export const MAP_CATEGORY_LABELS = {
   persistent: 'Persistent',
   abnormal: 'Abnormal',
   unknown: 'Unknown',
-  firms_detection: 'FIRMS Detection',
 } as const
 
 export const MAP_CATEGORY_SHAPES = {
@@ -24,7 +22,6 @@ export const MAP_CATEGORY_SHAPES = {
   persistent: 'triangle',
   abnormal: 'diamond',
   unknown: 'hexagon',
-  firms_detection: 'star',
 } as const
 
 export type MapCategory = keyof typeof MAP_CATEGORY_COLORS
@@ -34,8 +31,7 @@ export function getMapCategory(category: SourceCategory): MapCategory {
   if (category === 'natural_biomass') return 'natural_biomass'
   if (category === 'persistent') return 'persistent'
   if (category === 'abnormal') return 'abnormal'
-  if (category === 'unknown') return 'unknown'
-  return 'firms_detection'
+  return 'unknown'
 }
 
 export function getShapeClipPath(shape: (typeof MAP_CATEGORY_SHAPES)[MapCategory]) {
@@ -50,7 +46,5 @@ export function getShapeClipPath(shape: (typeof MAP_CATEGORY_SHAPES)[MapCategory
       return 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)'
     case 'hexagon':
       return 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)'
-    case 'star':
-      return 'polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 70%, 21% 92%, 32% 57%, 2% 35%, 39% 35%)'
   }
 }

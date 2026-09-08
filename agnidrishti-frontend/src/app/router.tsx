@@ -43,8 +43,8 @@ export const router = createBrowserRouter([
       { path: 'alerts', element: <AlertsPage />, errorElement: <RouteErrorBoundary /> },
       { path: 'data-layers', element: <DataLayersPage />, errorElement: <RouteErrorBoundary /> },
       { path: 'system', element: <SystemPage />, errorElement: <RouteErrorBoundary /> },
-      { path: 'login', element: <LoginPage />, errorElement: <RouteErrorBoundary /> },
-      { path: 'signup', element: <SignupPage />, errorElement: <RouteErrorBoundary /> },
     ],
   },
+  { path: '/login', element: <LoginPage />, errorElement: <RouteErrorBoundary /> },
+  { path: '/signup', element: <SignupPage />, errorElement: <RouteErrorBoundary /> },
 ])

@@ -3,13 +3,12 @@ import { useSources } from '../../services/sourceService'
 import type { SourceCategory } from '../../types/source'
 
 const categoryDetails: { category: SourceCategory; label: string; color: string }[] = [
-  { category: 'industrial', label: 'Industrial', color: '#000000' },
-  { category: 'natural_biomass', label: 'Natural / Biomass', color: '#16a34a' },
-  { category: 'persistent', label: 'Persistent', color: '#2563eb' },
-  { category: 'abnormal', label: 'Abnormal', color: '#dc2626' },
-  { category: 'unknown', label: 'Unknown', color: '#71717a' },
-  { category: 'gas_flare', label: 'Gas Flare / FIRMS', color: '#9333ea' },
-  { category: 'new', label: 'New', color: '#d97706' },
+  { category: 'industrial', label: 'Industrial', color: '#f97316' },
+  { category: 'natural_biomass', label: 'Natural / Biomass', color: '#22c55e' },
+  { category: 'persistent', label: 'Persistent', color: '#a855f7' },
+  { category: 'abnormal', label: 'Abnormal', color: '#ef4444' },
+  { category: 'unknown', label: 'Unknown / Unclassified', color: '#f59e0b' },
+  { category: 'gas_flare', label: 'Gas Flare', color: '#3b82f6' },
 ]
 
 export function IndustrialVsNaturalChart({ expanded = false, showDetailsLink = true }: { expanded?: boolean; showDetailsLink?: boolean }) {

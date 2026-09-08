@@ -54,24 +54,29 @@ export function MonitoringStatusCard() {
       </div>
       {isLoading && <div className="mt-4 h-24 animate-pulse bg-zinc-200 dark:bg-zinc-800" />}
       {isError && <p className="mt-4 text-xs font-bold text-danger">Unable to load monitoring data.</p>}
-      {data && (
-        <div className="mt-4 space-y-3 text-xs">
-          <div className="grid grid-cols-3 gap-3">
-            <Stat label="Total Runs" value={data.total_runs} />
-            <Stat label="Completed" value={data.completed_runs} icon={<CheckCircle2 size={14} className="text-success" />} />
-            <Stat label="Failed" value={data.failed_runs} icon={<XCircle size={14} className="text-danger" />} />
-          </div>
-          {data.latest && (
-            <div className="border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-1 font-semibold text-black dark:text-white">
-              <p className="font-bold uppercase text-black dark:text-white">Latest Status: {data.latest.status}</p>
-              <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Trigger: {data.latest.trigger_type} · {formatDt(data.latest.started_at)}</p>
-              <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Fetched {data.latest.fetched} · Inserted {data.latest.inserted} · Matched {data.latest.matched}</p>
-              <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Unmatched {data.latest.unmatched} · Alerts {data.latest.alerts_created}</p>
-              {data.latest.duration_seconds != null && <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Duration: {data.latest.duration_seconds.toFixed(1)}s</p>}
+      {data && (() => {
+        const total = data.total_runs ?? 0
+        const failed = data.failed_runs ?? 0
+        const completed = Math.max(0, total - failed)
+        return (
+          <div className="mt-4 space-y-3 text-xs">
+            <div className="grid grid-cols-3 gap-3">
+              <Stat label="Total Runs" value={total} />
+              <Stat label="Completed" value={completed} icon={<CheckCircle2 size={14} className="text-success" />} />
+              <Stat label="Failed" value={failed} icon={<XCircle size={14} className="text-danger" />} />
             </div>
-          )}
-        </div>
-      )}
+            {data.latest && (
+              <div className="border-2 border-black dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 space-y-1 font-semibold text-black dark:text-white">
+                <p className="font-bold uppercase text-black dark:text-white">Latest Status: {data.latest.status}</p>
+                <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Trigger: {data.latest.trigger_type} · {formatDt(data.latest.started_at)}</p>
+                <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Fetched {data.latest.fetched} · Inserted {data.latest.inserted} · Matched {data.latest.matched}</p>
+                <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Unmatched {data.latest.unmatched} · Alerts {data.latest.alerts_created}</p>
+                {data.latest.duration_seconds != null && <p className="text-[11px] text-zinc-700 dark:text-zinc-300">Duration: {data.latest.duration_seconds.toFixed(1)}s</p>}
+              </div>
+            )}
+          </div>
+        )
+      })()}
     </section>
   )
 }

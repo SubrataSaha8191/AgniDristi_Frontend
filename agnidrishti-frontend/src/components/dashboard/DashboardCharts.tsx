@@ -3,23 +3,27 @@ import { ThermalFingerprintChart } from '../charts/ThermalFingerprintChart'
 import { AnomalyDetectionChart } from '../charts/AnomalyDetectionChart'
 
 export function DashboardCharts({ sourceId }: { sourceId: string | null }) {
-  const placeholder = (title: string) => (
-    <section aria-label={title} className="py-2">
-      <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">{title}</h3>
-      <p className="mt-2 text-xs text-text-secondary font-medium">Select a source pin on the map to display data.</p>
-    </section>
-  )
+  if (!sourceId) {
+    return (
+      <div className="rounded-none border-2 border-dashed border-black dark:border-zinc-700 bg-surface/60 p-10 text-center shadow-sm">
+        <p className="text-sm font-black uppercase tracking-wider text-text-primary">No Thermal Source Selected</p>
+        <p className="mt-2 text-xs font-bold uppercase tracking-wider text-text-secondary">
+          Select a thermal source object on the spatial map above to inspect detail timelines, thermal fingerprints, and anomaly trends.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm">
-        {sourceId ? <ActivityTimelineChart sourceId={sourceId} /> : placeholder('Historical activity')}
+        <ActivityTimelineChart sourceId={sourceId} />
       </div>
       <div className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm">
-        {sourceId ? <ThermalFingerprintChart sourceId={sourceId} /> : placeholder('Thermal fingerprint')}
+        <ThermalFingerprintChart sourceId={sourceId} />
       </div>
       <div className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm">
-        {sourceId ? <AnomalyDetectionChart sourceId={sourceId} /> : placeholder('Anomaly detection')}
+        <AnomalyDetectionChart sourceId={sourceId} />
       </div>
     </div>
   )
