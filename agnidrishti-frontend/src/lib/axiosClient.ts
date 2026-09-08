@@ -3,9 +3,17 @@ import axios from 'axios'
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 export const isApiConfigured = Boolean(API_BASE_URL)
 
+function envTimeout(value: string | undefined, fallback: number) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+export const API_TIMEOUT_MS = envTimeout(import.meta.env.VITE_API_TIMEOUT_MS, 30_000)
+export const LONG_OPERATION_TIMEOUT_MS = envTimeout(import.meta.env.VITE_LONG_OPERATION_TIMEOUT_MS, 30 * 60_000)
+
 export const axiosClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: API_TIMEOUT_MS,
   headers: {
     Accept: 'application/json',
   },

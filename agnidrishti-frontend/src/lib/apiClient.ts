@@ -1,5 +1,5 @@
 import type { AxiosProgressEvent, AxiosRequestConfig } from 'axios'
-import { axiosClient, isApiConfigured, API_BASE_URL } from './axiosClient'
+import { axiosClient, isApiConfigured, API_BASE_URL, LONG_OPERATION_TIMEOUT_MS } from './axiosClient'
 
 export { isApiConfigured, API_BASE_URL }
 
@@ -19,7 +19,7 @@ export function apiPost<TResponse, TBody = unknown>(url: string, data?: TBody, c
 export function uploadFile<T>(url: string, file: File, onUploadProgress?: (event: AxiosProgressEvent) => void) {
   const body = new FormData()
   body.append('file', file)
-  return apiPost<T, FormData>(url, body, { onUploadProgress })
+  return apiPost<T, FormData>(url, body, { onUploadProgress, timeout: LONG_OPERATION_TIMEOUT_MS })
 }
 
 export const apiClient = apiRequest

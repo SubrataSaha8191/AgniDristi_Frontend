@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiPost, uploadFile } from '../lib/apiClient'
+import { LONG_OPERATION_TIMEOUT_MS } from '../lib/axiosClient'
 import type {
   AlertsResponse, ClassDistribution, DashboardSummary, GasFlareLikelihood, LatestRunResponse,
   MonitoringRunsResponse, MonitoringState, RecentFirmsResponse, ThermalObjectDetail,
@@ -89,7 +90,10 @@ export function useMonitoringRunHistory(limit = 20) {
 export function useTriggerMonitoringRun() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (dayRange: number) => apiPost<MonitoringState['latest']>('/monitoring/runs/trigger', undefined, { params: { day_range: Math.min(10, Math.max(1, dayRange)) } }),
+    mutationFn: (dayRange: number) => apiPost<MonitoringState['latest']>('/monitoring/runs/trigger', undefined, {
+      params: { day_range: Math.min(10, Math.max(1, dayRange)) },
+      timeout: LONG_OPERATION_TIMEOUT_MS,
+    }),
     onSuccess: async () => Promise.all([
       queryClient.invalidateQueries({ queryKey: dashboardKeys.summary }),
       queryClient.invalidateQueries({ queryKey: dashboardKeys.monitoring }),
