@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import agniDrishtiLogo from '../assets/SIH_tech_invaders (3).png'
 import { CheckCircle2, Loader2, Menu, Moon, Radio, Sun, User, UserPlus, XCircle, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useSourceStore } from '../stores/sourceStore'
@@ -36,10 +37,19 @@ export function TopNav() {
     <header className="flex items-center justify-between h-16 px-4 text-white bg-black border-b-2 border-black sm:px-6">
       <div className="flex items-center gap-3">
         <button type="button" aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={sidebarOpen} onClick={toggleSidebar}
-          className="flex items-center justify-center p-2 text-white border cursor-pointer border-zinc-700 bg-zinc-900 hover:bg-zinc-800">
+          className="flex h-9 w-9 items-center justify-center text-white border cursor-pointer border-zinc-700 bg-zinc-900 hover:bg-zinc-800 shrink-0">
           <Menu size={20} aria-hidden="true" />
         </button>
-        <span className="text-lg font-black tracking-widest uppercase sm:text-xl">AGNI<span className="text-[#d8f5a9]">DRISHTI</span></span>
+        <Link to="/dashboard" className="flex items-center gap-2 shrink-0">
+          <img
+            src={agniDrishtiLogo}
+            alt="AGNI-DRISHTI"
+            className="h-10 sm:h-11 w-auto max-h-11 object-contain block shrink-0 -mt-1"
+          />
+          <span className="text-lg font-black tracking-widest uppercase sm:text-xl leading-none flex items-center translate-y-[2.5px]">
+            AGNI<span className="text-[#d8f5a9]">DRISHTI</span>
+          </span>
+        </Link>
       </div>
 
       <div className="hidden items-center gap-3 border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300 md:flex">
