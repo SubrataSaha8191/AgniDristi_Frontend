@@ -9,12 +9,12 @@ export default function AlertsPage() {
           ALERTS OPERATIONS CENTER
         </h1>
         <p className="mt-2 text-xs font-bold uppercase tracking-widest text-text-secondary">
-          MONITOR HIGH-PRIORITY THERMAL SOURCE EVENTS &amp; SATELLITE ANOMALIES
+          MONITOR ACTIONABLE LOCATION-BASED THERMAL INCIDENTS
         </p>
       </header>
 
       <section aria-label="System Alerts Stream">
-        <SectionHeading num="01" title="SYSTEM ALERTS STREAM" subtitle="Real-time thermal anomaly alerts stream" />
+        <SectionHeading num="01" title="ACTIONABLE ALERTS STREAM" subtitle="Confirmed repeated unknown activity and abnormal known sources" />
         <AlertsList />
       </section>
     </div>

@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { AlertCircle, ArrowRight, ShieldAlert, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { getAlertTotal } from '../services/alertService'
+import { useKPISummary } from '../services/kpiService'
 import { useSources } from '../services/sourceService'
 
 export default function AnomalyPage() {
   const [level, setLevel] = useState<string>('ALL')
   const { data: sources = [], isLoading: loadingSources } = useSources()
+  const { data: summary } = useKPISummary()
 
   const highCount = sources.filter((s) => s.anomalyLevel === 'high').length
   const medCount = sources.filter((s) => s.anomalyLevel === 'medium').length
-  const alertCount = getAlertTotal()
+  const alertCount = summary?.alerts ?? 0
 
   const filteredSources = sources.filter((s) => level === 'ALL' || s.anomalyLevel.toUpperCase() === level)
 
@@ -32,7 +33,7 @@ export default function AnomalyPage() {
           <p className="mt-2 font-mono text-2xl font-black text-text-primary">{medCount}</p>
         </div>
         <div className="border-2 border-black dark:border-zinc-700 bg-surface p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-          <p className="flex items-center gap-1.5 text-xs font-black uppercase text-text-primary"><TrendingUp size={16} /> Total Alerts Logged</p>
+          <p className="flex items-center gap-1.5 text-xs font-black uppercase text-text-primary"><TrendingUp size={16} /> Actionable Alerts</p>
           <p className="mt-2 font-mono text-2xl font-black text-text-primary">{alertCount}</p>
         </div>
       </div>

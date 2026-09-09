@@ -53,14 +53,17 @@ export interface AnomalyPoint {
   current: number
 }
 
+export type AlertType = 'REPEATED_UNMATCHED' | 'ABNORMAL_KNOWN_SOURCE'
+
 export interface Alert {
   id: number
-  alert_type: string
+  alert_type: AlertType
   firms_uid: string | null
   object_uid: string | null
   latitude: number | null
   longitude: number | null
   severity: string | null
   message: string | null
+  resolved: boolean
   created_at: string | null
 }

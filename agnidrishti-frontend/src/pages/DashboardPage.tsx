@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Flame, Radar, ScanSearch, Zap } from 'lucide-react'
+import { Bell, Flame, Radar, ScanSearch, Zap } from 'lucide-react'
 import { KPICard } from '../components/kpi/KPICard'
 import { SectionHeading } from '../components/common/SectionHeading'
 import { IndustryDistributionChart } from '../components/dashboard/IndustryDistributionChart'
 import { RecentAlertsWidget } from '../components/dashboard/RecentAlertsWidget'
 import { ThermalObjectExplorer } from '../components/dashboard/ThermalObjectExplorer'
-import { useDashboardMap, useMapDates } from '../services/dashboardService'
+import { useDashboardMap, useDashboardSummary, useMapDates } from '../services/dashboardService'
 
 export type MapDatasetMode = 'firms' | 'vnf'
 
@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [requestedDate, setRequestedDate] = useState<string | null>(null)
   const [datasetMode, setDatasetMode] = useState<MapDatasetMode>('firms')
   const mapQuery = useDashboardMap(requestedDate, 'all', 0)
+  const summaryQuery = useDashboardSummary()
   const mapData = mapQuery.data
   const availableDates = datesQuery.data?.dates ?? []
   const selectedDate = requestedDate ?? mapData?.selected_date ?? availableDates[0]?.date ?? null
@@ -22,10 +23,11 @@ export default function DashboardPage() {
     [mapData?.firms],
   )
   const cards = [
-    { label: 'FIRMS detections', value: mapData?.counts.firms, icon: Radar },
-    { label: 'Matched FIRMS', value: mapData?.counts.matched_firms, icon: ScanSearch },
-    { label: 'Unmatched FIRMS', value: mapData?.counts.unmatched_firms, icon: Zap },
-    { label: 'Matched objects', value: matchedObjectCount, icon: Flame },
+    { label: 'FIRMS detections', value: mapData?.counts.firms, icon: Radar, loading: mapQuery.isLoading },
+    { label: 'Matched FIRMS', value: mapData?.counts.matched_firms, icon: ScanSearch, loading: mapQuery.isLoading },
+    { label: 'Unmatched FIRMS', value: mapData?.counts.unmatched_firms, icon: Zap, loading: mapQuery.isLoading },
+    { label: 'Matched objects', value: matchedObjectCount, icon: Flame, loading: mapQuery.isLoading },
+    { label: 'Actionable alerts', value: summaryQuery.data?.alerts, icon: Bell, loading: summaryQuery.isLoading },
   ]
 
   return (
@@ -52,7 +54,7 @@ export default function DashboardPage() {
             </select>
           </label>
         </div>
-        {mapQuery.isError ? <div className="border-2 border-black bg-surface p-5"><p className="text-sm font-bold text-danger">Selected-date summary could not be loaded.</p><button type="button" onClick={() => { void mapQuery.refetch() }} className="mt-3 border-2 border-black bg-black px-3 py-1.5 text-xs font-black uppercase text-white">Retry</button></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{cards.map((card) => <KPICard key={card.label} label={card.label} value={mapQuery.isLoading ? '...' : card.value ?? 'Not available'} icon={card.icon} />)}</div>}
+        {mapQuery.isError ? <div className="border-2 border-black bg-surface p-5"><p className="text-sm font-bold text-danger">Selected-date summary could not be loaded.</p><button type="button" onClick={() => { void mapQuery.refetch() }} className="mt-3 border-2 border-black bg-black px-3 py-1.5 text-xs font-black uppercase text-white">Retry</button></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{cards.map((card) => <KPICard key={card.label} label={card.label} value={card.loading ? '...' : card.value ?? 'Not available'} icon={card.icon} />)}</div>}
       </section>
 
       <section aria-label="Spatial object explorer"><SectionHeading num="02" title="Spatial object explorer" subtitle="Switch between selected-date FIRMS matches and VNF source history" /><ThermalObjectExplorer requestedDate={requestedDate} selectedDate={selectedDate} datasetMode={datasetMode} onDatasetModeChange={setDatasetMode} /></section>

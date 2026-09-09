@@ -149,9 +149,6 @@ export interface DashboardMapResponse {
   firms: RecentFirmsDetection[]
   vnf_detections: VnfMapDetection[]
 }
-export interface DashboardAlert { id: number; alert_type: string; firms_uid: string | null; object_uid: string | null; latitude: number | null; longitude: number | null; severity: string | null; message: string | null; created_at: string | null }
-export interface AlertsResponse { count: number; alerts: DashboardAlert[] }
-
 export interface GasFlareEvidence { reasons: string[]; signal_contributions: Record<string, number>; gem_facility_name: string | null; gem_industry_exact_type: string | null }
 
 export interface ThermalObjectDetail {
