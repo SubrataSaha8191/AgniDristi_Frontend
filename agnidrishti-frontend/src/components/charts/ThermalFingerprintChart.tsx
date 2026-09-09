@@ -21,7 +21,7 @@ export function ThermalFingerprintChart({ sourceId }: { sourceId: string }) {
               <CartesianGrid stroke="#71717a" strokeDasharray="2 2" strokeOpacity={0.3} />
               <XAxis dataKey="tempK" interval="preserveStartEnd" minTickGap={20} tickFormatter={(value: number) => `${Math.round(value)}`} tick={{ fontSize: 9, fill: 'currentColor' }} tickLine={false} />
               <YAxis tick={{ fontSize: 9, fill: 'currentColor' }} tickLine={false} />
-              <Tooltip cursor={{ fill: 'var(--color-bg)' }} contentStyle={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', fontSize: '11px', borderRadius: '8px' }} />
+              <Tooltip cursor={{ fill: 'var(--color-bg)' }} contentStyle={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', fontSize: '11px', borderRadius: '0px' }} />
               <Bar dataKey="normalizedFreq" name="Norm. Frequency %" fill="#3b82f6" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

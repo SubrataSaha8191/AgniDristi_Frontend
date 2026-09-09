@@ -33,7 +33,7 @@ export function AnomalyDetectionChart({ sourceId }: { sourceId: string }) {
               <CartesianGrid stroke="#71717a" strokeDasharray="2 2" strokeOpacity={0.3} />
               <XAxis dataKey="date" interval="preserveStartEnd" minTickGap={18} tick={{ fontSize: 9, fill: 'currentColor' }} tickLine={false} />
               <YAxis tick={{ fontSize: 9, fill: 'currentColor' }} tickLine={false} />
-              <Tooltip contentStyle={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', fontSize: '11px', borderRadius: '8px' }} />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', fontSize: '11px', borderRadius: '0px' }} />
               <Legend wrapperStyle={{ fontSize: 10, fontWeight: 700 }} />
               <Line type="monotone" dataKey="baseline" name="Baseline" stroke="#71717a" strokeWidth={2} strokeDasharray="4 4" dot={false} />
               <Line type="monotone" dataKey="current" name="Current" stroke={assessment.color} strokeWidth={2.5} dot={{ r: 3, fill: assessment.color }} />
