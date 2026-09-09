@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import type { GasFlareLikelihood } from '../types/dashboard'
 
 export type DateRange = {
@@ -58,22 +59,30 @@ const initialFilters = {
   objectOffset: 0,
 }
 
-export const useFilterStore = create<FilterState>((set) => ({
-  ...initialFilters,
-  setSourceId: (sourceId) => set({ sourceId }),
-  setLocation: (location) => set({ location }),
-  setFacility: (facility) => set({ facility }),
-  setDateRange: (dateRange) => set({ dateRange }),
-  setSourceType: (sourceType) => set({ sourceType }),
-  setIndustryType: (industryType) => set({ industryType }),
-  setAnomalyLevel: (anomalyLevel) => set({ anomalyLevel }),
-  setConfidenceLevel: (confidenceLevel) => set({ confidenceLevel }),
-  setPersistenceStatus: (persistenceStatus) => set({ persistenceStatus }),
-  setClassification: (classification) => set({ classification }),
-  setTemporalSource: (temporalSource) => set({ temporalSource }),
-  setGasFlareLikelihood: (gasFlareLikelihood) => set({ gasFlareLikelihood }),
-  setLikelyFlaresOnly: (likelyFlaresOnly) => set({ likelyFlaresOnly }),
-  setObjectLimit: (objectLimit) => set({ objectLimit }),
-  setObjectOffset: (objectOffset) => set({ objectOffset }),
-  reset: () => set(initialFilters),
-}))
+export const useFilterStore = create<FilterState>()(
+  persist(
+    (set) => ({
+      ...initialFilters,
+      setSourceId: (sourceId) => set({ sourceId }),
+      setLocation: (location) => set({ location }),
+      setFacility: (facility) => set({ facility }),
+      setDateRange: (dateRange) => set({ dateRange }),
+      setSourceType: (sourceType) => set({ sourceType }),
+      setIndustryType: (industryType) => set({ industryType }),
+      setAnomalyLevel: (anomalyLevel) => set({ anomalyLevel }),
+      setConfidenceLevel: (confidenceLevel) => set({ confidenceLevel }),
+      setPersistenceStatus: (persistenceStatus) => set({ persistenceStatus }),
+      setClassification: (classification) => set({ classification }),
+      setTemporalSource: (temporalSource) => set({ temporalSource }),
+      setGasFlareLikelihood: (gasFlareLikelihood) => set({ gasFlareLikelihood }),
+      setLikelyFlaresOnly: (likelyFlaresOnly) => set({ likelyFlaresOnly }),
+      setObjectLimit: (objectLimit) => set({ objectLimit }),
+      setObjectOffset: (objectOffset) => set({ objectOffset }),
+      reset: () => set(initialFilters),
+    }),
+    {
+      name: 'agnidrishti-filter-store',
+      storage: createJSONStorage(() => localStorage),
+    },
+  ),
+)

@@ -1,75 +1,120 @@
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alata&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.cdnfonts.com/css/samarkan');
 @import "tailwindcss";
 
+.font-samarkan {
+  font-family: 'Samarkan', 'Alata', 'Atlanta', sans-serif !important;
+  letter-spacing: 0.05em;
+}
+
 @theme {
-  --color-bg: #d8f5a9;
+  --color-bg: #f8fafc;
   --color-surface: #ffffff;
-  --color-border: #000000;
-  --color-accent: #000000;
-  --color-accent-highlight: #d8f5a9;
-  --color-text-primary: #000000;
-  --color-text-secondary: #27272a;
-  --color-success: #15803d;
-  --color-warning: #b45309;
-  --color-danger: #b91c1c;
-  --color-info: #1d4ed8;
-  --font-sans: 'Urbanist', ui-sans-serif, system-ui, sans-serif;
+  --color-surface-reverse: #222222;
+  --color-border: #262626;
+  --color-accent: #f97316;
+  --color-accent-highlight: #f97316;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+  --font-sans: 'Alata', 'Atlanta', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
 }
 
 :root {
-  --color-bg: #d8f5a9;
+  --color-bg: #f8fafc;
   --color-surface: #ffffff;
-  --color-border: #000000;
-  --color-accent: #000000;
-  --color-accent-highlight: #d8f5a9;
-  --color-text-primary: #000000;
-  --color-text-secondary: #27272a;
-  --color-success: #15803d;
-  --color-warning: #fc5b03;
-  --color-danger: #b91c1c;
-  --color-info: #1d4ed8;
+  --color-border: #262626;
+  --color-accent: #f97316;
+  --color-accent-highlight: #f97316;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
 }
 
 [data-theme='dark'] {
-  --color-bg: #09090b;
-  --color-surface: #141417;
-  --color-border: #3f3f46;
-  --color-accent: #d8f5a9;
-  --color-accent-highlight: #d8f5a9;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a1a1aa;
+  --color-bg: #181818;
+  --color-surface: #222222;
+  --color-surface-reverse: #ffffff;
+  --color-border: #444950;
+  --color-accent: #f97316;
+  --color-accent-highlight: #f97316;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #a3a3a3;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-info: #3b82f6;
 }
 
+/* Shiny grey dividers */
+hr, .divider, .divide-y > :not([hidden]) ~ :not([hidden]) {
+  border-color: #4a525d !important;
+}
+
 html, body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
-  font-family: 'Urbanist', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Alata', 'Atlanta', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* All headings uppercase */
+h1, h2, h3, h4, h5, h6 {
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em;
+}
+
+/* Ensure cards and container elements have no rounded corners */
+article, button, input, select, textarea, .card, [class*="rounded-lg"], [class*="rounded-md"], [class*="rounded-sm"], [class*="rounded-xl"], [class*="rounded-2xl"], [class*="rounded-3xl"] {
+  border-radius: 0px !important;
+}
+
+/* Individual card borders */
+article, .card {
+  border: 1px solid var(--color-border);
+}
+
+/* Thin black border around orange boxes, buttons, and badges */
+.bg-accent,
+[class*="bg-accent"] {
+  border: 1px solid #111111 !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
 }
 
 .source-panel-scroll {
   overscroll-behavior: contain;
 }
 
-.main-content-scroll, .source-panel-scroll {
+.main-content-scroll, .source-panel-scroll, .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
 }
-.main-content-scroll::-webkit-scrollbar, .source-panel-scroll::-webkit-scrollbar { width: 8px; }
-.main-content-scroll::-webkit-scrollbar-track, .source-panel-scroll::-webkit-scrollbar-track { background: transparent; }
-.main-content-scroll::-webkit-scrollbar-thumb, .source-panel-scroll::-webkit-scrollbar-thumb {
+.main-content-scroll::-webkit-scrollbar, .source-panel-scroll::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.main-content-scroll::-webkit-scrollbar-track, .source-panel-scroll::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.main-content-scroll::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--color-border);
-  border-radius: 0px;
+  border-radius: 4px;
 }
-.main-content-scroll::-webkit-scrollbar-thumb:hover, .source-panel-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
+.main-content-scroll::-webkit-scrollbar-thumb:hover, .source-panel-scroll::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
 
 ::selection {
   background-color: var(--color-accent);
-  color: #d8f5a9;
+  color: #fff;
 }
 
 @keyframes thermal-ping {
@@ -81,18 +126,69 @@ html, body {
   animation: thermal-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  background-color: var(--color-surface) !important;
+}
+
+.leaflet-tooltip-pane,
+.leaflet-popup-pane {
+  z-index: 1000 !important;
+}
+
 .leaflet-tooltip.thermal-tooltip {
+  z-index: 1000 !important;
+  pointer-events: none !important;
   background-color: var(--color-surface) !important;
   color: var(--color-text-primary) !important;
-  border: 2px solid var(--color-border) !important;
-  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
-  border-radius: 0px !important;
-  padding: 8px 10px !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
 }
 
 .leaflet-tooltip.thermal-tooltip::before {
   border-top-color: var(--color-border) !important;
 }
 
+@keyframes fire-wave-sway {
+  0% {
+    transform: rotate(0deg) skewX(0deg) scale(1);
+  }
+  20% {
+    transform: rotate(-8deg) skewX(-5deg) scale(1.06);
+  }
+  40% {
+    transform: rotate(7deg) skewX(4deg) scale(0.97);
+  }
+  60% {
+    transform: rotate(-6deg) skewX(-4deg) scale(1.05);
+  }
+  80% {
+    transform: rotate(8deg) skewX(5deg) scale(1.02);
+  }
+  100% {
+    transform: rotate(0deg) skewX(0deg) scale(1);
+  }
+}
 
+.animate-fire-wave {
+  animation: fire-wave-sway 1.4s ease-in-out infinite;
+  transform-origin: bottom center;
+  opacity: 1 !important;
+}
 
+@keyframes sat-float-anim {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(1.5deg);
+  }
+}
+
+.animate-sat-float {
+  animation: sat-float-anim 3.5s ease-in-out infinite;
+  transform-origin: center;
+}

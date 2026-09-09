@@ -16,10 +16,10 @@ function RouteErrorBoundary() {
   const error = useRouteError() as Error | undefined
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
-      <div className="max-w-lg border-2 border-black bg-surface p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <h1 className="text-lg font-black uppercase tracking-wider text-text-primary">Source Data Unavailable</h1>
+      <div className="max-w-lg rounded-lg border border-border bg-surface p-8 shadow-sm">
+        <h1 className="text-lg font-semibold text-text-primary">Source Data Unavailable</h1>
         <p className="mt-2 text-xs font-semibold text-text-secondary">{error?.message || 'An unexpected issue occurred while rendering this page.'}</p>
-        <Link to="/dashboard" className="mt-6 inline-block border-2 border-black bg-black px-4 py-2 text-xs font-black uppercase text-white hover:bg-zinc-800">
+        <Link to="/dashboard" className="mt-6 inline-block rounded-lg border border-accent bg-accent px-4 py-2 text-xs font-medium text-white hover:opacity-90">
           Return to Dashboard
         </Link>
       </div>

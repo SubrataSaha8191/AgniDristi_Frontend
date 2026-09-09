@@ -16,50 +16,50 @@ type AlertSelection = AlertType | 'ALL'
 
 export function RecentAlertsWidget() {
   const [selectedType, setSelectedType] = useState<AlertSelection>('ALL')
-  const query = useAlerts({ alertTypes: selectedType === 'ALL' ? [] : [selectedType], limit: 5, offset: 0 })
+  const query = useAlerts({ alertTypes: selectedType === 'ALL' ? [] : [selectedType], limit: 2, offset: 0 })
   const summaryQuery = useDashboardSummary()
-  const alerts = query.data?.alerts ?? []
+  const alerts = (query.data?.alerts ?? []).slice(0, 2)
   const actionableTotal = summaryQuery.data?.alerts ?? query.data?.total ?? 0
   const selectedTotal = selectedType === 'ALL' ? actionableTotal : query.data?.total ?? 0
 
   return (
-    <section className="border-2 border-text-primary bg-surface p-5" aria-labelledby="recent-alerts-heading">
-      <div className="flex items-center justify-between border-b-2 border-text-primary pb-3">
+    <section className="flex flex-col justify-between h-full min-h-[25rem] rounded-lg border border-border bg-surface p-5" aria-labelledby="recent-alerts-heading">
+      <div className="flex items-center justify-between border-b-2 border-[#525a66] pb-3">
         <div>
-          <h2 id="recent-alerts-heading" className="text-sm font-black uppercase tracking-wider">Recent actionable alerts</h2>
+          <h2 id="recent-alerts-heading" className="text-sm font-semibold">Recent actionable alerts</h2>
           <p className="mt-0.5 text-[10px] font-bold text-text-secondary">Location-based incidents requiring attention</p>
         </div>
-        <Link to={`/alerts${selectedType !== 'ALL' ? `?type=${selectedType}` : ''}`} className="border-2 border-black bg-black px-2.5 py-1 text-xs font-black uppercase hover:text-white dark:bg-[#d8f5a9] dark:text-black hover:bg-zinc-800">
+        <Link to={`/alerts${selectedType !== 'ALL' ? `?type=${selectedType}` : ''}`} className="rounded-lg border border-border bg-accent px-2.5 py-1 text-xs font-semibold text-text-primary hover:bg-accent/80">
           View all ({selectedTotal})
         </Link>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-1.5 border-b border-text-primary/20 pb-3">
-        <button type="button" onClick={() => setSelectedType('ALL')} aria-pressed={selectedType === 'ALL'} className={`border border-black px-2.5 py-1 text-[10px] font-black uppercase transition-colors ${selectedType === 'ALL' ? 'bg-black text-white dark:bg-[#d8f5a9] dark:text-black' : 'bg-surface text-text-primary hover:bg-black/10'}`}>All actionable alerts</button>
-        {ALERT_TYPES.map((alertType) => <button key={alertType} type="button" onClick={() => setSelectedType(alertType)} aria-pressed={selectedType === alertType} className={`border border-black px-2.5 py-1 text-[10px] font-black uppercase transition-colors ${selectedType === alertType ? 'bg-black text-white dark:bg-[#d8f5a9] dark:text-black' : 'bg-surface text-text-primary hover:bg-black/10'}`}>{ALERT_TYPE_LABELS[alertType]}</button>)}
+      <div className="mt-3 flex flex-wrap gap-1.5 border-b border-[#525a66]/50 pb-3">
+        <button type="button" onClick={() => setSelectedType('ALL')} aria-pressed={selectedType === 'ALL'} className={`rounded-lg border border-border px-2.5 py-1 text-[10px] font-semibold transition-colors ${selectedType === 'ALL' ? 'bg-accent text-text-primary' : 'bg-surface text-text-primary hover:bg-accent/20'}`}>All actionable alerts</button>
+        {ALERT_TYPES.map((alertType) => <button key={alertType} type="button" onClick={() => setSelectedType(alertType)} aria-pressed={selectedType === alertType} className={`rounded-lg border border-border px-2.5 py-1 text-[10px] font-semibold transition-colors ${selectedType === alertType ? 'bg-accent text-text-primary' : 'bg-surface text-text-primary hover:bg-accent/20'}`}>{ALERT_TYPE_LABELS[alertType]}</button>)}
       </div>
 
       {query.isPending && <div className="mt-4 space-y-2" role="status" aria-label="Loading recent alerts"><div className="h-20 animate-pulse bg-text-primary/10" /><div className="h-20 animate-pulse bg-text-primary/10" /></div>}
-      {query.isError && <div className="py-8 text-center"><p className="text-xs font-bold text-danger">Alerts could not be loaded.</p><button type="button" onClick={() => query.refetch()} className="mt-3 border-2 border-black px-3 py-1 text-xs font-black uppercase">Retry</button></div>}
+      {query.isError && <div className="py-8 text-center"><p className="text-xs font-bold text-danger">Alerts could not be loaded.</p><button type="button" onClick={() => query.refetch()} className="mt-3 border border-border px-3 py-1 text-xs font-semibold">Retry</button></div>}
       {!query.isPending && !query.isError && alerts.length === 0 && <p className="py-8 text-center text-xs font-bold text-text-secondary">{selectedType === 'ALL' ? GLOBAL_ALERTS_EMPTY_MESSAGE : FILTERED_ALERTS_EMPTY_MESSAGE}</p>}
 
-      <ul className="divide-y divide-text-primary/15">
+      <ul className="mt-3 flex-1 min-h-0 overflow-y-auto divide-y divide-[#525a66]/40">
         {alerts.map((alert) => {
           const mapHref = alertMapHref(alert)
           return (
             <li key={alert.id} className="py-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-black">{ALERT_TYPE_LABELS[alert.alert_type]}</p>
+                  <p className="text-xs font-semibold">{ALERT_TYPE_LABELS[alert.alert_type]}</p>
                   <p className="mt-1 font-mono text-[10px] font-bold text-text-secondary">Location incident #{alert.id}</p>
                   {alert.message && <p className="mt-1 text-xs text-text-secondary">{alert.message}</p>}
                   {alert.firms_uid && <p className="mt-1 font-mono text-[10px] text-text-secondary">FIRMS: {alert.firms_uid}</p>}
                   {alert.object_uid && <p className="mt-1 font-mono text-[10px] text-text-secondary">Object: {alert.object_uid}</p>}
                   <p className="mt-1 font-mono text-[10px] text-text-secondary">{formatAlertTimestamp(alert.created_at)}{mapHref ? ` · ${alert.latitude!.toFixed(4)}, ${alert.longitude!.toFixed(4)}` : ''}</p>
                 </div>
-                <span className="border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase">{alert.severity ?? 'LOW'}</span>
+                <span className="rounded-lg border border-border px-2 py-0.5 text-[10px] font-semibold">{alert.severity ?? 'LOW'}</span>
               </div>
-              {mapHref && <a href={mapHref} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-[10px] font-black uppercase underline"><MapPin size={12} />View on map</a>}
+              {mapHref && <a href={mapHref} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold underline"><MapPin size={12} />View on map</a>}
             </li>
           )
         })}

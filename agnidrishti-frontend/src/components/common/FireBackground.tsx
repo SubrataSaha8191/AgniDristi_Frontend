@@ -1,10 +1,10 @@
 export function FireBackground() {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden select-none bg-[#0a0c10]" aria-hidden="true">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden select-none bg-[#181818]" aria-hidden="true">
       <svg className="w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="fireGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#0a0c10" stopOpacity="0.95" />
+            <stop offset="0%" stopColor="#181818" stopOpacity="0.95" />
             <stop offset="40%" stopColor="#dc2626" stopOpacity="0.35" />
             <stop offset="75%" stopColor="#ea580c" stopOpacity="0.2" />
             <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.05" />

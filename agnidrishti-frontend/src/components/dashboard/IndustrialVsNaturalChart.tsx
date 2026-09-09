@@ -22,18 +22,18 @@ export function IndustrialVsNaturalChart({ expanded = false, showDetailsLink = t
   }, { offset: 0, parts: [] }).parts.join(', ')
 
   return (
-    <section className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm" aria-labelledby="source-breakdown-heading">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-black dark:border-zinc-700 pb-3">
-        <h2 id="source-breakdown-heading" className="text-sm font-black uppercase tracking-wider text-text-primary">Industrial vs Natural</h2>
-        {showDetailsLink && <Link to="/assessment" className="text-xs font-bold uppercase tracking-wider text-text-primary hover:underline">View details →</Link>}
+    <section className="rounded-lg border border-border bg-surface p-5 shadow-sm" aria-labelledby="source-breakdown-heading">
+      <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <h2 id="source-breakdown-heading" className="text-sm font-semibold text-text-primary">Industrial vs Natural</h2>
+        {showDetailsLink && <Link to="/assessment" className="text-xs font-semibold text-text-primary hover:underline">View details →</Link>}
       </div>
       {isLoading ? <div className="mt-5 h-32 animate-pulse bg-zinc-200 dark:bg-zinc-800" role="status" /> : (
         <div className={`${expanded ? 'mt-8 gap-10 flex-wrap' : 'mt-5 gap-5'} flex items-center justify-center`}>
-          <div className={`relative ${expanded ? 'h-48 w-48' : 'h-32 w-32'} shrink-0 rounded-full border-2 border-black dark:border-zinc-700`} style={{ background: `conic-gradient(${gradient || 'var(--color-border) 0 100%'})` }} role="img">
-            <div className={`${expanded ? 'inset-8' : 'inset-5'} absolute flex items-center justify-center rounded-full border-2 border-black dark:border-zinc-700 bg-surface`}><span className={`${expanded ? 'text-2xl' : 'text-lg'} font-mono font-black text-text-primary`}>{total}</span></div>
+          <div className={`relative ${expanded ? 'h-48 w-48' : 'h-32 w-32'} shrink-0 rounded-full border border-border`} style={{ background: `conic-gradient(${gradient || 'var(--color-border) 0 100%'})` }} role="img">
+            <div className={`${expanded ? 'inset-8' : 'inset-5'} absolute flex items-center justify-center rounded-full border border-border bg-surface`}><span className={`${expanded ? 'text-2xl' : 'text-lg'} font-mono font-semibold text-text-primary`}>{total}</span></div>
           </div>
           <div className={`${expanded ? 'gap-3 text-xs' : 'gap-2 text-[10px]'} grid text-text-secondary`}>
-            {slices.map((slice) => <p key={slice.category} className="font-semibold uppercase"><span className="mr-1.5 inline-block h-2 w-2 border border-black dark:border-zinc-600" style={{ backgroundColor: slice.color }} />{slice.label} <span className="font-mono text-text-primary">{slice.percentage.toFixed(1)}%</span></p>)}
+            {slices.map((slice) => <p key={slice.category} className="font-semibold"><span className="mr-1.5 inline-block h-2 w-2 border border-border" style={{ backgroundColor: slice.color }} />{slice.label} <span className="font-mono text-text-primary">{slice.percentage.toFixed(1)}%</span></p>)}
           </div>
         </div>
       )}

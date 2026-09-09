@@ -25,7 +25,7 @@ export function RegionalAnalytics() {
           </h2>
           <p className="mt-1 text-sm text-text-secondary">Illustrative aggregate view using demo data, not live regional reporting.</p>
         </div>
-        <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-warning">Demo data</span>
+        <span className="rounded-full bg-warning/10 px-2.5 py-1 text-[10px] font-semibold text-warning">Demo data</span>
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">

@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { AlertCircle, Bell, FileSearch, FileText, Layers, LayoutDashboard, Search, Settings, TrendingUp, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import gsap from 'gsap'
-import { useThemeStore } from '../stores/themeStore'
 import { useUIStore } from '../stores/uiStore'
+import { useSourceStore } from '../stores/sourceStore'
 
 const sections = [
   { label: 'GENERAL', items: [{ label: 'Dashboard', to: '/dashboard', end: true, icon: LayoutDashboard }, { label: 'Search & Discovery', to: '/search', icon: Search }, { label: 'Source Investigation', to: '/investigation', icon: FileSearch }, { label: 'Event Assessment', to: '/assessment', icon: AlertCircle }, { label: 'Change & Anomaly', to: '/anomaly', icon: TrendingUp }, { label: 'Alerts', to: '/alerts', icon: Bell }] },
@@ -12,9 +12,9 @@ const sections = [
 ]
 
 export function Sidebar() {
-  const theme = useThemeStore((state) => state.theme)
   const sidebarOpen = useUIStore((state) => state.sidebarOpen)
   const toggleSidebar = useUIStore((state) => state.toggleSidebar)
+  const selectedSourceId = useSourceStore((state) => state.selectedSourceId)
   const [shouldRender, setShouldRender] = useState(sidebarOpen)
   const mobileRef = useRef<HTMLElement>(null)
   const desktopRef = useRef<HTMLElement>(null)
@@ -46,30 +46,35 @@ export function Sidebar() {
   const renderNav = (isMobile = false) => (
     <nav aria-label="Primary navigation" className={isMobile ? 'max-w-md mx-auto py-2' : ''}>
       {isMobile && (
-        <div className="flex items-center justify-between pb-4 mb-4 border-b-2 border-black">
-          <span className="text-lg font-black tracking-widest uppercase">AGNI<span className="text-[#d8f5a9] bg-black px-1.5 py-0.5 ml-1">MENU</span></span>
-          <button type="button" onClick={toggleSidebar} aria-label="Close menu" className="p-2 border-2 border-black bg-black text-white hover:bg-zinc-800"><X size={20} /></button>
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-border">
+          <span className="font-samarkan text-xl font-normal">AGNI<span className="font-sans text-accent bg-accent/10 rounded-lg px-1.5 py-0.5 ml-1 text-xs font-semibold">MENU</span></span>
+          <button type="button" onClick={toggleSidebar} aria-label="Close menu" className="rounded-lg border border-border bg-accent p-2 text-white hover:opacity-90"><X size={20} /></button>
         </div>
       )}
       {sections.map(({ label: sectionLabel, items }) => (
         <section key={sectionLabel} className="mt-5 first:mt-0">
-          <h2 className="px-3 pb-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-text-secondary">{sectionLabel}</h2>
+          <h2 className="px-3 pb-1.5 text-[10px] font-semibold text-text-secondary">{sectionLabel}</h2>
           <div className="space-y-1">
-            {items.map(({ label, to, end, icon: Icon }) => (
-              <NavLink key={to} to={to} end={end} onClick={() => { if (isMobile) toggleSidebar() }}
-                className={({ isActive }) => `flex items-center gap-3 rounded-none border-2 px-4 py-2.5 text-xs font-black uppercase tracking-wide transition-colors ${
-                  isActive
-                    ? theme === 'dark' ? 'border-[#d8f5a9] bg-[#d8f5a9] text-black shadow-[3px_3px_0px_0px_rgba(216,245,169,0.3)]' : 'border-black bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
-                    : theme === 'dark' ? 'border-transparent text-text-secondary hover:bg-zinc-800 hover:border-zinc-500 hover:text-white' : 'border-transparent text-text-secondary hover:bg-transparent hover:border-black hover:text-black'
-                }`}>
-                {({ isActive }) => (
-                  <>
-                    <Icon size={18} className={isActive ? (theme === 'dark' ? 'text-black' : 'text-[#d8f5a9]') : 'text-text-primary'} aria-hidden="true" />
-                    {label}
-                  </>
-                )}
-              </NavLink>
-            ))}
+            {items.map(({ label, to, end, icon: Icon }) => {
+              const targetTo = (to === '/investigation' && selectedSourceId)
+                ? `/investigation/${encodeURIComponent(selectedSourceId)}`
+                : to
+              return (
+                <NavLink key={to} to={targetTo} end={end} onClick={() => { if (isMobile) toggleSidebar() }}
+                  className={({ isActive }) => `flex items-center gap-3 rounded-lg border px-4 py-2.5 text-xs font-medium transition-colors ${
+                    isActive
+                      ? 'border-accent bg-accent text-white'
+                      : 'border-transparent text-text-secondary hover:bg-bg hover:border-border hover:text-text-primary'
+                  }`}>
+                  {({ isActive }) => (
+                    <>
+                      <Icon size={18} className={isActive ? 'text-white' : 'text-text-primary'} aria-hidden="true" />
+                      {label}
+                    </>
+                  )}
+                </NavLink>
+              )
+            })}
           </div>
         </section>
       ))}
@@ -80,10 +85,10 @@ export function Sidebar() {
 
   return (
     <>
-      <aside ref={desktopRef} className="hidden h-full w-64 shrink-0 border-r-2 border-black bg-surface p-4 md:block">
+      <aside ref={desktopRef} className="hidden h-full w-64 shrink-0 border-r border-border bg-surface p-4 md:block">
         {renderNav(false)}
       </aside>
-      <aside ref={mobileRef} className="fixed inset-0 z-50 h-full w-full overflow-y-auto border-b-2 border-black bg-surface p-6 shadow-2xl md:hidden">
+      <aside ref={mobileRef} className="fixed inset-0 z-50 h-full w-full overflow-y-auto border-b border-border bg-surface p-6 shadow-lg md:hidden">
         {renderNav(true)}
       </aside>
     </>

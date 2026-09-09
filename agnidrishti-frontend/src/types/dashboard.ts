@@ -41,6 +41,8 @@ export interface ThermalObject {
   gas_flare_likelihood?: GasFlareLikelihood | null
   gas_flare_score?: number | null
   gas_flare_source?: string | null
+  state_name?: string | null
+  district_name?: string | null
 }
 
 export interface ThermalObjectsResponse { total: number; limit: number; offset: number; objects: ThermalObject[] }
@@ -60,6 +62,8 @@ export interface RecentFirmsDetection {
   known_source: boolean | null
   matched_object_uid: string | null
   match_distance_km: number | null
+  state_name?: string | null
+  district_name?: string | null
 }
 
 export interface RecentFirmsResponse { count: number; detections: RecentFirmsDetection[] }
@@ -99,6 +103,8 @@ export interface VnfMapDetection {
   vnf_type?: 'persistent' | 'transient' | null
   gem_industry_exact_type: string | null
   gem_facility_name: string | null
+  state_name?: string | null
+  district_name?: string | null
 }
 
 export type VnfPersistence = 'persistent' | 'transient' | 'both'
@@ -125,8 +131,15 @@ export interface VnfDetectionsResponse {
   detections: VnfMapDetection[]
 }
 
+export interface TimeRangeInfo {
+  range: string
+  from: string
+  to: string
+}
+
 export interface DashboardMapResponse {
   selected_date: string | null
+  time_range?: TimeRangeInfo | null
   filters?: {
     object_scope: MapObjectScope
     firms_limit: number
@@ -154,7 +167,7 @@ export interface GasFlareEvidence { reasons: string[]; signal_contributions: Rec
 export interface ThermalObjectDetail {
   object_uid: string
   stage3_object_id: string | null
-  location: { latitude: number; longitude: number }
+  location: { latitude: number; longitude: number; state_name?: string | null; district_name?: string | null }
   classification: { label: string | null; source: string | null; confidence: number | null }
   temporal: { detection_count: number | null; active_months: number | null; persistence_ratio: number | null; source_persistence_ratio?: number | null; longest_active_run: number | null; max_inactive_gap: number | null; source_hint?: string | null; tci?: number | null; seasonal_concentration?: number | null }
   temperature: { mean: number | null; median: number | null; min: number | null; max: number | null; std: number | null; range: number | null; cv: number | null }
@@ -164,6 +177,33 @@ export interface ThermalObjectDetail {
   thermal_fingerprint: Record<string, number> | null
   object_radius_m: number | null
   recent_firms: Array<{ firms_uid: string; latitude: number; longitude: number; bright_ti4: number | null; bright_ti5: number | null; frp: number | null; acq_date: string | null; acq_time: string | null; satellite: string | null; confidence: string | number | null; match_distance_km: number | null }>
+}
+
+export interface DistrictDetectionCount {
+  district_name: string
+  vnf_detection_count: number
+  firms_detection_count: number
+  total_detection_count: number
+}
+
+export interface StateDetectionCount {
+  state_name: string
+  vnf_detection_count: number
+  firms_detection_count: number
+  total_detection_count: number
+  districts: DistrictDetectionCount[]
+}
+
+export interface DetectionsByStateResponse {
+  count: number
+  total_vnf_detections: number
+  total_firms_detections: number
+  total_detections: number
+  scope: {
+    vnf: string
+    firms: string
+  }
+  states: StateDetectionCount[]
 }
 
 export interface VnfUploadResult { filename: string; status?: string; mode?: string; batch_id?: string; input_detections?: number; inserted_detections?: number; duplicates?: number; matched_existing?: number; new_candidates?: number; objects_found?: number; new_objects?: number; processing_time_seconds?: number; [key: string]: unknown }

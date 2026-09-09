@@ -12,8 +12,9 @@ export type MapDatasetMode = 'firms' | 'vnf'
 export default function DashboardPage() {
   const datesQuery = useMapDates(30)
   const [requestedDate, setRequestedDate] = useState<string | null>(null)
+  const [timeRange, setTimeRange] = useState<string | null>(null)
   const [datasetMode, setDatasetMode] = useState<MapDatasetMode>('firms')
-  const mapQuery = useDashboardMap(requestedDate, 'all', 0)
+  const mapQuery = useDashboardMap(requestedDate, 'all', 0, timeRange)
   const summaryQuery = useDashboardSummary()
   const mapData = mapQuery.data
   const availableDates = datesQuery.data?.dates ?? []
@@ -32,34 +33,73 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-9 pb-12">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-text-primary pb-5">
-        <div><div className="inline-flex items-center gap-2 border-2 border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-widest text-[#d8f5a9]"><span className="h-2 w-2 bg-[#d8f5a9]" />System intelligence</div><h1 className="mt-3 text-3xl font-black uppercase tracking-[0.12em] text-text-primary sm:text-4xl">Thermal source intelligence</h1><p className="mt-2 text-xs font-bold uppercase tracking-widest text-text-secondary">Telemetry thermal objects, FIRMS detections, and flare assessments</p></div>
-        {mapQuery.isFetching && <span role="status" className="text-xs font-black uppercase text-text-secondary">Refreshing...</span>}
-      </header>
+       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+         <div>
+           <h1 className="text-3xl font-semibold text-text-primary sm:text-4xl">Thermal source intelligence</h1>
+         </div>
+         {mapQuery.isFetching && <span role="status" className="text-xs font-medium text-text-secondary">Refreshing...</span>}
+       </header>
 
       <section aria-label="Selected-date operational summary">
-        <SectionHeading num="01" title="Operational summary" subtitle={selectedDate ? `FIRMS activity for ${selectedDate}` : 'Selected-date FIRMS activity'} />
-        <div className="mb-4 -mt-2 flex justify-end">
-          <label className="text-[10px] font-black uppercase tracking-wider text-text-secondary">Observation date
-            <select
-              value={selectedDate ?? ''}
-              disabled={datesQuery.isLoading || datesQuery.isError || availableDates.length === 0}
-              onChange={(event) => setRequestedDate(event.target.value || null)}
-              className="ml-2 border-2 border-black bg-surface px-3 py-2 font-mono text-xs font-bold text-text-primary outline-none focus:ring-2 focus:ring-text-primary"
+        <SectionHeading num="01" title="Operational summary" subtitle={timeRange ? `Rolling range ${timeRange} activity` : selectedDate ? `FIRMS activity for ${selectedDate}` : 'Thermal telemetry activity'} />
+        <div className="mb-4 -mt-2 flex flex-wrap items-center justify-end gap-3">
+          {mapData?.time_range && (
+            <div className="text-[10px] font-mono text-text-secondary border border-border bg-surface px-2.5 py-1.5">
+              Range: <span className="font-bold text-accent">{mapData.time_range.range}</span> ({new Date(mapData.time_range.from).toLocaleDateString()} - {new Date(mapData.time_range.to).toLocaleDateString()})
+            </div>
+          )}
+
+          <div className="flex items-center gap-1 bg-surface border border-border p-1">
+            <span className="px-2 text-[10px] font-semibold text-text-secondary">Time Window:</span>
+            <button
+              type="button"
+              onClick={() => { setRequestedDate(null); setTimeRange('24h') }}
+              className={`px-2.5 py-1 text-[10px] font-semibold transition-colors cursor-pointer ${timeRange === '24h' ? 'bg-accent text-white' : 'hover:bg-bg'}`}
             >
+              24h
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRequestedDate(null); setTimeRange('7d') }}
+              className={`px-2.5 py-1 text-[10px] font-semibold transition-colors cursor-pointer ${timeRange === '7d' ? 'bg-accent text-white' : 'hover:bg-bg'}`}
+            >
+              7d
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRequestedDate(null); setTimeRange('30d') }}
+              className={`px-2.5 py-1 text-[10px] font-semibold transition-colors cursor-pointer ${timeRange === '30d' ? 'bg-accent text-white' : 'hover:bg-bg'}`}
+            >
+              30d
+            </button>
+          </div>
+
+          <label className="text-[10px] font-medium text-text-secondary">
+            Specific date:
+            <select
+              value={requestedDate ?? ''}
+              disabled={datesQuery.isLoading || datesQuery.isError || availableDates.length === 0}
+              onChange={(event) => {
+                if (event.target.value) {
+                  setTimeRange(null)
+                  setRequestedDate(event.target.value)
+                }
+              }}
+              className="ml-2 border border-border bg-surface px-3 py-1.5 font-mono text-xs font-medium text-text-primary outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="">Select date...</option>
               {datesQuery.isLoading && <option value="">Loading dates...</option>}
               {datesQuery.isError && <option value="">Dates unavailable</option>}
-              {!datesQuery.isLoading && !datesQuery.isError && availableDates.length === 0 && <option value="">No FIRMS dates</option>}
               {availableDates.map((entry) => <option key={entry.date} value={entry.date}>{entry.date} | {entry.firms_count} hits</option>)}
             </select>
           </label>
         </div>
-        {mapQuery.isError ? <div className="border-2 border-black bg-surface p-5"><p className="text-sm font-bold text-danger">Selected-date summary could not be loaded.</p><button type="button" onClick={() => { void mapQuery.refetch() }} className="mt-3 border-2 border-black bg-black px-3 py-1.5 text-xs font-black uppercase text-white">Retry</button></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{cards.map((card) => <KPICard key={card.label} label={card.label} value={card.loading ? '...' : card.value ?? 'Not available'} icon={card.icon} />)}</div>}
+         {mapQuery.isError ? <div className="rounded-lg border border-border bg-surface p-5"><p className="text-sm font-medium text-danger">Summary data could not be loaded.</p><button type="button" onClick={() => { void mapQuery.refetch() }} className="mt-3 rounded-lg border border-border bg-accent px-3 py-1.5 text-xs font-medium text-white">Retry</button></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{cards.map((card) => <KPICard key={card.label} label={card.label} value={card.loading ? '...' : card.value ?? 'Not available'} icon={card.icon} />)}</div>}
       </section>
 
       <section aria-label="Spatial object explorer"><SectionHeading num="02" title="Spatial object explorer" subtitle="Switch between selected-date FIRMS matches and VNF source history" /><ThermalObjectExplorer requestedDate={requestedDate} selectedDate={selectedDate} datasetMode={datasetMode} onDatasetModeChange={setDatasetMode} /></section>
 
-      <section aria-label="Distribution and alerts"><SectionHeading num="03" title="Distribution and alerts" subtitle="Industry classifications and current operational alerts" /><div className="grid gap-6 xl:grid-cols-[1.25fr_1fr]"><IndustryDistributionChart /><RecentAlertsWidget /></div></section>
+      <section aria-label="Distribution and alerts"><SectionHeading num="03" title="Distribution and alerts" subtitle="Industry classifications and current operational alerts" /><div className="grid gap-6 items-stretch xl:grid-cols-[1.25fr_1fr]"><IndustryDistributionChart /><RecentAlertsWidget /></div></section>
     </div>
   )
 }

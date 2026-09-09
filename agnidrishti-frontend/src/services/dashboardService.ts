@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiPost, uploadFile } from '../lib/apiClient'
 import type {
-  ClassDistribution, DashboardMapResponse, DashboardSummary, GasFlareLikelihood, LatestRunResponse,
+  ClassDistribution, DashboardMapResponse, DashboardSummary, DetectionsByStateResponse, GasFlareLikelihood, LatestRunResponse,
   MapDatesResponse, MapObjectScope, MonitoringRunsResponse, MonitoringState, RecentFirmsResponse, ThermalObjectDetail,
   ThermalObjectsResponse, VnfDetectionsResponse, VnfPersistence, VnfUploadResult,
 } from '../types/dashboard'
@@ -9,6 +9,7 @@ import type {
 export const dashboardKeys = {
   summary: ['dashboard', 'summary'] as const,
   classes: ['dashboard', 'classes'] as const,
+  byState: ['dashboard', 'detections', 'byState'] as const,
   objects: ['dashboard', 'objects'] as const,
   detail: (id: string | null) => ['dashboard', 'object', id] as const,
   firms: ['dashboard', 'firms'] as const,
@@ -16,7 +17,7 @@ export const dashboardKeys = {
   monitoring: ['dashboard', 'monitoring'] as const,
   runs: ['monitoring', 'runs'] as const,
   mapDates: (limit: number) => ['dashboard', 'map', 'dates', limit] as const,
-  map: (date: string | null, objectScope: MapObjectScope, vnfLimit: number) => ['dashboard', 'map', date, objectScope, vnfLimit] as const,
+  map: (date: string | null, range: string | null, objectScope: MapObjectScope, vnfLimit: number) => ['dashboard', 'map', date, range, objectScope, vnfLimit] as const,
   vnfDetections: (persistence: VnfPersistence, limit: number, offset: number) => ['dashboard', 'vnf', 'detections', persistence, limit, offset] as const,
 }
 
@@ -24,6 +25,7 @@ export interface ObjectQuery { limit: number; offset: number; classification?: s
 
 export function useDashboardSummary() { return useQuery({ queryKey: dashboardKeys.summary, queryFn: ({ signal }) => apiGet<DashboardSummary>('/dashboard/summary', { signal }) }) }
 export function useClassDistribution() { return useQuery({ queryKey: dashboardKeys.classes, queryFn: ({ signal }) => apiGet<ClassDistribution>('/dashboard/classes', { signal }) }) }
+export function useDetectionsByState() { return useQuery({ queryKey: dashboardKeys.byState, queryFn: ({ signal }) => apiGet<DetectionsByStateResponse>('/dashboard/detections/by-state', { signal }), staleTime: 5 * 60_000 }) }
 
 export function useThermalObjects(query: ObjectQuery, enabled = true) {
   const { gas_flare_likelihood, likely_only, gas_flare_only, ...serverParams } = query
@@ -61,11 +63,15 @@ export function useMapDates(limit = 30) {
   })
 }
 
-export function useDashboardMap(date: string | null, objectScope: MapObjectScope, vnfLimit = 0) {
+export function useDashboardMap(date: string | null, objectScope: MapObjectScope, vnfLimit = 0, range: string | null = null) {
   return useQuery({
-    queryKey: dashboardKeys.map(date, objectScope, vnfLimit),
+    queryKey: dashboardKeys.map(date, range, objectScope, vnfLimit),
     queryFn: ({ signal }) => apiGet<DashboardMapResponse>('/dashboard/map', {
-      params: { ...(date ? { date } : {}), object_scope: objectScope, vnf_limit: vnfLimit },
+      params: {
+        ...(range ? { range } : date ? { date } : {}),
+        object_scope: objectScope,
+        vnf_limit: vnfLimit,
+      },
       signal,
     }),
     placeholderData: (previous) => previous,
