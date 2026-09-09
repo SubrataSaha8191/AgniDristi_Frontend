@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronRight, Database, Factory, Flame, MapPin, Satellite } 
 import { Link, useParams } from 'react-router-dom'
 import { useRecentFirms, useThermalObjects, useVnfDetections } from '../services/dashboardService'
 import { useSourceStore } from '../stores/sourceStore'
+import DetectionStreakTracker from '../components/DetectionStreakTracker'
 
 const DISTRICT_ALIASES: Record<string, string> = {
   haldia: 'Purba Medinipur',
@@ -59,6 +60,8 @@ export default function DistrictSearchPage() {
         <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Database size={13} /> VNF detections</dt><dd className="mt-2 font-mono text-2xl font-semibold">{(vnfQuery.data?.total ?? 0).toLocaleString()}</dd></div>
         <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Satellite size={13} /> FIRMS detections</dt><dd className="mt-2 font-mono text-2xl font-semibold">{(firmsQuery.data?.count ?? 0).toLocaleString()}</dd></div>
       </dl>
+
+      <DetectionStreakTracker scope={{ districtName: backendDistrict }} selectedSource="all" />
 
       {loading && <div className="space-y-2" role="status" aria-label="Loading district data"><div className="h-12 animate-pulse bg-text-primary/10" /><div className="h-12 animate-pulse bg-text-primary/10" /><div className="h-12 animate-pulse bg-text-primary/10" /></div>}
       {isError && <div className="border border-danger/50 bg-danger/5 p-8 text-center text-xs text-danger">District data could not be loaded. Check the API connection and try again.</div>}

@@ -232,6 +232,19 @@ export interface DetectionsByStateResponse {
   states: StateDetectionCount[]
 }
 
+export interface DetectionActivityDay {
+  date: string
+  count: number
+}
+
+export interface DetectionActivityCalendarResponse {
+  state: string
+  total_detections: number
+  range_start: string
+  range_end: string
+  days: DetectionActivityDay[]
+}
+
 export interface IndustryStateStat {
   state_name: string
   vnf_detection_count: number

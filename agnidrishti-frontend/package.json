@@ -24,6 +24,7 @@
     "lucide-react": "^1.40.0",
     "postcss": "^8.5.27",
     "react": "^19.2.8",
+    "react-activity-calendar": "^3.2.1",
     "react-dom": "^19.2.8",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.18.3",

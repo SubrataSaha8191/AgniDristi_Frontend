@@ -3,6 +3,7 @@ import { ArrowLeft, Database, Flame, MapPin, Radio, Satellite } from 'lucide-rea
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { INDUSTRY_CATEGORIES, getIndustryCategory, type IndustryCategory } from '../lib/industryCategories'
 import { useDetectionsByState, useRecentFirms, useThermalObjects, useVnfDetections } from '../services/dashboardService'
+import DetectionStreakTracker from '../components/DetectionStreakTracker'
 import type { RecentFirmsDetection, ThermalObject, VnfMapDetection } from '../types/dashboard'
 
 type Dataset = 'vnf' | 'firms'
@@ -113,6 +114,8 @@ export default function StateSearchPage() {
           </div>
         </div>
       </section>
+
+      <DetectionStreakTracker scope={{ stateName: decodedState }} selectedSource={dataset} />
 
       <section aria-labelledby="detection-results">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
