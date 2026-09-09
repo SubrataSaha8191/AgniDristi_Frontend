@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Layers, MapPin } from 'lucide-react'
+import { ChevronDown, ChevronRight, ExternalLink, Layers, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useDetectionsByState } from '../../services/dashboardService'
 
 export function StateDistrictDetectionsWidget() {
@@ -95,20 +96,28 @@ export function StateDistrictDetectionsWidget() {
 
             return (
               <div key={stateItem.state_name} className="border border-border bg-bg/50 p-3 transition-colors hover:border-accent">
-                <button
-                  type="button"
-                  onClick={() => toggleState(stateItem.state_name)}
-                  className="flex w-full items-center justify-between gap-3 text-left cursor-pointer"
-                >
+                <div className="flex w-full items-center justify-between gap-3 text-left">
                   <div className="flex items-center gap-2 min-w-0">
-                    {isExpanded ? <ChevronDown size={16} className="text-accent shrink-0" /> : <ChevronRight size={16} className="text-text-secondary shrink-0" />}
-                    <span className="font-semibold text-xs text-text-primary truncate">{stateItem.state_name}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleState(stateItem.state_name)}
+                      className="cursor-pointer text-text-secondary hover:text-accent"
+                    >
+                      {isExpanded ? <ChevronDown size={16} className="text-accent shrink-0" /> : <ChevronRight size={16} className="text-text-secondary shrink-0" />}
+                    </button>
+                    <Link
+                      to={`/state/${encodeURIComponent(stateItem.state_name)}`}
+                      className="font-semibold text-xs text-text-primary truncate hover:text-accent hover:underline flex items-center gap-1"
+                    >
+                      <span>{stateItem.state_name}</span>
+                      <ExternalLink size={11} className="text-text-secondary opacity-60 hover:opacity-100" />
+                    </Link>
                     <span className="font-mono text-[10px] text-text-secondary">({stateItem.districts.length} districts)</span>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="font-mono text-xs font-bold text-text-primary">{stateItem.total_detection_count.toLocaleString()}</span>
                   </div>
-                </button>
+                </div>
 
                 {/* Progress bar */}
                 <div className="mt-2 h-1.5 w-full bg-transparent border border-border">
