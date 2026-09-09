@@ -1,48 +1,113 @@
 import { useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Flame } from 'lucide-react'
-import { useClassDistribution, useRecentFirms, useThermalObjects } from '../../services/dashboardService'
+import { ChevronLeft, ChevronRight, Database, Flame, Radar } from 'lucide-react'
+import { useDashboardMap, useThermalObjects } from '../../services/dashboardService'
 import { useFilterStore } from '../../stores/filterStore'
 import { useSourceStore } from '../../stores/sourceStore'
-import type { GasFlareLikelihood } from '../../types/dashboard'
+import type { MapDatasetMode } from '../../pages/DashboardPage'
 import { ThermalMap } from '../map/ThermalMap'
 
 const fieldClass = 'mt-1 w-full border-2 border-black dark:border-zinc-700 bg-surface px-3 py-2 text-xs font-bold text-text-primary outline-none focus:ring-2 focus:ring-text-primary'
-const flareOptions: GasFlareLikelihood[] = ['LIKELY', 'POSSIBLE', 'UNLIKELY']
 const display = (value: string | number | null | undefined, suffix = '') => value == null || value === '' ? 'Not available' : `${value}${suffix}`
+const isLikelyFlare = (object: { gas_flare_likelihood?: string | null }) => object.gas_flare_likelihood === 'LIKELY'
 
-export function ThermalObjectExplorer() {
+type ThermalObjectExplorerProps = {
+  requestedDate: string | null
+  selectedDate: string | null
+  datasetMode: MapDatasetMode
+  onDatasetModeChange: (mode: MapDatasetMode) => void
+}
+
+export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode, onDatasetModeChange }: ThermalObjectExplorerProps) {
   const filters = useFilterStore()
-  const classes = useClassDistribution()
-  const recentFirms = useRecentFirms(500)
-  const query = useThermalObjects({ limit: 5000, offset: 0, classification: filters.classification || undefined, source_hint: filters.temporalSource || undefined, gas_flare_likelihood: filters.gasFlareLikelihood, likely_only: filters.likelyFlaresOnly })
   const openPanel = useSourceStore((state) => state.openPanel)
-  const allObjects = useMemo(() => query.data?.objects ?? [], [query.data?.objects])
+  const mapQuery = useDashboardMap(requestedDate, 'all', 0)
+  const persistentObjectsQuery = useThermalObjects({ limit: 5_000, offset: 0, gas_flare_only: filters.likelyFlaresOnly })
+  const mapData = mapQuery.data
+  const allKnownObjects = useMemo(() => mapData?.objects ?? [], [mapData?.objects])
+  const persistentFirms = useMemo(
+    () => mapQuery.isPlaceholderData
+      ? []
+      : (mapData?.firms ?? []).filter((detection) => detection.known_source === true && Boolean(detection.matched_object_uid)),
+    [mapData?.firms, mapQuery.isPlaceholderData],
+  )
+  const associatedObjectUids = useMemo(
+    () => new Set(persistentFirms.map((detection) => detection.matched_object_uid)),
+    [persistentFirms],
+  )
+  const vnfObjects = useMemo(
+    () => persistentObjectsQuery.isPlaceholderData ? [] : persistentObjectsQuery.data?.objects ?? [],
+    [persistentObjectsQuery.data?.objects, persistentObjectsQuery.isPlaceholderData],
+  )
+  const visibleObjects = useMemo(
+    () => {
+      const vnfFallbackObjects = vnfObjects.length > 0 ? vnfObjects : allKnownObjects
+      const objects = datasetMode === 'firms' ? allKnownObjects.filter((object) => associatedObjectUids.has(object.object_uid)) : vnfFallbackObjects
+      if (!filters.likelyFlaresOnly) return objects
+      return objects.filter(isLikelyFlare)
+    },
+    [allKnownObjects, associatedObjectUids, datasetMode, filters.likelyFlaresOnly, vnfObjects],
+  )
+  const classificationOptions = useMemo(() => {
+    const counts = new Map<string, number>()
+    visibleObjects.forEach((object) => {
+      const label = (object.classification_label || object.industry_name || 'Unknown').trim() || 'Unknown'
+      counts.set(label, (counts.get(label) ?? 0) + 1)
+    })
+    return [...counts.entries()]
+      .map(([label, count]) => ({ label, count }))
+      .sort((left, right) => left.label.localeCompare(right.label))
+  }, [visibleObjects])
+  const allObjects = useMemo(() => {
+    const requestedClassification = filters.classification.trim().toLocaleLowerCase()
+    return visibleObjects.filter((object) => {
+      if (!requestedClassification) return true
+      const objectClassification = (object.classification_label || object.industry_name || 'Unknown').trim().toLocaleLowerCase()
+      return objectClassification === requestedClassification
+    })
+  }, [visibleObjects, filters.classification])
   const objects = useMemo(() => allObjects.slice(filters.objectOffset, filters.objectOffset + filters.objectLimit), [allObjects, filters.objectOffset, filters.objectLimit])
-  const sourceHints = useMemo(() => [...new Set(allObjects.map((object) => object.temporal_source_hint).filter(Boolean) as string[])].sort(), [allObjects])
-  const total = query.data?.total ?? allObjects.length
+  const filteredObjectUids = useMemo(() => new Set(allObjects.map((object) => object.object_uid)), [allObjects])
+  const mapFirms = useMemo(
+    () => persistentFirms.filter((detection) => detection.matched_object_uid && filteredObjectUids.has(detection.matched_object_uid)),
+    [filteredObjectUids, persistentFirms],
+  )
+  const total = allObjects.length
   const canNext = filters.objectOffset + filters.objectLimit < total
-  const reset = () => { filters.setClassification(''); filters.setTemporalSource(''); filters.setGasFlareLikelihood(''); filters.setLikelyFlaresOnly(false); filters.setObjectOffset(0) }
+  const activeLoading = datasetMode === 'vnf' ? persistentObjectsQuery.isLoading && vnfObjects.length === 0 && allKnownObjects.length === 0 : mapQuery.isLoading
+  const activeError = datasetMode === 'vnf' ? persistentObjectsQuery.isError : mapQuery.isError
+  const reset = () => { filters.reset(); onDatasetModeChange('firms') }
 
   return (
     <div className="space-y-4">
       <section className="p-4 border-2 border-text-primary bg-surface" aria-label="Thermal object filters">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <label className="text-[10px] font-black uppercase tracking-wider text-text-secondary">Industry classification
-            <select className={fieldClass} value={filters.classification} onChange={(event) => { filters.setClassification(event.target.value); filters.setObjectOffset(0) }}><option value="">All classifications</option>{(classes.data?.classes ?? []).map((entry) => <option key={entry.label} value={entry.label}>{entry.label} ({entry.count})</option>)}</select>
+            <select className={fieldClass} value={filters.classification} onChange={(event) => { filters.setClassification(event.target.value); filters.setObjectOffset(0) }}><option value="">All classifications</option>{classificationOptions.map((entry) => <option key={entry.label} value={entry.label}>{entry.label} ({entry.count})</option>)}</select>
           </label>
-          <label className="text-[10px] font-black uppercase tracking-wider text-text-secondary">Temporal source
-            <select className={fieldClass} value={filters.temporalSource} onChange={(event) => { filters.setTemporalSource(event.target.value); filters.setObjectOffset(0) }}><option value="">All temporal sources</option>{sourceHints.map((hint) => <option key={hint} value={hint}>{hint}</option>)}</select>
-          </label>
-          <label className="text-[10px] font-black uppercase tracking-wider text-text-secondary">Flare likelihood
-            <select className={fieldClass} value={filters.gasFlareLikelihood} disabled={filters.likelyFlaresOnly} onChange={(event) => { filters.setGasFlareLikelihood(event.target.value as GasFlareLikelihood | ''); filters.setObjectOffset(0) }}><option value="">All assessments</option>{flareOptions.map((option) => <option key={option}>{option}</option>)}</select>
+          <label className="flex min-h-14 cursor-pointer items-center justify-center gap-2 border-2 border-black bg-surface px-3 text-xs font-black uppercase text-text-primary hover:bg-black hover:text-white dark:border-zinc-700 dark:hover:bg-[#d8f5a9] dark:hover:text-black">
+            <input
+              type="checkbox"
+              checked={filters.likelyFlaresOnly}
+              onChange={(event) => { filters.setLikelyFlaresOnly(event.target.checked); filters.setObjectOffset(0) }}
+              className="h-4 w-4 accent-black"
+            />
+            <Flame size={15} />
+            Likely gas flares only
           </label>
           <label className="flex items-center gap-2 px-3 text-xs font-black uppercase border-2 border-black cursor-pointer min-h-14 dark:border-zinc-700 text-text-primary"><input type="checkbox" checked={filters.likelyFlaresOnly} onChange={(event) => { filters.setLikelyFlaresOnly(event.target.checked); filters.setObjectOffset(0) }} className="w-4 h-4 accent-red-600" /><Flame size={15} className="text-red-600" /> Likely gas flares only</label>
           <button type="button" onClick={reset} className="min-h-14 border-2 border-black bg-black px-4 text-xs font-black uppercase text-white dark:bg-[#d8f5a9] dark:text-black hover:bg-[#d8f5a9]/50 transition-colors cursor-pointer">Reset filters</button>
         </div>
-        {classes.isError && <p className="mt-2 text-xs font-bold text-danger">Classification options are unavailable. You can still browse all objects.</p>}
       </section>
 
-      <ThermalMap objects={allObjects} detections={recentFirms.data?.detections} isLoading={query.isLoading} error={query.isError} onRetry={() => { void query.refetch() }} />
+      <ThermalMap
+        objects={allObjects}
+        detections={datasetMode === 'firms' ? mapFirms : []}
+        vnfDetections={[]}
+        datasetMode={datasetMode}
+        isLoading={activeLoading}
+        error={activeError}
+        onRetry={() => { void mapQuery.refetch(); if (datasetMode === 'vnf') void persistentObjectsQuery.refetch() }}
+      />
 
       <section className="overflow-hidden border-2 border-text-primary bg-surface" aria-labelledby="thermal-object-list-heading">
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b-2 border-text-primary"><div><h3 id="thermal-object-list-heading" className="text-sm font-black uppercase">Thermal object list</h3><p className="text-xs text-text-secondary">Showing {objects.length} on this page, {total} spatial matches</p></div><label className="text-[10px] font-black uppercase text-text-secondary">Rows<select value={filters.objectLimit} onChange={(event) => { filters.setObjectLimit(Number(event.target.value)); filters.setObjectOffset(0) }} className="p-1 ml-2 text-xs border-2 border-black bg-surface text-text-primary"><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option><option value={100}>100</option></select></label></div>
