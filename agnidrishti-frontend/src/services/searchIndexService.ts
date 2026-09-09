@@ -1,4 +1,5 @@
 import { backendApi } from './backendApi'
+import { INDUSTRY_CATEGORIES, getIndustryRoute } from '../lib/industryCategories'
 
 export type SearchEntityType = 'factory' | 'district' | 'state' | 'industry'
 
@@ -10,6 +11,7 @@ export interface SearchIndexItem {
   state?: string
   district?: string
   industryType?: string
+  keywords?: string[]
   targetRoute: string
 }
 
@@ -190,22 +192,59 @@ const PREDEFINED_INDEX: SearchIndexItem[] = [
   },
 ]
 
+const INDIA_STATES_AND_TERRITORIES = [
+  'Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
+  'Chandigarh', 'Chhattisgarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Goa',
+  'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka',
+  'Kerala', 'Ladakh', 'Lakshadweep', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya',
+  'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Sikkim',
+  'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+]
+
 let cachedDynamicIndex: SearchIndexItem[] = []
+
+export function getInitialSearchIndex(): SearchIndexItem[] {
+  const itemsMap = new Map<string, SearchIndexItem>()
+  PREDEFINED_INDEX.forEach((item) => itemsMap.set(item.id, item))
+  INDIA_STATES_AND_TERRITORIES.forEach((name) => {
+    const id = `state-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+    itemsMap.set(id, {
+      id,
+      name,
+      type: 'state',
+      subtitle: 'State or union territory · VNF and FIRMS detections',
+      targetRoute: `/state/${encodeURIComponent(name)}`,
+    })
+  })
+  INDUSTRY_CATEGORIES.forEach(({ key, label }) => {
+    itemsMap.set(`industry-${key}`, {
+      id: `industry-${key}`,
+      name: label,
+      type: 'industry',
+      subtitle: 'Industry category · Detection statistics by state',
+      industryType: key,
+      keywords: key === 'metallurgy' ? ['metullergy', 'metalurgy', 'steel'] : [key.replace('_', ' ')],
+      targetRoute: getIndustryRoute(key),
+    })
+  })
+  return Array.from(itemsMap.values())
+}
 
 export async function getMasterSearchIndex(): Promise<SearchIndexItem[]> {
   if (cachedDynamicIndex.length > 0) {
     return cachedDynamicIndex
   }
 
-  const itemsMap = new Map<string, SearchIndexItem>()
-
-  // 1. Add predefined items
-  PREDEFINED_INDEX.forEach((item) => itemsMap.set(item.id, item))
+  const itemsMap = new Map(getInitialSearchIndex().map((item) => [item.id, item]))
 
   // 2. Fetch live objects dynamically from backend
   try {
-    const res = await backendApi.getObjects({ limit: '100' })
-    const sources = Array.isArray(res.data) ? res.data : res.data?.items ?? []
+    const [objectsResult, statesResult] = await Promise.allSettled([
+      backendApi.getObjects({ limit: '5000', offset: '0' }),
+      backendApi.getDetectionsByState(),
+    ])
+    const objectPayload = objectsResult.status === 'fulfilled' ? objectsResult.value.data : null
+    const sources = Array.isArray(objectPayload) ? objectPayload : objectPayload?.objects ?? objectPayload?.items ?? []
 
     sources.forEach((src: any) => {
       const name = src.matched_facility_name || src.name || `Thermal Object ${src.source_id || src.id}`
@@ -243,6 +282,20 @@ export async function getMasterSearchIndex(): Promise<SearchIndexItem[]> {
         })
       }
     })
+
+    const statePayload = statesResult.status === 'fulfilled' ? statesResult.value.data : null
+    const states = Array.isArray(statePayload) ? statePayload : statePayload?.states ?? []
+    states.forEach((state: { state_name?: string; total_detection_count?: number }) => {
+      if (!state.state_name) return
+      const id = `state-${state.state_name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      itemsMap.set(id, {
+        id,
+        name: state.state_name,
+        type: 'state',
+        subtitle: `State · ${(state.total_detection_count ?? 0).toLocaleString()} indexed detections`,
+        targetRoute: `/state/${encodeURIComponent(state.state_name)}`,
+      })
+    })
   } catch {
     // Fallback to predefined list if backend is offline
   }
@@ -254,15 +307,24 @@ export async function getMasterSearchIndex(): Promise<SearchIndexItem[]> {
 export function matchSearchQuery(query: string, index: SearchIndexItem[]): SearchIndexItem[] {
   const clean = query.trim().toLowerCase()
   if (!clean) return []
+  const normalized = clean.replace(/[^a-z0-9]+/g, ' ')
 
   return index.filter((item) => {
-    const matchName = item.name.toLowerCase().includes(clean)
-    const matchSubtitle = item.subtitle?.toLowerCase().includes(clean)
-    const matchState = item.state?.toLowerCase().includes(clean)
-    const matchDistrict = item.district?.toLowerCase().includes(clean)
+    const searchable = [item.name, item.subtitle, item.state, item.district, item.industryType, ...(item.keywords ?? [])]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+    const matchName = searchable.includes(normalized)
     const matchType = item.type.toLowerCase().includes(clean)
 
-    return matchName || matchSubtitle || matchState || matchDistrict || matchType
+    return matchName || matchType
+  }).sort((a, b) => {
+    const aName = a.name.toLowerCase()
+    const bName = b.name.toLowerCase()
+    const aRank = aName === clean ? 0 : aName.startsWith(clean) ? 1 : 2
+    const bRank = bName === clean ? 0 : bName.startsWith(clean) ? 1 : 2
+    return aRank - bRank || a.name.localeCompare(b.name)
   }).slice(0, 8)
 }
 

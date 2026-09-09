@@ -1,126 +1,99 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
+import { ArrowLeft, BarChart3, Building2, ChevronRight, Database, MapPin, Satellite } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, ChevronRight, Factory, MapPin } from 'lucide-react'
-import { backendApi } from '../services/backendApi'
-import { useSourceStore } from '../stores/sourceStore'
+import { INDUSTRY_CATEGORIES, getIndustryCategory, getIndustryLabel, getIndustryRoute, resolveIndustryCategory } from '../lib/industryCategories'
+import { useAllVnfDetections, useRecentFirms, useThermalObjects } from '../services/dashboardService'
+
+interface StateIndustryStat {
+  state: string
+  vnf: number
+  firms: number
+  facilities: number
+}
 
 export default function IndustrySearchPage() {
   const { industryType } = useParams<{ industryType: string }>()
-  const decodedIndustry = industryType ? decodeURIComponent(industryType) : 'Refinery'
+  const category = resolveIndustryCategory(industryType ? decodeURIComponent(industryType) : 'other')
+  const label = getIndustryLabel(category)
+  const vnfQuery = useAllVnfDetections('both')
+  const firmsQuery = useRecentFirms(10_000)
+  const objectsQuery = useThermalObjects({ limit: 5000, offset: 0 })
 
-  const [sources, setSources] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  const openPanel = useSourceStore((s) => s.openPanel)
-
-  useEffect(() => {
-    let isMounted = true
-    setLoading(true)
-
-    backendApi.getObjects()
-      .then((res) => {
-        if (!isMounted) return
-        const raw = Array.isArray(res.data) ? res.data : res.data?.items ?? []
-        const matched = raw.filter((s: any) =>
-          (s.classification_name || '').toLowerCase().includes(decodedIndustry.toLowerCase())
-        )
-        setSources(matched.length > 0 ? matched : raw.slice(0, 8))
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false)
-      })
-
-    return () => {
-      isMounted = false
+  const analytics = useMemo(() => {
+    const objects = objectsQuery.data?.objects ?? []
+    const matchingObjects = objects.filter((object) => getIndustryCategory(object.gem_industry_exact_type ?? object.industry_name ?? object.classification_label) === category)
+    const objectById = new Map(objects.map((object) => [object.object_uid, object]))
+    const vnf = (vnfQuery.data?.detections ?? []).filter((row) => getIndustryCategory(row.gem_industry_exact_type) === category)
+    const firms = (firmsQuery.data?.detections ?? []).filter((row) => {
+      const object = row.matched_object_uid ? objectById.get(row.matched_object_uid) : undefined
+      return getIndustryCategory(object?.gem_industry_exact_type ?? object?.industry_name ?? object?.classification_label) === category
+    })
+    const byState = new Map<string, StateIndustryStat>()
+    const getState = (name: string | null | undefined) => {
+      const state = name?.trim() || 'Unassigned'
+      const entry = byState.get(state) ?? { state, vnf: 0, firms: 0, facilities: 0 }
+      byState.set(state, entry)
+      return entry
     }
-  }, [decodedIndustry])
+    vnf.forEach((row) => { getState(row.state_name).vnf += 1 })
+    firms.forEach((row) => { getState(row.state_name).firms += 1 })
+    matchingObjects.forEach((row) => { getState(row.state_name).facilities += 1 })
+    return {
+      vnf,
+      firms,
+      matchingObjects,
+      states: Array.from(byState.values()).sort((a, b) => (b.vnf + b.firms) - (a.vnf + a.firms) || a.state.localeCompare(b.state)),
+    }
+  }, [category, firmsQuery.data?.detections, objectsQuery.data?.objects, vnfQuery.data?.detections])
 
-  const handleInvestigate = (sourceId: string) => {
-    openPanel(sourceId)
-  }
+  const loading = vnfQuery.isLoading || firmsQuery.isLoading || objectsQuery.isLoading
+  const isError = vnfQuery.isError || firmsQuery.isError || objectsQuery.isError
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Breadcrumbs */}
-      <div className="flex items-center gap-2 text-xs text-text-secondary">
-        <Link to="/dashboard" className="hover:text-accent flex items-center gap-1">
-          <ArrowLeft size={14} /> Dashboard
-        </Link>
-        <span>/</span>
-        <span className="font-semibold text-text-primary uppercase">Industry Category</span>
-        <span>/</span>
-        <span className="font-bold text-accent">{decodedIndustry}</span>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-text-secondary">
+        <Link to="/dashboard" className="flex items-center gap-1 hover:text-accent"><ArrowLeft size={14} /> Dashboard</Link>
+        <span aria-hidden="true">/</span><span>Industry statistics</span><span aria-hidden="true">/</span><span className="font-semibold text-text-primary">{label}</span>
+      </nav>
 
-      {/* Header */}
-      <div className="rounded-2xl border border-border bg-surface p-6 shadow-md">
-        <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-violet-400 text-white shadow-lg">
-            <Building2 size={30} />
-          </div>
-          <div>
-            <span className="rounded bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase">
-              INDUSTRY CATEGORY
-            </span>
-            <h1 className="text-2xl font-bold text-text-primary mt-1 font-samarkan tracking-wide">
-              {decodedIndustry} Facilities
-            </h1>
-            <p className="text-xs text-text-secondary mt-1">
-              Thermal source objects classified under the {decodedIndustry} industrial category across India.
-            </p>
-          </div>
+      <header className="border-b border-border pb-5">
+        <div className="flex items-start gap-3">
+          <div className="grid h-10 w-10 shrink-0 place-items-center border border-accent bg-accent/10 text-accent"><Building2 size={20} /></div>
+          <div><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">Industry intelligence</p><h1 className="mt-1 text-2xl font-semibold">{label} statistics</h1><p className="mt-1 text-xs leading-5 text-text-secondary">Detection volume and known facility coverage by state.</p></div>
         </div>
+      </header>
+
+      <div className="flex flex-wrap gap-2" aria-label="Industry categories">
+        {INDUSTRY_CATEGORIES.map((item) => <Link key={item.key} to={getIndustryRoute(item.key)} aria-current={item.key === category ? 'page' : undefined} className={`border px-3 py-2 text-xs font-semibold ${item.key === category ? 'border-accent bg-accent text-white' : 'border-border bg-surface text-text-secondary hover:border-accent hover:text-text-primary'}`}>{item.label}</Link>)}
       </div>
 
-      {/* Facilities list */}
-      <div className="space-y-4">
-        <h2 className="text-sm font-bold text-text-primary uppercase tracking-wide flex items-center gap-2">
-          <Factory size={16} className="text-accent" />
-          {decodedIndustry} Facilities ({sources.length})
-        </h2>
+      {loading && <div className="grid gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-4" role="status" aria-label="Loading industry statistics">{Array.from({ length: 4 }, (_, index) => <div key={index} className="h-24 animate-pulse bg-surface" />)}</div>}
+      {isError && <div className="border border-danger/50 bg-danger/5 p-8 text-center text-xs text-danger">Industry statistics could not be loaded. Check the API connection and try again.</div>}
 
-        {loading ? (
-          <div className="p-12 text-center text-xs text-text-secondary bg-surface rounded-xl border border-border">
-            Loading industry thermal data...
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {sources.map((src) => (
-              <div
-                key={src.source_id || src.id}
-                className="rounded-xl border border-border bg-surface p-4 hover:border-accent transition-all shadow-xs flex flex-col justify-between"
-              >
-                <div>
-                  <span className="rounded bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 font-mono text-[9px] font-bold text-purple-600 dark:text-purple-400 uppercase">
-                    {src.classification_name || decodedIndustry}
-                  </span>
-                  <h3 className="font-bold text-sm text-text-primary mt-2">
-                    {src.matched_facility_name || src.name || `Facility ${src.source_id || src.id}`}
-                  </h3>
-                  <p className="text-xs text-text-secondary mt-1 flex items-center gap-1">
-                    <MapPin size={12} className="text-accent shrink-0" />
-                    <span>{src.district_name || 'District'}, {src.state_name || 'State'}</span>
-                  </p>
-                </div>
+      {!loading && !isError && (
+        <>
+          <dl className="grid gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Database size={13} /> VNF detections</dt><dd className="mt-2 font-mono text-2xl font-semibold">{analytics.vnf.length.toLocaleString()}</dd></div>
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Satellite size={13} /> FIRMS matches</dt><dd className="mt-2 font-mono text-2xl font-semibold">{analytics.firms.length.toLocaleString()}</dd></div>
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Building2 size={13} /> Known facilities</dt><dd className="mt-2 font-mono text-2xl font-semibold">{analytics.matchingObjects.length.toLocaleString()}</dd></div>
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><MapPin size={13} /> States represented</dt><dd className="mt-2 font-mono text-2xl font-semibold text-accent">{analytics.states.filter((item) => item.state !== 'Unassigned').length.toLocaleString()}</dd></div>
+          </dl>
 
-                <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
-                  <span className="font-mono text-[10px] text-text-secondary">
-                    ID: {src.source_id || src.id}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleInvestigate(src.source_id || src.id)}
-                    className="flex items-center gap-1 rounded-lg border border-accent bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent hover:bg-accent hover:text-white transition-all cursor-pointer"
-                  >
-                    <span>Source Investigation</span>
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
+          <section aria-labelledby="state-breakdown">
+            <div className="mb-3 flex items-center justify-between"><h2 id="state-breakdown" className="flex items-center gap-2 text-sm font-semibold"><BarChart3 size={16} className="text-accent" /> State breakdown</h2><span className="font-mono text-[10px] text-text-secondary">VNF + FIRMS</span></div>
+            {analytics.states.length === 0 ? (
+              <div className="border border-border bg-surface p-10 text-center"><p className="text-sm font-semibold">No {label.toLowerCase()} records found</p><p className="mt-1 text-xs text-text-secondary">The current feeds do not contain a record mapped to this category.</p></div>
+            ) : (
+              <div className="overflow-x-auto border border-border bg-surface">
+                <table className="w-full min-w-[620px] border-collapse text-left text-xs">
+                  <thead className="bg-bg text-[10px] uppercase tracking-wider text-text-secondary"><tr><th className="px-4 py-3 font-semibold">State</th><th className="px-4 py-3 text-right font-semibold">VNF</th><th className="px-4 py-3 text-right font-semibold">FIRMS</th><th className="px-4 py-3 text-right font-semibold">Facilities</th><th className="px-4 py-3 text-right font-semibold">Total detections</th><th className="px-4 py-3"><span className="sr-only">Open state</span></th></tr></thead>
+                  <tbody className="divide-y divide-border">{analytics.states.map((item) => <tr key={item.state} className="hover:bg-accent/5"><td className="px-4 py-3 font-semibold">{item.state}</td><td className="px-4 py-3 text-right font-mono">{item.vnf.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">{item.firms.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">{item.facilities.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono font-semibold">{(item.vnf + item.firms).toLocaleString()}</td><td className="px-4 py-3 text-right">{item.state !== 'Unassigned' && <Link to={`/state/${encodeURIComponent(item.state)}?source=vnf&category=${category}`} className="inline-flex items-center gap-1 font-semibold text-accent hover:underline">View <ChevronRight size={13} /></Link>}</td></tr>)}</tbody>
+                </table>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            )}
+          </section>
+        </>
+      )}
     </div>
   )
 }

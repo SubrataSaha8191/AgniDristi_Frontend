@@ -1,5 +1,4 @@
 import { StateDistrictDetectionsWidget } from '../components/dashboard/StateDistrictDetectionsWidget'
-import { RegionalSourcesChart } from '../components/dashboard/RegionalSourcesChart'
 import { SectionHeading } from '../components/common/SectionHeading'
 import { useMonitoringUnmatched } from '../services/monitoringRunService'
 import { useKPISummary } from '../services/kpiService'
@@ -40,9 +39,9 @@ export default function AssessmentPage() {
 
       <section aria-label="Regional Distribution">
         <SectionHeading num="02" title="REGIONAL &amp; ADMINISTRATIVE ASSESSMENT" subtitle="Live state and district thermal detection breakdown from database" />
-        <div className="grid gap-6 items-stretch lg:grid-cols-2">
+        <div className="grid gap-6 items-stretch ">
           <StateDistrictDetectionsWidget />
-          <RegionalSourcesChart expanded showDetailsLink={false} />
+          {/*<RegionalSourcesChart expanded showDetailsLink={false} />*/}
         </div>
       </section>
 

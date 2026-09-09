@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { AlertCircle, Bell, FileSearch, FileText, Layers, LayoutDashboard, Search, Settings, TrendingUp, X } from 'lucide-react'
+import { AlertCircle, Bell, FileSearch, FileText, LayoutDashboard, Settings, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import gsap from 'gsap'
 import { useUIStore } from '../stores/uiStore'
 import { useSourceStore } from '../stores/sourceStore'
 
+// { label: 'Search & Discovery', to: '/search', icon: Search },
+// { label: 'Change & Anomaly', to: '/anomaly', icon: TrendingUp },
+//{ label: 'Data Layers', to: '/data-layers', icon: Layers }
+
 const sections = [
-  { label: 'GENERAL', items: [{ label: 'Dashboard', to: '/dashboard', end: true, icon: LayoutDashboard }, { label: 'Search & Discovery', to: '/search', icon: Search }, { label: 'Source Investigation', to: '/investigation', icon: FileSearch }, { label: 'Event Assessment', to: '/assessment', icon: AlertCircle }, { label: 'Change & Anomaly', to: '/anomaly', icon: TrendingUp }, { label: 'Alerts', to: '/alerts', icon: Bell }] },
-  { label: 'REPORTING', items: [{ label: 'Intelligence Reports', to: '/reports', icon: FileText }, { label: 'Data Layers', to: '/data-layers', icon: Layers }] },
+  { label: 'GENERAL', items: [{ label: 'Dashboard', to: '/dashboard', end: true, icon: LayoutDashboard },{ label: 'Source Investigation', to: '/investigation', icon: FileSearch }, { label: 'Event Assessment', to: '/assessment', icon: AlertCircle }, { label: 'Alerts', to: '/alerts', icon: Bell }] },
+  { label: 'REPORTING', items: [{ label: 'Intelligence Reports', to: '/reports', icon: FileText }] },
   { label: 'SYSTEM', items: [{ label: 'System / Model', to: '/system', icon: Settings }] },
 ]
 

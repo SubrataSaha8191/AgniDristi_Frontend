@@ -4,6 +4,7 @@ import type { AlertType } from '../types/source'
 export const backendApi = {
   getSummary: () => axiosClient.get('/dashboard/summary'),
   getObjects: (params?: Record<string, string>) => axiosClient.get('/dashboard/objects', { params }),
+  getDetectionsByState: () => axiosClient.get('/dashboard/detections/by-state'),
   getObjectDetail: (id: string) => axiosClient.get(`/dashboard/objects/${encodeURIComponent(id)}`),
   getAlerts: (params: { limit?: number; offset?: number; alert_type?: AlertType } = {}) => axiosClient.get('/dashboard/alerts', { params }),
   getMonitoring: () => axiosClient.get('/dashboard/monitoring'),

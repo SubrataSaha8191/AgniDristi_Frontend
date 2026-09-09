@@ -19,6 +19,7 @@ export const dashboardKeys = {
   mapDates: (limit: number) => ['dashboard', 'map', 'dates', limit] as const,
   map: (date: string | null, range: string | null, objectScope: MapObjectScope, vnfLimit: number) => ['dashboard', 'map', date, range, objectScope, vnfLimit] as const,
   vnfDetections: (persistence: VnfPersistence, limit: number, offset: number) => ['dashboard', 'vnf', 'detections', persistence, limit, offset] as const,
+  allVnfDetections: (persistence: VnfPersistence) => ['dashboard', 'vnf', 'detections', persistence, 'all'] as const,
 }
 
 export interface ObjectQuery { limit: number; offset: number; classification?: string; source_hint?: string; gas_flare_likelihood?: GasFlareLikelihood | ''; likely_only?: boolean; gas_flare_only?: boolean }
@@ -89,6 +90,40 @@ export function useVnfDetections(persistence: VnfPersistence, limit = 10_000, of
     }),
     placeholderData: (previous) => previous,
     staleTime: 5 * 60_000,
+  })
+}
+
+export function useAllVnfDetections(persistence: VnfPersistence = 'both') {
+  return useQuery({
+    queryKey: dashboardKeys.allVnfDetections(persistence),
+    staleTime: 5 * 60_000,
+    queryFn: async ({ signal }): Promise<VnfDetectionsResponse> => {
+      const pageSize = 10_000
+      let offset = 0
+      let firstPage: VnfDetectionsResponse | null = null
+      let lastPage: VnfDetectionsResponse | null = null
+      const detections = new Map<number, VnfDetectionsResponse['detections'][number]>()
+
+      do {
+        lastPage = await apiGet<VnfDetectionsResponse>('/dashboard/vnf/detections', { params: { persistence, limit: pageSize, offset }, signal })
+        firstPage ??= lastPage
+        const sizeBefore = detections.size
+        lastPage.detections.forEach((item) => detections.set(item.id, item))
+        const added = detections.size - sizeBefore
+        if (added === 0) break
+        offset += lastPage.detections.length
+      } while (lastPage.detections.length > 0 && detections.size < lastPage.total)
+
+      const base = firstPage!
+      const allDetections = Array.from(detections.values())
+      return {
+        ...base,
+        limit: allDetections.length,
+        offset: 0,
+        detections: allDetections,
+        counts: { ...base.counts, returned_detections: allDetections.length },
+      }
+    },
   })
 }
 

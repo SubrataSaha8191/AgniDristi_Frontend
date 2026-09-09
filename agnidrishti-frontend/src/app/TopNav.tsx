@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import agniDrishtiLogo from '../assets/SIH_tech_invaders (3).png'
 import {
   Building2,
@@ -24,6 +24,7 @@ import { triggerMonitoringRun } from '../services/monitoringRunService'
 import {
   type SearchIndexItem,
   classifyQueryEntity,
+  getInitialSearchIndex,
   getMasterSearchIndex,
   matchSearchQuery,
 } from '../services/searchIndexService'
@@ -40,22 +41,15 @@ export function TopNav() {
 
   // Search Bar state
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchIndex, setSearchIndex] = useState<SearchIndexItem[]>([])
-  const [suggestions, setSuggestions] = useState<SearchIndexItem[]>([])
+  const [searchIndex, setSearchIndex] = useState<SearchIndexItem[]>(getInitialSearchIndex)
   const [isFocused, setIsFocused] = useState(false)
+  const [activeSuggestion, setActiveSuggestion] = useState(-1)
   const searchContainerRef = useRef<HTMLDivElement>(null)
+  const suggestions = useMemo(() => matchSearchQuery(searchQuery, searchIndex), [searchIndex, searchQuery])
 
   useEffect(() => {
     void getMasterSearchIndex().then(setSearchIndex)
   }, [])
-
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      setSuggestions(matchSearchQuery(searchQuery, searchIndex))
-    } else {
-      setSuggestions([])
-    }
-  }, [searchQuery, searchIndex])
 
   // Handle outside click to close popover
   useEffect(() => {
@@ -84,6 +78,22 @@ export function TopNav() {
     } else {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
       setSearchQuery('')
+      setIsFocused(false)
+    }
+  }
+
+  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isFocused || suggestions.length === 0) return
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveSuggestion((current) => (current + 1) % suggestions.length)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveSuggestion((current) => (current <= 0 ? suggestions.length - 1 : current - 1))
+    } else if (event.key === 'Enter' && activeSuggestion >= 0) {
+      event.preventDefault()
+      handleSelectEntity(suggestions[activeSuggestion])
+    } else if (event.key === 'Escape') {
       setIsFocused(false)
     }
   }
@@ -159,10 +169,17 @@ export function TopNav() {
             <Search size={15} className="absolute left-3 text-text-secondary" />
             <input
               type="text"
+              role="combobox"
+              aria-label="Search states, industries, districts, and factories"
+              aria-autocomplete="list"
+              aria-expanded={isFocused && suggestions.length > 0}
+              aria-controls="global-search-suggestions"
+              aria-activedescendant={activeSuggestion >= 0 ? `global-search-option-${activeSuggestion}` : undefined}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setActiveSuggestion(-1) }}
               onFocus={() => setIsFocused(true)}
-              placeholder="Search State, District, Factory (e.g. Haldia, West Bengal)..."
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Search state or industry (e.g. Odisha, Oil & Gas)..."
               className="w-full rounded-xl border border-border bg-bg/80 pl-9 pr-8 py-1.5 text-xs text-text-primary outline-none transition-all focus:border-accent focus:bg-surface focus:ring-1 focus:ring-accent"
             />
             {searchQuery && (
@@ -179,18 +196,22 @@ export function TopNav() {
 
         {/* Autocomplete Dropdown Popover */}
         {isFocused && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 max-h-80 overflow-y-auto rounded-xl border border-border bg-surface p-2 shadow-2xl z-50 divide-y divide-border/50">
+          <div id="global-search-suggestions" role="listbox" className="absolute top-full left-0 right-0 mt-2 max-h-80 overflow-y-auto rounded-xl border border-border bg-surface p-2 shadow-2xl z-50 divide-y divide-border/50">
             <div className="px-2 py-1 flex items-center justify-between text-[10px] font-bold text-text-secondary uppercase">
               <span>Matching Entities</span>
               <span className="font-mono text-[9px] text-accent font-semibold">{suggestions.length} results</span>
             </div>
             <div className="pt-1 space-y-1">
-              {suggestions.map((item) => (
+              {suggestions.map((item, index) => (
                 <button
                   key={item.id}
+                  id={`global-search-option-${index}`}
+                  role="option"
+                  aria-selected={activeSuggestion === index}
                   type="button"
                   onClick={() => handleSelectEntity(item)}
-                  className="flex w-full items-center justify-between rounded-lg p-2 text-left hover:bg-accent/10 transition-colors cursor-pointer group"
+                  onMouseEnter={() => setActiveSuggestion(index)}
+                  className={`flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors cursor-pointer group ${activeSuggestion === index ? 'bg-accent/10' : 'hover:bg-accent/10'}`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-bg group-hover:border-accent/40">
