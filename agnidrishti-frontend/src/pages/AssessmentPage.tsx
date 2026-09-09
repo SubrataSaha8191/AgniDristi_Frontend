@@ -1,4 +1,4 @@
-import { IndustrialVsNaturalChart } from '../components/dashboard/IndustrialVsNaturalChart'
+import { StateDistrictDetectionsWidget } from '../components/dashboard/StateDistrictDetectionsWidget'
 import { RegionalSourcesChart } from '../components/dashboard/RegionalSourcesChart'
 import { SectionHeading } from '../components/common/SectionHeading'
 import { useMonitoringUnmatched } from '../services/monitoringRunService'
@@ -39,16 +39,16 @@ export default function AssessmentPage() {
       </section>
 
       <section aria-label="Regional Distribution">
-        <SectionHeading num="02" title="REGIONAL DISTRIBUTION ASSESSMENT" subtitle="Regional thermal source density breakdown" />
-        <div className="grid gap-6 lg:grid-cols-2">
+        <SectionHeading num="02" title="REGIONAL &amp; ADMINISTRATIVE ASSESSMENT" subtitle="Live state and district thermal detection breakdown from database" />
+        <div className="grid gap-6 items-stretch lg:grid-cols-2">
+          <StateDistrictDetectionsWidget />
           <RegionalSourcesChart expanded showDetailsLink={false} />
-          <IndustrialVsNaturalChart expanded showDetailsLink={false} />
         </div>
       </section>
 
       <section aria-label="Unmatched Detections">
         <SectionHeading num="03" title="UNMATCHED SATELLITE DETECTIONS" subtitle="Recent FIRMS satellite observations requiring ground verification" />
-         <div className="rounded-lg border border-border bg-surface p-4">
+        <div className="rounded-lg border border-border bg-surface p-4 max-h-[22rem] overflow-y-auto custom-scrollbar">
           <ul className="divide-y divide-black/20 text-xs">
             {unmatchedList.slice(0, 10).map((u: Record<string, unknown>, idx: number) => (
                <li key={idx} className="py-2.5 flex flex-wrap items-center justify-between gap-2 font-mono text-xs font-medium text-text-primary">

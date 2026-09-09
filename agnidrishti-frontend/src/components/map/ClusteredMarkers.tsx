@@ -62,6 +62,7 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
     const radiusPane = ensurePane(map, 'thermal-radius-pane', 640)
     const objectPane = ensurePane(map, 'thermal-objects-pane', 660)
     const vnfPane = ensurePane(map, 'vnf-detections-pane', 630)
+    const tooltipPane = ensurePane(map, 'tooltipPane', 1000)
     const radiusLayer = L.layerGroup()
     const objectLayer = L.layerGroup()
     const firmsLayer = L.layerGroup()
@@ -91,10 +92,12 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
       })
       marker.bindTooltip(lazyTooltip(industryLabel, [
         ['Object', object.object_uid],
+        ['State', object.state_name || 'Unassigned', '', true],
+        ['District', object.district_name || 'Unassigned', '', true],
         ['GEM exact type', object.gem_industry_exact_type, '', true],
         ['GEM facility', object.gem_facility_name, '', true],
         ['GEM match radius', object.gem_match_radius_m, ' m', true],
-      ]), { className: 'thermal-tooltip' })
+      ]), { className: 'thermal-tooltip', pane: tooltipPane })
       marker.on('click', () => openPanel(object.object_uid))
       objectLayer.addLayer(marker)
     })
@@ -109,10 +112,12 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
         ['FRP', detection.frp],
         ['Brightness T4', detection.bright_ti4, ' K'],
         ['Brightness T5', detection.bright_ti5, ' K'],
+        ['State', detection.state_name || 'Unassigned', '', true],
+        ['District', detection.district_name || 'Unassigned', '', true],
         ['Confidence', detection.confidence],
         ['Acquisition time', detection.acq_time],
         ['Matched object', detection.matched_object_uid, '', true],
-      ]), { className: 'thermal-tooltip' })
+      ]), { className: 'thermal-tooltip', pane: tooltipPane })
       if (detection.matched_object_uid) marker.on('click', () => openPanel(detection.matched_object_uid!))
       firmsLayer.addLayer(marker)
     })
@@ -127,14 +132,15 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
         pane: vnfPane,
       })
       marker.bindTooltip(lazyTooltip(`VNF ${detection.id_key || detection.id}`, [
-        ['Source state', detection.processing_state],
+        ['State', detection.state_name || detection.processing_state || 'Unassigned'],
+        ['District', detection.district_name || 'Unassigned', '', true],
         ['Position source', detection.position_source],
         ['Matched object', detection.matched_object_uid, '', true],
         ['Primary temperature', detection.temp_primary, ' K'],
         ['Scan date', detection.mscan_date],
         ['Raw latitude', detection.raw_latitude, '', true],
         ['Raw longitude', detection.raw_longitude, '', true],
-      ]), { className: 'thermal-tooltip' })
+      ]), { className: 'thermal-tooltip', pane: tooltipPane })
       if (detection.matched_object_uid) marker.on('click', () => openPanel(detection.matched_object_uid!))
       vnfLayer.addLayer(marker)
     })

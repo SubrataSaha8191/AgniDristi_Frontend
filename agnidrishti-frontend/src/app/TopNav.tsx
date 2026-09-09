@@ -39,7 +39,7 @@ export function TopNav() {
         </button>
         <div className="flex shrink-0 items-center gap-1.5">
           <img src={agniDrishtiLogo} alt="AGNI-DRISHTI" className="h-6 w-auto max-h-7 shrink-0 object-contain sm:h-8 sm:max-h-9 -mt-0.5 sm:-mt-1" />
-          <span className="flex items-center whitespace-nowrap text-xs font-semibold sm:text-lg md:text-xl shrink-0 leading-none">AGNI<span className="text-accent">DRISHTI</span></span>
+          <span className="font-samarkan flex items-center whitespace-nowrap text-sm font-normal sm:text-xl md:text-2xl shrink-0 leading-none tracking-wide">AGNI<span className="text-accent font-samarkan">DRISHTI</span></span>
         </div>
       </div>
 

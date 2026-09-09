@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 export type DatasetMode = 'FIRMS' | 'VNF'
 
@@ -19,23 +20,31 @@ type SourceState = {
   closePanel: () => void
 }
 
-export const useSourceStore = create<SourceState>((set) => ({
-  selectedSourceId: null,
-  isPanelOpen: false,
-  isPanelCollapsed: false,
-  datasetMode: 'FIRMS',
-  activeLayerIds: ['firms', 'persistent', 'facilities'],
-  setSelectedSourceId: (selectedSourceId) => set({ selectedSourceId }),
-  setPanelOpen: (isPanelOpen) => set({ isPanelOpen }),
-  setPanelCollapsed: (isPanelCollapsed) => set({ isPanelCollapsed }),
-  togglePanelCollapse: () => set((s) => ({ isPanelCollapsed: !s.isPanelCollapsed })),
-  setDatasetMode: (datasetMode) => set({ datasetMode }),
-  toggleLayerId: (id) => set((s) => ({
-    activeLayerIds: s.activeLayerIds.includes(id)
-      ? s.activeLayerIds.filter((item) => item !== id)
-      : [...s.activeLayerIds, id],
-  })),
-  setAllLayers: (activeLayerIds) => set({ activeLayerIds }),
-  openPanel: (selectedSourceId) => set({ selectedSourceId, isPanelOpen: true, isPanelCollapsed: false }),
-  closePanel: () => set({ isPanelOpen: false }),
-}))
+export const useSourceStore = create<SourceState>()(
+  persist(
+    (set) => ({
+      selectedSourceId: null,
+      isPanelOpen: false,
+      isPanelCollapsed: false,
+      datasetMode: 'FIRMS',
+      activeLayerIds: ['firms', 'persistent', 'facilities'],
+      setSelectedSourceId: (selectedSourceId) => set({ selectedSourceId }),
+      setPanelOpen: (isPanelOpen) => set({ isPanelOpen }),
+      setPanelCollapsed: (isPanelCollapsed) => set({ isPanelCollapsed }),
+      togglePanelCollapse: () => set((s) => ({ isPanelCollapsed: !s.isPanelCollapsed })),
+      setDatasetMode: (datasetMode) => set({ datasetMode }),
+      toggleLayerId: (id) => set((s) => ({
+        activeLayerIds: s.activeLayerIds.includes(id)
+          ? s.activeLayerIds.filter((item) => item !== id)
+          : [...s.activeLayerIds, id],
+      })),
+      setAllLayers: (activeLayerIds) => set({ activeLayerIds }),
+      openPanel: (selectedSourceId) => set({ selectedSourceId, isPanelOpen: true, isPanelCollapsed: false }),
+      closePanel: () => set({ isPanelOpen: false, selectedSourceId: null }),
+    }),
+    {
+      name: 'agnidrishti-source-store',
+      storage: createJSONStorage(() => localStorage),
+    },
+  ),
+)

@@ -23,7 +23,7 @@ export function RecentAlertsWidget() {
   const selectedTotal = selectedType === 'ALL' ? actionableTotal : query.data?.total ?? 0
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-5" aria-labelledby="recent-alerts-heading">
+    <section className="flex flex-col justify-between h-full min-h-[25rem] rounded-lg border border-border bg-surface p-5" aria-labelledby="recent-alerts-heading">
       <div className="flex items-center justify-between border-b-2 border-[#525a66] pb-3">
         <div>
           <h2 id="recent-alerts-heading" className="text-sm font-semibold">Recent actionable alerts</h2>
@@ -43,7 +43,7 @@ export function RecentAlertsWidget() {
       {query.isError && <div className="py-8 text-center"><p className="text-xs font-bold text-danger">Alerts could not be loaded.</p><button type="button" onClick={() => query.refetch()} className="mt-3 border border-border px-3 py-1 text-xs font-semibold">Retry</button></div>}
       {!query.isPending && !query.isError && alerts.length === 0 && <p className="py-8 text-center text-xs font-bold text-text-secondary">{selectedType === 'ALL' ? GLOBAL_ALERTS_EMPTY_MESSAGE : FILTERED_ALERTS_EMPTY_MESSAGE}</p>}
 
-      <ul className="divide-y divide-[#525a66]/40">
+      <ul className="mt-3 flex-1 min-h-0 overflow-y-auto divide-y divide-[#525a66]/40">
         {alerts.map((alert) => {
           const mapHref = alertMapHref(alert)
           return (

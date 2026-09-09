@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Database, Flame, Radar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Database, Flame, Radar, Target, X } from 'lucide-react'
 import { useDashboardMap, useThermalObjects } from '../../services/dashboardService'
 import { useFilterStore } from '../../stores/filterStore'
 import { useSourceStore } from '../../stores/sourceStore'
@@ -9,7 +9,6 @@ import { ActivityTimelineChart } from '../charts/ActivityTimelineChart'
 import { ThermalFingerprintChart } from '../charts/ThermalFingerprintChart'
 import { AnomalyDetectionChart } from '../charts/AnomalyDetectionChart'
 
-const fieldClass = 'mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs font-bold text-text-primary outline-none focus:ring-2 focus:ring-text-primary'
 const display = (value: string | number | null | undefined, suffix = '') => value == null || value === '' ? 'Not available' : `${value}${suffix}`
 const isLikelyFlare = (object: { gas_flare_likelihood?: string | null }) => object.gas_flare_likelihood === 'LIKELY'
 
@@ -25,6 +24,7 @@ type ThermalObjectExplorerProps = {
 export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode, onDatasetModeChange, mapAside, belowMap }: ThermalObjectExplorerProps) {
   const filters = useFilterStore()
   const openPanel = useSourceStore((state) => state.openPanel)
+  const closePanel = useSourceStore((state) => state.closePanel)
   const selectedSourceId = useSourceStore((state) => state.selectedSourceId)
   const mapQuery = useDashboardMap(requestedDate, 'all', 0)
   const persistentObjectsQuery = useThermalObjects({ limit: 5_000, offset: 0, gas_flare_only: filters.likelyFlaresOnly })
@@ -72,7 +72,6 @@ export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode
     })
   }, [visibleObjects, filters.classification])
   const objects = useMemo(() => allObjects.slice(filters.objectOffset, filters.objectOffset + filters.objectLimit), [allObjects, filters.objectOffset, filters.objectLimit])
-  const chartSourceId = selectedSourceId ?? objects[0]?.object_uid ?? null
   const filteredObjectUids = useMemo(() => new Set(allObjects.map((object) => object.object_uid)), [allObjects])
   const mapFirms = useMemo(
     () => persistentFirms.filter((detection) => detection.matched_object_uid && filteredObjectUids.has(detection.matched_object_uid)),
@@ -89,7 +88,7 @@ export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode
       <section className="rounded-lg border border-border bg-surface p-4" aria-label="Thermal object filters">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <label className="text-[10px] font-semibold text-text-secondary">Industry classification
-            <select className={fieldClass} value={filters.classification} onChange={(event) => { filters.setClassification(event.target.value); filters.setObjectOffset(0) }}><option value="">All classifications</option>{classificationOptions.map((entry) => <option key={entry.label} value={entry.label}>{entry.label} ({entry.count})</option>)}</select>
+            <select className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs font-bold text-text-primary outline-none focus:ring-2 focus:ring-text-primary" value={filters.classification} onChange={(event) => { filters.setClassification(event.target.value); filters.setObjectOffset(0) }}><option value="">All classifications</option>{classificationOptions.map((entry) => <option key={entry.label} value={entry.label}>{entry.label} ({entry.count})</option>)}</select>
           </label>
           <label className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-text-primary hover:bg-accent hover:text-text-primary">
             <input
@@ -107,26 +106,70 @@ export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode
         </div>
       </section>
 
-      <div className={mapAside ? 'grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(16rem,1fr)]' : undefined}>
-        <ThermalMap
-          objects={allObjects}
-          detections={datasetMode === 'firms' ? mapFirms : []}
-          vnfDetections={[]}
-          datasetMode={datasetMode}
-          isLoading={activeLoading}
-          error={activeError}
-          onRetry={() => { void mapQuery.refetch(); if (datasetMode === 'vnf') void persistentObjectsQuery.refetch() }}
-        />
-        {mapAside}
-      </div>
-
-      {chartSourceId && (
-        <div className="grid gap-6 lg:grid-cols-3" aria-label="Thermal source analytics">
-          <div className="rounded-lg border border-border bg-surface p-4"><ActivityTimelineChart sourceId={chartSourceId} /></div>
-          <div className="rounded-lg border border-border bg-surface p-4"><ThermalFingerprintChart sourceId={chartSourceId} /></div>
-          <div className="rounded-lg border border-border bg-surface p-4"><AnomalyDetectionChart sourceId={chartSourceId} /></div>
+      {/* Map and Side Analytics Panel Grid */}
+      <div className={`grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-5 ${selectedSourceId ? 'items-stretch' : 'items-start'}`}>
+        {/* Left Side: Map Container */}
+        <div className="w-full min-w-0 flex flex-col h-full">
+          <ThermalMap
+            objects={allObjects}
+            detections={datasetMode === 'firms' ? mapFirms : []}
+            vnfDetections={[]}
+            datasetMode={datasetMode}
+            isLoading={activeLoading}
+            error={activeError}
+            className="h-full flex flex-col"
+            heightClass={selectedSourceId ? "h-full min-h-[36rem] lg:min-h-[46rem]" : "h-[22rem] sm:h-[24rem]"}
+            onRetry={() => { void mapQuery.refetch(); if (datasetMode === 'vnf') void persistentObjectsQuery.refetch() }}
+          />
         </div>
-      )}
+
+        {/* Right Side: Vertically Stacked Analytics Panel */}
+        <aside aria-label="Thermal source analytics" className="w-full min-w-0 flex flex-col justify-between">
+          {selectedSourceId ? (
+            <div className="space-y-4 flex flex-col h-full">
+              <div className="flex items-center justify-between border border-border bg-surface p-3 rounded-lg shadow-sm shrink-0">
+                <div className="min-w-0 pr-2">
+                  <span className="text-[10px] font-bold text-accent uppercase tracking-wider block">Selected Target Point</span>
+                  <span className="font-mono text-xs font-bold text-text-primary truncate block" title={selectedSourceId}>
+                    {selectedSourceId}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => closePanel()}
+                  className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 border border-border bg-accent text-white hover:opacity-90 cursor-pointer shrink-0 rounded-lg"
+                >
+                  <X size={14} /> DESELECT
+                </button>
+              </div>
+
+              {/* Vertically Stacked Analytics Charts */}
+              <div className="space-y-4 flex-1">
+                <div className="rounded-lg border border-border bg-surface p-4 shadow-sm">
+                  <ActivityTimelineChart sourceId={selectedSourceId} />
+                </div>
+                <div className="rounded-lg border border-border bg-surface p-4 shadow-sm">
+                  <ThermalFingerprintChart sourceId={selectedSourceId} />
+                </div>
+                <div className="rounded-lg border border-border bg-surface p-4 shadow-sm">
+                  <AnomalyDetectionChart sourceId={selectedSourceId} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center p-8 text-center rounded-lg border border-dashed border-border bg-surface h-[24rem]">
+              <div className="grid place-items-center h-12 w-12 rounded-full bg-accent/15 text-accent mb-3">
+                <Target size={24} />
+              </div>
+              <h3 className="text-sm font-bold text-text-primary uppercase tracking-wide">No Point Selected</h3>
+              <p className="mt-1.5 text-xs text-text-secondary max-w-xs leading-relaxed">
+                Click any thermal object or FIRMS detection marker on the map to inspect its historical activity timeline, thermal fingerprint, and anomaly telemetry.
+              </p>
+            </div>
+          )}
+          {mapAside}
+        </aside>
+      </div>
 
       {belowMap}
 

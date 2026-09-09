@@ -19,6 +19,7 @@ export default {
       fontFamily: {
         sans: ['Alata', 'Atlanta', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        samarkan: ['Samarkan', 'Alata', 'Atlanta', 'sans-serif'],
       },
       borderRadius: {
         DEFAULT: '0px',
