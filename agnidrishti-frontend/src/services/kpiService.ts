@@ -17,10 +17,11 @@ interface DashboardSummaryResponse {
   } | null
 }
 
-export function useKPISummary() {
+export function useKPISummary(refetchInterval = 10000) {
   const datasetMode = useSourceStore((s) => s.datasetMode)
   return useQuery({
     queryKey: ['kpi-summary', datasetMode],
+    refetchInterval,
     queryFn: async (): Promise<KPISummary> => {
       try {
         const res = await axiosClient.get<DashboardSummaryResponse>('/dashboard/summary', {

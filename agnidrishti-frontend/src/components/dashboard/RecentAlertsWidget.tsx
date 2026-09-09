@@ -24,7 +24,7 @@ export function RecentAlertsWidget() {
           <h2 id="recent-alerts-heading" className="text-sm font-black uppercase tracking-wider">Recent alerts</h2>
           <p className="mt-0.5 text-[10px] font-bold text-text-secondary">Grouped anomaly detection events</p>
         </div>
-        <Link to={`/alerts${selectedCat !== 'ALL' ? `?type=${selectedCat}` : ''}`} className="border-2 border-black bg-black px-2.5 py-1 text-xs font-black uppercase text-white dark:bg-[#d8f5a9] dark:text-black hover:bg-zinc-800">
+        <Link to={`/alerts${selectedCat !== 'ALL' ? `?type=${selectedCat}` : ''}`} className="border-2 border-black bg-black px-2.5 py-1 text-xs font-black uppercase hover:text-white dark:bg-[#d8f5a9] dark:text-black hover:bg-zinc-800">
           View all ({selectedCount})
         </Link>
       </div>
