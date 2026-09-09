@@ -2,9 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiPost, uploadFile } from '../lib/apiClient'
 import type {
   ClassDistribution, DashboardMapResponse, DashboardSummary, DetectionsByStateResponse, GasFlareLikelihood, LatestRunResponse,
-  MapDatesResponse, MapObjectScope, MonitoringRunsResponse, MonitoringState, RecentFirmsResponse, ThermalObjectDetail,
+  IndustryStatsResponse, MapDatesResponse, MapObjectScope, MonitoringRunsResponse, MonitoringState, RecentFirmsResponse, ThermalObjectDetail,
   ThermalObjectsResponse, VnfDetectionsResponse, VnfPersistence, VnfUploadResult,
 } from '../types/dashboard'
+import type { IndustryCategory } from '../lib/industryCategories'
 
 export const dashboardKeys = {
   summary: ['dashboard', 'summary'] as const,
@@ -13,6 +14,7 @@ export const dashboardKeys = {
   objects: ['dashboard', 'objects'] as const,
   detail: (id: string | null) => ['dashboard', 'object', id] as const,
   firms: ['dashboard', 'firms'] as const,
+  industryStats: (category: IndustryCategory) => ['dashboard', 'industries', category, 'stats'] as const,
   alerts: ['dashboard', 'alerts'] as const,
   monitoring: ['dashboard', 'monitoring'] as const,
   runs: ['monitoring', 'runs'] as const,
@@ -22,7 +24,13 @@ export const dashboardKeys = {
   allVnfDetections: (persistence: VnfPersistence) => ['dashboard', 'vnf', 'detections', persistence, 'all'] as const,
 }
 
-export interface ObjectQuery { limit: number; offset: number; classification?: string; source_hint?: string; gas_flare_likelihood?: GasFlareLikelihood | ''; likely_only?: boolean; gas_flare_only?: boolean }
+export interface GeographicCategoryFilters {
+  state_name?: string
+  district_name?: string
+  category?: IndustryCategory
+}
+
+export interface ObjectQuery extends GeographicCategoryFilters { limit: number; offset: number; classification?: string; source_hint?: string; gas_flare_likelihood?: GasFlareLikelihood | ''; likely_only?: boolean; gas_flare_only?: boolean }
 
 export function useDashboardSummary() { return useQuery({ queryKey: dashboardKeys.summary, queryFn: ({ signal }) => apiGet<DashboardSummary>('/dashboard/summary', { signal }) }) }
 export function useClassDistribution() { return useQuery({ queryKey: dashboardKeys.classes, queryFn: ({ signal }) => apiGet<ClassDistribution>('/dashboard/classes', { signal }) }) }
@@ -52,8 +60,16 @@ export function useThermalObjectDetail(objectUid: string | null) {
   return useQuery({ queryKey: dashboardKeys.detail(objectUid), enabled: Boolean(objectUid), queryFn: ({ signal }) => apiGet<ThermalObjectDetail>(`/dashboard/objects/${encodeURIComponent(objectUid!)}`, { signal }) })
 }
 
-export function useRecentFirms(limit = 500, matchedOnly?: boolean) {
-  return useQuery({ queryKey: [...dashboardKeys.firms, limit, matchedOnly], queryFn: ({ signal }) => apiGet<RecentFirmsResponse>('/dashboard/firms/recent', { params: { limit, matched_only: matchedOnly }, signal }) })
+export function useRecentFirms(limit = 500, matchedOnly?: boolean, filters: GeographicCategoryFilters = {}) {
+  return useQuery({ queryKey: [...dashboardKeys.firms, limit, matchedOnly, filters], queryFn: ({ signal }) => apiGet<RecentFirmsResponse>('/dashboard/firms/recent', { params: { limit, matched_only: matchedOnly, ...filters }, signal }) })
+}
+
+export function useIndustryStats(category: IndustryCategory) {
+  return useQuery({
+    queryKey: dashboardKeys.industryStats(category),
+    queryFn: ({ signal }) => apiGet<IndustryStatsResponse>(`/dashboard/industries/${encodeURIComponent(category)}/stats`, { signal }),
+    staleTime: 5 * 60_000,
+  })
 }
 
 export function useMapDates(limit = 30) {
@@ -80,12 +96,12 @@ export function useDashboardMap(date: string | null, objectScope: MapObjectScope
   })
 }
 
-export function useVnfDetections(persistence: VnfPersistence, limit = 10_000, offset = 0, enabled = true) {
+export function useVnfDetections(persistence: VnfPersistence, limit = 10_000, offset = 0, enabled = true, filters: GeographicCategoryFilters = {}) {
   return useQuery({
-    queryKey: dashboardKeys.vnfDetections(persistence, limit, offset),
+    queryKey: [...dashboardKeys.vnfDetections(persistence, limit, offset), filters],
     enabled,
     queryFn: ({ signal }) => apiGet<VnfDetectionsResponse>('/dashboard/vnf/detections', {
-      params: { persistence, limit, offset },
+      params: { persistence, limit, offset, ...filters },
       signal,
     }),
     placeholderData: (previous) => previous,
@@ -93,9 +109,9 @@ export function useVnfDetections(persistence: VnfPersistence, limit = 10_000, of
   })
 }
 
-export function useAllVnfDetections(persistence: VnfPersistence = 'both') {
+export function useAllVnfDetections(persistence: VnfPersistence = 'both', filters: GeographicCategoryFilters = {}) {
   return useQuery({
-    queryKey: dashboardKeys.allVnfDetections(persistence),
+    queryKey: [...dashboardKeys.allVnfDetections(persistence), filters],
     staleTime: 5 * 60_000,
     queryFn: async ({ signal }): Promise<VnfDetectionsResponse> => {
       const pageSize = 10_000
@@ -105,7 +121,7 @@ export function useAllVnfDetections(persistence: VnfPersistence = 'both') {
       const detections = new Map<number, VnfDetectionsResponse['detections'][number]>()
 
       do {
-        lastPage = await apiGet<VnfDetectionsResponse>('/dashboard/vnf/detections', { params: { persistence, limit: pageSize, offset }, signal })
+        lastPage = await apiGet<VnfDetectionsResponse>('/dashboard/vnf/detections', { params: { persistence, limit: pageSize, offset, ...filters }, signal })
         firstPage ??= lastPage
         const sizeBefore = detections.size
         lastPage.detections.forEach((item) => detections.set(item.id, item))

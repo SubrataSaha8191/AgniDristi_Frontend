@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { ArrowLeft, Database, Flame, MapPin, Radio, Satellite } from 'lucide-react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { INDUSTRY_CATEGORIES, getIndustryCategory, type IndustryCategory } from '../lib/industryCategories'
-import { useAllVnfDetections, useDetectionsByState, useRecentFirms, useThermalObjects } from '../services/dashboardService'
+import { useDetectionsByState, useRecentFirms, useThermalObjects, useVnfDetections } from '../services/dashboardService'
 import type { RecentFirmsDetection, ThermalObject, VnfMapDetection } from '../types/dashboard'
 
 type Dataset = 'vnf' | 'firms'
@@ -40,26 +40,24 @@ export default function StateSearchPage() {
     ? requestedCategory as IndustryCategory
     : 'all'
 
-  const vnfQuery = useAllVnfDetections('both')
-  const firmsQuery = useRecentFirms(10_000)
-  const objectsQuery = useThermalObjects({ limit: 5000, offset: 0 })
+  const stateFilter = useMemo(() => ({
+    state_name: decodedState,
+    ...(category === 'all' ? {} : { category }),
+  }), [category, decodedState])
+  const vnfQuery = useVnfDetections('both', 1000, 0, true, stateFilter)
+  const firmsQuery = useRecentFirms(10_000, undefined, stateFilter)
+  const objectsQuery = useThermalObjects({ limit: 5000, offset: 0, state_name: decodedState })
   const stateCountsQuery = useDetectionsByState()
 
   const objectById = useMemo(() => new Map((objectsQuery.data?.objects ?? []).map((object) => [object.object_uid, object])), [objectsQuery.data?.objects])
   const stateVnf = useMemo(() => (vnfQuery.data?.detections ?? []).filter((item) => samePlace(item.state_name, decodedState)), [decodedState, vnfQuery.data?.detections])
   const stateFirms = useMemo(() => (firmsQuery.data?.detections ?? []).filter((item) => samePlace(item.state_name, decodedState)), [decodedState, firmsQuery.data?.detections])
 
-  const categoryForVnf = (item: VnfMapDetection) => getIndustryCategory(item.gem_industry_exact_type)
-  const categoryForFirms = (item: RecentFirmsDetection) => categoryForObject(item.matched_object_uid ? objectById.get(item.matched_object_uid) : undefined)
+  const categoryForVnf = (item: VnfMapDetection) => item.industry_category ?? getIndustryCategory(item.gem_industry_exact_type)
+  const categoryForFirms = (item: RecentFirmsDetection) => item.industry_category ?? categoryForObject(item.matched_object_uid ? objectById.get(item.matched_object_uid) : undefined)
   const filteredVnf = category === 'all' ? stateVnf : stateVnf.filter((item) => categoryForVnf(item) === category)
   const filteredFirms = category === 'all' ? stateFirms : stateFirms.filter((item) => categoryForFirms(item) === category)
   const currentRows = dataset === 'vnf' ? filteredVnf : filteredFirms
-  const categoryCounts = INDUSTRY_CATEGORIES.map((item) => ({
-    ...item,
-    count: dataset === 'vnf'
-      ? stateVnf.filter((row) => categoryForVnf(row) === item.key).length
-      : stateFirms.filter((row) => categoryForFirms(row) === item.key).length,
-  }))
   const stateAggregate = stateCountsQuery.data?.states.find((item) => samePlace(item.state_name, decodedState))
   const loading = dataset === 'vnf' ? vnfQuery.isLoading : firmsQuery.isLoading || objectsQuery.isLoading
   const isError = dataset === 'vnf' ? vnfQuery.isError : firmsQuery.isError || objectsQuery.isError
@@ -102,15 +100,15 @@ export default function StateSearchPage() {
           <div>
             <h2 id="detection-filters" className="text-xs font-semibold">Detection source</h2>
             <div className="mt-2 inline-flex border border-border bg-bg p-1" role="group" aria-label="Detection source">
-              <button type="button" aria-pressed={dataset === 'vnf'} onClick={() => updateFilters({ source: 'vnf' })} className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold ${dataset === 'vnf' ? 'bg-accent text-white' : 'text-text-secondary hover:text-text-primary'}`}><Database size={14} /> VNF <span className="font-mono">{stateVnf.length}</span></button>
-              <button type="button" aria-pressed={dataset === 'firms'} onClick={() => updateFilters({ source: 'firms' })} className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold ${dataset === 'firms' ? 'bg-accent text-white' : 'text-text-secondary hover:text-text-primary'}`}><Satellite size={14} /> FIRMS <span className="font-mono">{stateFirms.length}</span></button>
+              <button type="button" aria-pressed={dataset === 'vnf'} onClick={() => updateFilters({ source: 'vnf' })} className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold ${dataset === 'vnf' ? 'bg-accent text-white' : 'text-text-secondary hover:text-text-primary'}`}><Database size={14} /> VNF <span className="font-mono">{vnfQuery.data?.total ?? 0}</span></button>
+              <button type="button" aria-pressed={dataset === 'firms'} onClick={() => updateFilters({ source: 'firms' })} className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold ${dataset === 'firms' ? 'bg-accent text-white' : 'text-text-secondary hover:text-text-primary'}`}><Satellite size={14} /> FIRMS <span className="font-mono">{firmsQuery.data?.count ?? 0}</span></button>
             </div>
           </div>
           <div className="lg:text-right">
             <h2 className="text-xs font-semibold">Industry category</h2>
             <div className="mt-2 flex flex-wrap gap-2 lg:justify-end" role="group" aria-label="Industry category">
-              <button type="button" aria-pressed={category === 'all'} onClick={() => updateFilters({ category: 'all' })} className={`border px-3 py-1.5 text-[11px] font-semibold ${category === 'all' ? 'border-accent bg-accent/10 text-accent' : 'border-border text-text-secondary hover:border-accent'}`}>All <span className="ml-1 font-mono">{dataset === 'vnf' ? stateVnf.length : stateFirms.length}</span></button>
-              {categoryCounts.map((item) => <button key={item.key} type="button" aria-pressed={category === item.key} onClick={() => updateFilters({ category: item.key })} className={`border px-3 py-1.5 text-[11px] font-semibold ${category === item.key ? 'border-accent bg-accent/10 text-accent' : 'border-border text-text-secondary hover:border-accent'}`}>{item.label} <span className="ml-1 font-mono">{item.count}</span></button>)}
+              <button type="button" aria-pressed={category === 'all'} onClick={() => updateFilters({ category: 'all' })} className={`border px-3 py-1.5 text-[11px] font-semibold ${category === 'all' ? 'border-accent bg-accent/10 text-accent' : 'border-border text-text-secondary hover:border-accent'}`}>All</button>
+              {INDUSTRY_CATEGORIES.map((item) => <button key={item.key} type="button" aria-pressed={category === item.key} onClick={() => updateFilters({ category: item.key })} className={`border px-3 py-1.5 text-[11px] font-semibold ${category === item.key ? 'border-accent bg-accent/10 text-accent' : 'border-border text-text-secondary hover:border-accent'}`}>{item.label}</button>)}
             </div>
           </div>
         </div>

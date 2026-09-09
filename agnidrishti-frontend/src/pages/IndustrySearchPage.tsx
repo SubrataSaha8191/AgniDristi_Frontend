@@ -1,53 +1,17 @@
-import { useMemo } from 'react'
 import { ArrowLeft, BarChart3, Building2, ChevronRight, Database, MapPin, Satellite } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
-import { INDUSTRY_CATEGORIES, getIndustryCategory, getIndustryLabel, getIndustryRoute, resolveIndustryCategory } from '../lib/industryCategories'
-import { useAllVnfDetections, useRecentFirms, useThermalObjects } from '../services/dashboardService'
-
-interface StateIndustryStat {
-  state: string
-  vnf: number
-  firms: number
-  facilities: number
-}
+import { INDUSTRY_CATEGORIES, getIndustryLabel, getIndustryRoute, resolveIndustryCategory } from '../lib/industryCategories'
+import { useIndustryStats } from '../services/dashboardService'
 
 export default function IndustrySearchPage() {
   const { industryType } = useParams<{ industryType: string }>()
   const category = resolveIndustryCategory(industryType ? decodeURIComponent(industryType) : 'other')
   const label = getIndustryLabel(category)
-  const vnfQuery = useAllVnfDetections('both')
-  const firmsQuery = useRecentFirms(10_000)
-  const objectsQuery = useThermalObjects({ limit: 5000, offset: 0 })
-
-  const analytics = useMemo(() => {
-    const objects = objectsQuery.data?.objects ?? []
-    const matchingObjects = objects.filter((object) => getIndustryCategory(object.gem_industry_exact_type ?? object.industry_name ?? object.classification_label) === category)
-    const objectById = new Map(objects.map((object) => [object.object_uid, object]))
-    const vnf = (vnfQuery.data?.detections ?? []).filter((row) => getIndustryCategory(row.gem_industry_exact_type) === category)
-    const firms = (firmsQuery.data?.detections ?? []).filter((row) => {
-      const object = row.matched_object_uid ? objectById.get(row.matched_object_uid) : undefined
-      return getIndustryCategory(object?.gem_industry_exact_type ?? object?.industry_name ?? object?.classification_label) === category
-    })
-    const byState = new Map<string, StateIndustryStat>()
-    const getState = (name: string | null | undefined) => {
-      const state = name?.trim() || 'Unassigned'
-      const entry = byState.get(state) ?? { state, vnf: 0, firms: 0, facilities: 0 }
-      byState.set(state, entry)
-      return entry
-    }
-    vnf.forEach((row) => { getState(row.state_name).vnf += 1 })
-    firms.forEach((row) => { getState(row.state_name).firms += 1 })
-    matchingObjects.forEach((row) => { getState(row.state_name).facilities += 1 })
-    return {
-      vnf,
-      firms,
-      matchingObjects,
-      states: Array.from(byState.values()).sort((a, b) => (b.vnf + b.firms) - (a.vnf + a.firms) || a.state.localeCompare(b.state)),
-    }
-  }, [category, firmsQuery.data?.detections, objectsQuery.data?.objects, vnfQuery.data?.detections])
-
-  const loading = vnfQuery.isLoading || firmsQuery.isLoading || objectsQuery.isLoading
-  const isError = vnfQuery.isError || firmsQuery.isError || objectsQuery.isError
+  const statsQuery = useIndustryStats(category)
+  const stats = statsQuery.data
+  const states = [...(stats?.states ?? [])].sort((a, b) => b.total_detection_count - a.total_detection_count || a.state_name.localeCompare(b.state_name))
+  const loading = statsQuery.isLoading
+  const isError = statsQuery.isError
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12">
@@ -73,21 +37,21 @@ export default function IndustrySearchPage() {
       {!loading && !isError && (
         <>
           <dl className="grid gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Database size={13} /> VNF detections</dt><dd className="mt-2 font-mono text-2xl font-semibold">{analytics.vnf.length.toLocaleString()}</dd></div>
-            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Satellite size={13} /> FIRMS matches</dt><dd className="mt-2 font-mono text-2xl font-semibold">{analytics.firms.length.toLocaleString()}</dd></div>
-            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Building2 size={13} /> Known facilities</dt><dd className="mt-2 font-mono text-2xl font-semibold">{analytics.matchingObjects.length.toLocaleString()}</dd></div>
-            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><MapPin size={13} /> States represented</dt><dd className="mt-2 font-mono text-2xl font-semibold text-accent">{analytics.states.filter((item) => item.state !== 'Unassigned').length.toLocaleString()}</dd></div>
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Database size={13} /> VNF detections</dt><dd className="mt-2 font-mono text-2xl font-semibold">{(stats?.vnf_detection_count ?? 0).toLocaleString()}</dd></div>
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Satellite size={13} /> FIRMS matches</dt><dd className="mt-2 font-mono text-2xl font-semibold">{(stats?.firms_detection_count ?? 0).toLocaleString()}</dd></div>
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Building2 size={13} /> Known facilities</dt><dd className="mt-2 font-mono text-2xl font-semibold">{(stats?.facility_count ?? 0).toLocaleString()}</dd></div>
+            <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><MapPin size={13} /> States represented</dt><dd className="mt-2 font-mono text-2xl font-semibold text-accent">{states.filter((item) => item.state_name !== 'Unassigned').length.toLocaleString()}</dd></div>
           </dl>
 
           <section aria-labelledby="state-breakdown">
             <div className="mb-3 flex items-center justify-between"><h2 id="state-breakdown" className="flex items-center gap-2 text-sm font-semibold"><BarChart3 size={16} className="text-accent" /> State breakdown</h2><span className="font-mono text-[10px] text-text-secondary">VNF + FIRMS</span></div>
-            {analytics.states.length === 0 ? (
+            {states.length === 0 ? (
               <div className="border border-border bg-surface p-10 text-center"><p className="text-sm font-semibold">No {label.toLowerCase()} records found</p><p className="mt-1 text-xs text-text-secondary">The current feeds do not contain a record mapped to this category.</p></div>
             ) : (
               <div className="overflow-x-auto border border-border bg-surface">
                 <table className="w-full min-w-[620px] border-collapse text-left text-xs">
                   <thead className="bg-bg text-[10px] uppercase tracking-wider text-text-secondary"><tr><th className="px-4 py-3 font-semibold">State</th><th className="px-4 py-3 text-right font-semibold">VNF</th><th className="px-4 py-3 text-right font-semibold">FIRMS</th><th className="px-4 py-3 text-right font-semibold">Facilities</th><th className="px-4 py-3 text-right font-semibold">Total detections</th><th className="px-4 py-3"><span className="sr-only">Open state</span></th></tr></thead>
-                  <tbody className="divide-y divide-border">{analytics.states.map((item) => <tr key={item.state} className="hover:bg-accent/5"><td className="px-4 py-3 font-semibold">{item.state}</td><td className="px-4 py-3 text-right font-mono">{item.vnf.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">{item.firms.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">{item.facilities.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono font-semibold">{(item.vnf + item.firms).toLocaleString()}</td><td className="px-4 py-3 text-right">{item.state !== 'Unassigned' && <Link to={`/state/${encodeURIComponent(item.state)}?source=vnf&category=${category}`} className="inline-flex items-center gap-1 font-semibold text-accent hover:underline">View <ChevronRight size={13} /></Link>}</td></tr>)}</tbody>
+                  <tbody className="divide-y divide-border">{states.map((item) => <tr key={item.state_name} className="hover:bg-accent/5"><td className="px-4 py-3 font-semibold">{item.state_name}</td><td className="px-4 py-3 text-right font-mono">{item.vnf_detection_count.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">{item.firms_detection_count.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono">{item.facility_count.toLocaleString()}</td><td className="px-4 py-3 text-right font-mono font-semibold">{item.total_detection_count.toLocaleString()}</td><td className="px-4 py-3 text-right">{item.state_name !== 'Unassigned' && <Link to={`/state/${encodeURIComponent(item.state_name)}?source=vnf&category=${category}`} className="inline-flex items-center gap-1 font-semibold text-accent hover:underline">View <ChevronRight size={13} /></Link>}</td></tr>)}</tbody>
                 </table>
               </div>
             )}

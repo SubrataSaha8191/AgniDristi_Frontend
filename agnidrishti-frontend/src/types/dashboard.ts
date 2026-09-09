@@ -1,4 +1,5 @@
 import type { GasFlareLikelihood, MonitoringRun } from './monitoring'
+import type { IndustryCategory } from '../lib/industryCategories'
 export type { GasFlareLikelihood, LatestRunResponse, MonitoringRun, MonitoringRunsResponse, MonitoringState } from './monitoring'
 
 export interface DashboardSummary {
@@ -34,6 +35,7 @@ export interface ThermalObject {
   temp_max: number | null
   object_radius_m: number | null
   industry_name?: string | null
+  industry_category?: IndustryCategory
   gem_industry_exact_type?: string | null
   gem_facility_name?: string | null
   gem_match_radius_m?: number | null
@@ -64,9 +66,15 @@ export interface RecentFirmsDetection {
   match_distance_km: number | null
   state_name?: string | null
   district_name?: string | null
+  industry_category?: IndustryCategory
 }
 
-export interface RecentFirmsResponse { count: number; detections: RecentFirmsDetection[] }
+export interface RecentFirmsResponse {
+  count: number
+  limit: number
+  offset: number
+  detections: RecentFirmsDetection[]
+}
 
 export interface MapDateHit {
   date: string
@@ -103,6 +111,7 @@ export interface VnfMapDetection {
   vnf_type?: 'persistent' | 'transient' | null
   gem_industry_exact_type: string | null
   gem_facility_name: string | null
+  industry_category?: IndustryCategory
   state_name?: string | null
   district_name?: string | null
 }
@@ -113,6 +122,9 @@ export interface VnfDetectionsResponse {
   filters: {
     persistence: VnfPersistence
     processing_states: string[]
+    state_name?: string | null
+    district_name?: string | null
+    category?: IndustryCategory | null
   }
   total: number
   limit: number
@@ -204,6 +216,24 @@ export interface DetectionsByStateResponse {
     firms: string
   }
   states: StateDetectionCount[]
+}
+
+export interface IndustryStateStat {
+  state_name: string
+  vnf_detection_count: number
+  firms_detection_count: number
+  facility_count: number
+  total_detection_count: number
+}
+
+export interface IndustryStatsResponse {
+  category: IndustryCategory
+  label: string
+  vnf_detection_count: number
+  firms_detection_count: number
+  facility_count: number
+  state_count: number
+  states: IndustryStateStat[]
 }
 
 export interface VnfUploadResult { filename: string; status?: string; mode?: string; batch_id?: string; input_detections?: number; inserted_detections?: number; duplicates?: number; matched_existing?: number; new_candidates?: number; objects_found?: number; new_objects?: number; processing_time_seconds?: number; [key: string]: unknown }
