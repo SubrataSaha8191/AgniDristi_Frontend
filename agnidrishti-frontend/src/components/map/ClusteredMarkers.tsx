@@ -65,10 +65,6 @@ export function ClusteredMarkers({ objects, detections }: { objects: ThermalObje
     syncRadialVisibility()
     return () => { map.off('zoomend', syncRadialVisibility); if (map.hasLayer(radialLayer)) map.removeLayer(radialLayer); map.removeLayer(clustersGroup) }
   }, [map, objects, detections, openPanel])
-
-    map.addLayer(clusters); map.addLayer(firmsLayer)
-    return () => { map.removeLayer(clusters); map.removeLayer(firmsLayer) }
-  }, [detections, map, objects, openPanel])
   return null
 }
 
