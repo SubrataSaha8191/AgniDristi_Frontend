@@ -1,10 +1,13 @@
-import { useMemo } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Database, Flame, Radar } from 'lucide-react'
 import { useDashboardMap, useThermalObjects } from '../../services/dashboardService'
 import { useFilterStore } from '../../stores/filterStore'
 import { useSourceStore } from '../../stores/sourceStore'
 import type { MapDatasetMode } from '../../pages/DashboardPage'
 import { ThermalMap } from '../map/ThermalMap'
+import { ActivityTimelineChart } from '../charts/ActivityTimelineChart'
+import { ThermalFingerprintChart } from '../charts/ThermalFingerprintChart'
+import { AnomalyDetectionChart } from '../charts/AnomalyDetectionChart'
 
 const fieldClass = 'mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs font-bold text-text-primary outline-none focus:ring-2 focus:ring-text-primary'
 const display = (value: string | number | null | undefined, suffix = '') => value == null || value === '' ? 'Not available' : `${value}${suffix}`
@@ -15,11 +18,14 @@ type ThermalObjectExplorerProps = {
   selectedDate: string | null
   datasetMode: MapDatasetMode
   onDatasetModeChange: (mode: MapDatasetMode) => void
+  mapAside?: ReactNode
+  belowMap?: ReactNode
 }
 
-export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode, onDatasetModeChange }: ThermalObjectExplorerProps) {
+export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode, onDatasetModeChange, mapAside, belowMap }: ThermalObjectExplorerProps) {
   const filters = useFilterStore()
   const openPanel = useSourceStore((state) => state.openPanel)
+  const selectedSourceId = useSourceStore((state) => state.selectedSourceId)
   const mapQuery = useDashboardMap(requestedDate, 'all', 0)
   const persistentObjectsQuery = useThermalObjects({ limit: 5_000, offset: 0, gas_flare_only: filters.likelyFlaresOnly })
   const mapData = mapQuery.data
@@ -66,6 +72,7 @@ export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode
     })
   }, [visibleObjects, filters.classification])
   const objects = useMemo(() => allObjects.slice(filters.objectOffset, filters.objectOffset + filters.objectLimit), [allObjects, filters.objectOffset, filters.objectLimit])
+  const chartSourceId = selectedSourceId ?? objects[0]?.object_uid ?? null
   const filteredObjectUids = useMemo(() => new Set(allObjects.map((object) => object.object_uid)), [allObjects])
   const mapFirms = useMemo(
     () => persistentFirms.filter((detection) => detection.matched_object_uid && filteredObjectUids.has(detection.matched_object_uid)),
@@ -100,15 +107,28 @@ export function ThermalObjectExplorer({ requestedDate, selectedDate, datasetMode
         </div>
       </section>
 
-      <ThermalMap
-        objects={allObjects}
-        detections={datasetMode === 'firms' ? mapFirms : []}
-        vnfDetections={[]}
-        datasetMode={datasetMode}
-        isLoading={activeLoading}
-        error={activeError}
-        onRetry={() => { void mapQuery.refetch(); if (datasetMode === 'vnf') void persistentObjectsQuery.refetch() }}
-      />
+      <div className={mapAside ? 'grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(16rem,1fr)]' : undefined}>
+        <ThermalMap
+          objects={allObjects}
+          detections={datasetMode === 'firms' ? mapFirms : []}
+          vnfDetections={[]}
+          datasetMode={datasetMode}
+          isLoading={activeLoading}
+          error={activeError}
+          onRetry={() => { void mapQuery.refetch(); if (datasetMode === 'vnf') void persistentObjectsQuery.refetch() }}
+        />
+        {mapAside}
+      </div>
+
+      {chartSourceId && (
+        <div className="grid gap-6 lg:grid-cols-3" aria-label="Thermal source analytics">
+          <div className="rounded-lg border border-border bg-surface p-4"><ActivityTimelineChart sourceId={chartSourceId} /></div>
+          <div className="rounded-lg border border-border bg-surface p-4"><ThermalFingerprintChart sourceId={chartSourceId} /></div>
+          <div className="rounded-lg border border-border bg-surface p-4"><AnomalyDetectionChart sourceId={chartSourceId} /></div>
+        </div>
+      )}
+
+      {belowMap}
 
       <section className="overflow-hidden rounded-lg border border-border bg-surface" aria-labelledby="thermal-object-list-heading">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3"><div><h3 id="thermal-object-list-heading" className="text-sm font-semibold">Thermal object list</h3><p className="text-xs text-text-secondary">Showing {objects.length} on this page, {total} spatial matches</p></div><label className="text-[10px] font-semibold text-text-secondary">Rows<select value={filters.objectLimit} onChange={(event) => { filters.setObjectLimit(Number(event.target.value)); filters.setObjectOffset(0) }} className="ml-2 rounded-lg border border-border bg-surface p-1 text-xs text-text-primary"><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option><option value={100}>100</option></select></label></div>

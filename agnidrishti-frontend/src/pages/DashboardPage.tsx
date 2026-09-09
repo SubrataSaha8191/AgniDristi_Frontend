@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react'
 import { Bell, Flame, Radar, ScanSearch, Zap } from 'lucide-react'
 import { KPICard } from '../components/kpi/KPICard'
 import { SectionHeading } from '../components/common/SectionHeading'
-import { IndustryDistributionChart } from '../components/dashboard/IndustryDistributionChart'
+import { IndustrialVsNaturalChart } from '../components/dashboard/IndustrialVsNaturalChart'
+import { RegionalSourcesChart } from '../components/dashboard/RegionalSourcesChart'
 import { RecentAlertsWidget } from '../components/dashboard/RecentAlertsWidget'
+import { SourceTrendTable } from '../components/dashboard/SourceTrendTable'
 import { ThermalObjectExplorer } from '../components/dashboard/ThermalObjectExplorer'
 import { useDashboardMap, useDashboardSummary, useMapDates } from '../services/dashboardService'
 
@@ -57,9 +59,27 @@ export default function DashboardPage() {
          {mapQuery.isError ? <div className="rounded-lg border border-border bg-surface p-5"><p className="text-sm font-medium text-danger">Selected-date summary could not be loaded.</p><button type="button" onClick={() => { void mapQuery.refetch() }} className="mt-3 rounded-lg border border-border bg-accent px-3 py-1.5 text-xs font-medium text-white">Retry</button></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{cards.map((card) => <KPICard key={card.label} label={card.label} value={card.loading ? '...' : card.value ?? 'Not available'} icon={card.icon} />)}</div>}
       </section>
 
-      <section aria-label="Spatial object explorer"><SectionHeading num="02" title="Spatial object explorer" subtitle="Switch between selected-date FIRMS matches and VNF source history" /><ThermalObjectExplorer requestedDate={requestedDate} selectedDate={selectedDate} datasetMode={datasetMode} onDatasetModeChange={setDatasetMode} /></section>
-
-      <section aria-label="Distribution and alerts"><SectionHeading num="03" title="Distribution and alerts" subtitle="Industry classifications and current operational alerts" /><div className="grid gap-6 xl:grid-cols-[1.25fr_1fr]"><IndustryDistributionChart /><RecentAlertsWidget /></div></section>
+       <section aria-label="Spatial object explorer">
+         <SectionHeading num="02" title="Spatial object explorer" subtitle="Switch between selected-date FIRMS matches and VNF source history" />
+         <ThermalObjectExplorer
+           requestedDate={requestedDate}
+           selectedDate={selectedDate}
+           datasetMode={datasetMode}
+           onDatasetModeChange={setDatasetMode}
+           mapAside={
+             <div className="max-h-[38rem] space-y-6 overflow-y-auto pr-1">
+               <RecentAlertsWidget />
+               <IndustrialVsNaturalChart />
+             </div>
+           }
+           belowMap={
+             <div className="grid gap-6 xl:grid-cols-2">
+               <RegionalSourcesChart />
+               <SourceTrendTable />
+             </div>
+           }
+         />
+       </section>
     </div>
   )
 }
