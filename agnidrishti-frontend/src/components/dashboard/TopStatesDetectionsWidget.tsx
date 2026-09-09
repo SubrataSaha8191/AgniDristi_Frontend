@@ -3,7 +3,10 @@ import { sortStateDetections } from './stateDetectionUtils'
 
 export function TopStatesDetectionsWidget() {
   const { data, isLoading, isError, refetch } = useDetectionsByState()
-  const topStates = sortStateDetections(data?.states ?? [], 'count-desc').slice(0, 3)
+  const topStates = sortStateDetections((data?.states ?? []).filter((state) => {
+    const name = state.state_name?.trim().toLowerCase()
+    return Boolean(name && name !== 'unassigned' && name !== 'unknown' && name !== 'n/a')
+  }), 'count-desc').slice(0, 4)
   const maxDetections = Math.max(...topStates.map((state) => state.total_detection_count), 1)
 
   return (
@@ -16,7 +19,7 @@ export function TopStatesDetectionsWidget() {
         <p className="mt-0.5 text-[9px] font-bold text-text-secondary">Highest-volume state detections across VNF and FIRMS</p>
       </div>
 
-      {isLoading && <div className="mt-3 space-y-2" role="status" aria-label="Loading top states"><div className="h-9 animate-pulse bg-text-primary/10" /><div className="h-9 animate-pulse bg-text-primary/10" /><div className="h-9 animate-pulse bg-text-primary/10" /></div>}
+      {isLoading && <div className="mt-3 space-y-2" role="status" aria-label="Loading top states"><div className="h-9 animate-pulse bg-text-primary/10" /><div className="h-9 animate-pulse bg-text-primary/10" /><div className="h-9 animate-pulse bg-text-primary/10" /><div className="h-9 animate-pulse bg-text-primary/10" /></div>}
       {isError && <div className="py-4 text-center"><p className="text-[10px] font-bold text-danger">State summary could not be loaded.</p><button type="button" onClick={() => void refetch()} className="mt-2 border border-border bg-accent px-2.5 py-1 text-[10px] font-semibold text-white">Retry</button></div>}
       {!isLoading && !isError && topStates.length === 0 && <p className="py-4 text-center text-[10px] font-bold text-text-secondary">No state detections reported.</p>}
 

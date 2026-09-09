@@ -6,7 +6,7 @@ import { IndustryDistributionChart } from '../components/dashboard/IndustryDistr
 import { RecentAlertsWidget } from '../components/dashboard/RecentAlertsWidget'
 import { TopStatesDetectionsWidget } from '../components/dashboard/TopStatesDetectionsWidget'
 import { ThermalObjectExplorer } from '../components/dashboard/ThermalObjectExplorer'
-import { useDashboardMap, useDashboardSummary, useMapDates } from '../services/dashboardService'
+import { useDashboardMap, useMapDates } from '../services/dashboardService'
 
 export type MapDatasetMode = 'firms' | 'vnf'
 
@@ -16,7 +16,6 @@ export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState<string | null>(null)
   const [datasetMode, setDatasetMode] = useState<MapDatasetMode>('firms')
   const mapQuery = useDashboardMap(requestedDate, 'all', 0, timeRange)
-  const summaryQuery = useDashboardSummary()
   const mapData = mapQuery.data
   const availableDates = datesQuery.data?.dates ?? []
   const selectedDate = requestedDate ?? mapData?.selected_date ?? availableDates[0]?.date ?? null
@@ -29,7 +28,7 @@ export default function DashboardPage() {
     { label: 'Matched FIRMS', value: mapData?.counts.matched_firms, icon: ScanSearch, loading: mapQuery.isLoading },
     { label: 'Unmatched FIRMS', value: mapData?.counts.unmatched_firms, icon: Zap, loading: mapQuery.isLoading },
     { label: 'Matched objects', value: matchedObjectCount, icon: Flame, loading: mapQuery.isLoading },
-    { label: 'Actionable alerts', value: summaryQuery.data?.alerts, icon: Bell, loading: summaryQuery.isLoading },
+    { label: 'Actionable alerts', value: mapData?.counts.actionable_alerts, icon: Bell, loading: mapQuery.isLoading },
   ]
 
   return (

@@ -16,6 +16,7 @@ type SourceState = {
   setDatasetMode: (mode: DatasetMode) => void
   toggleLayerId: (id: string) => void
   setAllLayers: (ids: string[]) => void
+  selectMapSource: (sourceId: string) => void
   openPanel: (sourceId: string) => void
   closePanel: () => void
 }
@@ -39,6 +40,7 @@ export const useSourceStore = create<SourceState>()(
           : [...s.activeLayerIds, id],
       })),
       setAllLayers: (activeLayerIds) => set({ activeLayerIds }),
+      selectMapSource: (selectedSourceId) => set({ selectedSourceId, isPanelOpen: true, isPanelCollapsed: true }),
       openPanel: (selectedSourceId) => set({ selectedSourceId, isPanelOpen: true, isPanelCollapsed: false }),
       closePanel: () => set({ isPanelOpen: false, selectedSourceId: null }),
     }),

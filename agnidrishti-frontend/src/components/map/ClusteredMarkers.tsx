@@ -55,7 +55,7 @@ const lazyTooltip = (title: string, rows: Array<[string, unknown, string?, boole
 
 export function ClusteredMarkers({ objects, detections, vnfDetections }: { objects: ThermalObject[]; detections: RecentFirmsDetection[]; vnfDetections: VnfMapDetection[] }) {
   const map = useMap()
-  const openPanel = useSourceStore((state) => state.openPanel)
+  const selectMapSource = useSourceStore((state) => state.selectMapSource)
 
   useEffect(() => {
     const firmsPane = ensurePane(map, 'firms-detections-pane', 620)
@@ -98,7 +98,7 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
         ['GEM facility', object.gem_facility_name, '', true],
         ['GEM match radius', object.gem_match_radius_m, ' m', true],
       ]), { className: 'thermal-tooltip', pane: tooltipPane })
-      marker.on('click', () => openPanel(object.object_uid))
+      marker.on('click', () => selectMapSource(object.object_uid))
       objectLayer.addLayer(marker)
     })
 
@@ -118,7 +118,7 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
         ['Acquisition time', detection.acq_time],
         ['Matched object', detection.matched_object_uid, '', true],
       ]), { className: 'thermal-tooltip', pane: tooltipPane })
-      if (detection.matched_object_uid) marker.on('click', () => openPanel(detection.matched_object_uid!))
+      if (detection.matched_object_uid) marker.on('click', () => selectMapSource(detection.matched_object_uid!))
       firmsLayer.addLayer(marker)
     })
 
@@ -141,7 +141,7 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
         ['Raw latitude', detection.raw_latitude, '', true],
         ['Raw longitude', detection.raw_longitude, '', true],
       ]), { className: 'thermal-tooltip', pane: tooltipPane })
-      if (detection.matched_object_uid) marker.on('click', () => openPanel(detection.matched_object_uid!))
+      if (detection.matched_object_uid) marker.on('click', () => selectMapSource(detection.matched_object_uid!))
       vnfLayer.addLayer(marker)
     })
 
@@ -165,7 +165,7 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
       map.removeLayer(objectLayer)
       map.removeLayer(firmsLayer)
     }
-  }, [map, objects, detections, vnfDetections, openPanel])
+  }, [map, objects, detections, vnfDetections, selectMapSource])
 
   return null
 }

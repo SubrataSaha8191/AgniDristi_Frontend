@@ -14,7 +14,10 @@ export function StateDistrictDetectionsWidget() {
     setExpandedStates((prev) => ({ ...prev, [stateName]: !prev[stateName] }))
   }
 
-  const states = data?.states ?? []
+  const states = (data?.states ?? []).filter((state) => {
+    const name = state.state_name?.trim().toLowerCase()
+    return Boolean(name && name !== 'unassigned' && name !== 'unknown' && name !== 'n/a')
+  })
   const maxDetections = Math.max(...states.map((s) => s.total_detection_count), 1)
 
   const filteredStates = sortStateDetections(states

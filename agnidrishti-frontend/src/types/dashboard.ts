@@ -177,6 +177,7 @@ export interface DashboardMapResponse {
     unmatched_firms: number
     objects: number
     vnf_detections: number
+    actionable_alerts: number
   }
   positioning?: {
     objects: string
