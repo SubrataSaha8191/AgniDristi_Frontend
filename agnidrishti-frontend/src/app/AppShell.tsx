@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { SourceSnapshotPanel } from '../components/source/SourceSnapshotPanel'
+import { AgniDevBubble } from '../components/assistant/AgniDevBubble'
+import { AgniDevChatWindow } from '../components/assistant/AgniDevChatWindow'
 import { Sidebar } from './Sidebar'
 import { TopNav } from './TopNav'
 
@@ -18,6 +20,8 @@ export function AppShell() {
           <SourceSnapshotPanel />
         </div>
       </div>
+      <AgniDevBubble />
+      <AgniDevChatWindow />
     </div>
   )
 }

@@ -9,4 +9,6 @@ export const backendApi = {
   getMonitoring: () => axiosClient.get('/dashboard/monitoring'),
   triggerRun: (triggerType = 'manual') => axiosClient.post('/monitoring/runs/trigger', null, { params: { trigger_type: triggerType } }),
   uploadVnf: (formData: FormData) => axiosClient.post('/vnf/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  queryAssistant: (data: { question: string; thread_id?: string | null; top_k?: number }) => axiosClient.post('/assistant/query', data),
+  getAssistantStatus: () => axiosClient.get('/assistant/status'),
 }

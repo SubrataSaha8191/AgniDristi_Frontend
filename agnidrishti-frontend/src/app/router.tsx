@@ -11,6 +11,10 @@ import SignupPage from '../pages/SignupPage'
 import ReportsPage from '../pages/ReportsPage'
 import SearchPage from '../pages/SearchPage'
 import SystemPage from '../pages/SystemPage'
+import StateSearchPage from '../pages/StateSearchPage'
+import DistrictSearchPage from '../pages/DistrictSearchPage'
+import FactorySearchPage from '../pages/FactorySearchPage'
+import IndustrySearchPage from '../pages/IndustrySearchPage'
 
 function RouteErrorBoundary() {
   const error = useRouteError() as Error | undefined
@@ -36,6 +40,10 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/dashboard" replace /> },
       { path: 'dashboard', element: <DashboardPage />, errorElement: <RouteErrorBoundary /> },
       { path: 'search', element: <SearchPage />, errorElement: <RouteErrorBoundary /> },
+      { path: 'state/:stateName', element: <StateSearchPage />, errorElement: <RouteErrorBoundary /> },
+      { path: 'district/:districtName', element: <DistrictSearchPage />, errorElement: <RouteErrorBoundary /> },
+      { path: 'factory/:factoryName', element: <FactorySearchPage />, errorElement: <RouteErrorBoundary /> },
+      { path: 'industry/:industryType', element: <IndustrySearchPage />, errorElement: <RouteErrorBoundary /> },
       { path: 'investigation/:sourceId?', element: <InvestigationPage />, errorElement: <RouteErrorBoundary /> },
       { path: 'assessment', element: <AssessmentPage />, errorElement: <RouteErrorBoundary /> },
       { path: 'anomaly', element: <AnomalyPage />, errorElement: <RouteErrorBoundary /> },
