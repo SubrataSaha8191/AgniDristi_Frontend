@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { backendApi } from '../services/backendApi'
 import { useSourceStore } from '../stores/sourceStore'
+import DetectionStreakTracker from '../components/DetectionStreakTracker'
 
 export default function FactorySearchPage() {
   const { factoryName } = useParams<{ factoryName: string }>()
@@ -130,6 +131,8 @@ export default function FactorySearchPage() {
           <p className="text-[10px] text-text-secondary mt-1">WGS84 Geodetic</p>
         </div>
       </div>
+
+      <DetectionStreakTracker scope={{ factoryName: decodedFactory }} selectedSource="all" />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { ArrowLeft, BarChart3, Building2, ChevronRight, Database, MapPin, Satell
 import { Link, useParams } from 'react-router-dom'
 import { INDUSTRY_CATEGORIES, getIndustryLabel, getIndustryRoute, resolveIndustryCategory } from '../lib/industryCategories'
 import { useIndustryStats } from '../services/dashboardService'
+import DetectionStreakTracker from '../components/DetectionStreakTracker'
 
 export default function IndustrySearchPage() {
   const { industryType } = useParams<{ industryType: string }>()
@@ -42,6 +43,8 @@ export default function IndustrySearchPage() {
             <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><Building2 size={13} /> Known facilities</dt><dd className="mt-2 font-mono text-2xl font-semibold">{(stats?.facility_count ?? 0).toLocaleString()}</dd></div>
             <div className="bg-surface p-4"><dt className="flex items-center gap-2 text-[10px] uppercase text-text-secondary"><MapPin size={13} /> States represented</dt><dd className="mt-2 font-mono text-2xl font-semibold text-accent">{states.filter((item) => item.state_name !== 'Unassigned').length.toLocaleString()}</dd></div>
           </dl>
+
+          <DetectionStreakTracker scope={{ category }} selectedSource="all" />
 
           <section aria-labelledby="state-breakdown">
             <div className="mb-3 flex items-center justify-between"><h2 id="state-breakdown" className="flex items-center gap-2 text-sm font-semibold"><BarChart3 size={16} className="text-accent" /> State breakdown</h2><span className="font-mono text-[10px] text-text-secondary">VNF + FIRMS</span></div>

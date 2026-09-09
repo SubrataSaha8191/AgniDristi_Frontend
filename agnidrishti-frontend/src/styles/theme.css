@@ -100,6 +100,21 @@ article, .card {
   overscroll-behavior: contain;
 }
 
+.react-activity-calendar__tooltip {
+  background-color: var(--color-text-primary) !important;
+  color: var(--color-bg) !important;
+}
+
+.react-activity-calendar__tooltip .react-activity-calendar__tooltip-arrow {
+  fill: var(--color-text-primary) !important;
+}
+
+.detection-activity-card .react-activity-calendar {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+
 .main-content-scroll, .source-panel-scroll, .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;

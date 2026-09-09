@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiPost, uploadFile } from '../lib/apiClient'
 import type {
-  ClassDistribution, DashboardMapResponse, DashboardSummary, DetectionsByStateResponse, GasFlareLikelihood, LatestRunResponse,
+  ClassDistribution, DashboardMapResponse, DashboardSummary, DetectionActivityCalendarResponse, DetectionsByStateResponse, GasFlareLikelihood, LatestRunResponse,
   IndustryStatsResponse, MapDatesResponse, MapObjectScope, MonitoringRunsResponse, MonitoringState, RecentFirmsResponse, ThermalObjectDetail,
   ThermalObjectsResponse, VnfDetectionsResponse, VnfPersistence, VnfUploadResult,
 } from '../types/dashboard'
@@ -11,6 +11,8 @@ export const dashboardKeys = {
   summary: ['dashboard', 'summary'] as const,
   classes: ['dashboard', 'classes'] as const,
   byState: ['dashboard', 'detections', 'byState'] as const,
+  activityCalendar: (stateName: string, source: 'vnf' | 'firms' | 'all', year: number) => ['dashboard', 'stateActivity', stateName, source, year] as const,
+  scopedActivityCalendar: (scope: ActivityCalendarScope, source: 'vnf' | 'firms' | 'all', year: number) => ['dashboard', 'scopedActivity', scope, source, year] as const,
   objects: ['dashboard', 'objects'] as const,
   detail: (id: string | null) => ['dashboard', 'object', id] as const,
   firms: ['dashboard', 'firms'] as const,
@@ -31,10 +33,37 @@ export interface GeographicCategoryFilters {
 }
 
 export interface ObjectQuery extends GeographicCategoryFilters { limit: number; offset: number; classification?: string; source_hint?: string; gas_flare_likelihood?: GasFlareLikelihood | ''; likely_only?: boolean; gas_flare_only?: boolean }
+export interface ActivityCalendarScope { stateName?: string; districtName?: string; factoryName?: string; category?: string }
 
 export function useDashboardSummary() { return useQuery({ queryKey: dashboardKeys.summary, queryFn: ({ signal }) => apiGet<DashboardSummary>('/dashboard/summary', { signal }) }) }
 export function useClassDistribution() { return useQuery({ queryKey: dashboardKeys.classes, queryFn: ({ signal }) => apiGet<ClassDistribution>('/dashboard/classes', { signal }) }) }
 export function useDetectionsByState() { return useQuery({ queryKey: dashboardKeys.byState, queryFn: ({ signal }) => apiGet<DetectionsByStateResponse>('/dashboard/detections/by-state', { signal }), staleTime: 5 * 60_000 }) }
+export function useDetectionActivityCalendar(stateName: string, source: 'vnf' | 'firms' | 'all' = 'all', year = new Date().getFullYear()) {
+  return useQuery({
+    queryKey: dashboardKeys.activityCalendar(stateName, source, year),
+    enabled: Boolean(stateName),
+    queryFn: ({ signal }) => apiGet<DetectionActivityCalendarResponse>(`/dashboard/states/${encodeURIComponent(stateName)}/activity-calendar`, { params: { source, year }, signal }),
+    staleTime: 5 * 60_000,
+  })
+}
+export function useScopedDetectionActivityCalendar(scope: ActivityCalendarScope, source: 'vnf' | 'firms' | 'all' = 'all', year = new Date().getFullYear()) {
+  return useQuery({
+    queryKey: dashboardKeys.scopedActivityCalendar(scope, source, year),
+    enabled: Boolean(scope.stateName || scope.districtName || scope.category),
+    queryFn: ({ signal }) => apiGet<DetectionActivityCalendarResponse>('/dashboard/activity-calendar', {
+      params: {
+        ...(scope.stateName ? { state_name: scope.stateName } : {}),
+        ...(scope.districtName ? { district_name: scope.districtName } : {}),
+        ...(scope.factoryName ? { factory_name: scope.factoryName } : {}),
+        ...(scope.category ? { category: scope.category } : {}),
+        source,
+        year,
+      },
+      signal,
+    }),
+    staleTime: 5 * 60_000,
+  })
+}
 
 export function useThermalObjects(query: ObjectQuery, enabled = true) {
   const { gas_flare_likelihood, likely_only, gas_flare_only, ...serverParams } = query
