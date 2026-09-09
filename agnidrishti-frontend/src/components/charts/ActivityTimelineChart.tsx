@@ -27,8 +27,8 @@ function ActivityTooltip({ active, payload }: { active?: boolean; payload?: Read
   if (!active || !point) return null
 
   return (
-    <div className="border border-zinc-700 bg-zinc-900 p-2 text-[11px] text-zinc-50">
-      <p className="font-black uppercase">{monthLabel(point.month)}</p>
+    <div className="rounded-lg border border-border bg-surface p-2 text-[11px] text-text-primary">
+      <p className="font-semibold">{monthLabel(point.month)}</p>
       <p className="mt-1">Detections: {point.detections.toLocaleString()}</p>
       <p>Average: {temperature(point.avgTempK)}</p>
       {(point.minTempK != null || point.maxTempK != null) && <p>Range: {temperature(point.minTempK)} to {temperature(point.maxTempK)}</p>}
@@ -43,8 +43,8 @@ export function ActivityTimelineChart({ sourceId }: { sourceId: string }) {
 
   return (
     <section aria-label="Historical activity">
-      <div className="flex items-center justify-between border-b border-black/10 pb-2 dark:border-zinc-800">
-        <h3 className="text-xs font-black uppercase tracking-wider text-text-primary">Historical Activity</h3>
+      <div className="flex items-center justify-between border-b border-border pb-2">
+        <h3 className="text-xs font-semibold text-text-primary">Historical Activity</h3>
         <span className="font-mono text-[10px] font-bold text-text-secondary">{sourceId}</span>
       </div>
       {isLoading && <div className="mt-3 h-44 animate-pulse bg-zinc-200 dark:bg-zinc-800" role="status" aria-label="Loading activity" />}
@@ -52,7 +52,7 @@ export function ActivityTimelineChart({ sourceId }: { sourceId: string }) {
       {!isLoading && !isError && data.length === 0 && <p className="mt-3 grid h-44 place-items-center text-center text-xs font-bold text-text-secondary">Month-wise history is unavailable because this object has no dated detections.</p>}
       {!isLoading && !isError && data.length > 0 && (
         <>
-          <p className="mt-2 text-[10px] font-bold uppercase text-text-secondary">{completeHistory ? `Complete history: ${data.length} months, ${totalDetections.toLocaleString()} detections` : `Recent sample: ${totalDetections.toLocaleString()} dated detections grouped by month`}</p>
+          <p className="mt-2 text-[10px] font-bold text-text-secondary">{completeHistory ? `Complete history: ${data.length} months, ${totalDetections.toLocaleString()} detections` : `Recent sample: ${totalDetections.toLocaleString()} dated detections grouped by month`}</p>
           <div className="mt-3 h-44 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -22 }}>

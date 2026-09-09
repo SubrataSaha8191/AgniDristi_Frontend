@@ -53,26 +53,26 @@ export default function ReportsPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary">INTELLIGENCE OUTPUT</span>
-        <h1 className="text-2xl font-black tracking-tight uppercase text-text-primary">Intelligence Reports</h1>
+         <span className="text-[10px] font-medium text-text-secondary">Intelligence Output</span>
+         <h1 className="text-2xl font-semibold text-text-primary">Intelligence Reports</h1>
         <p className="mt-1 text-xs font-semibold text-text-secondary">Export live geospatial and satellite anomaly briefs directly from satellite telemetry feeds.</p>
       </div>
 
       <div className="space-y-4">
         {dynamicReports.map(({ title, type, date, description, icon: Icon, payload }) => (
-          <article key={title} className="flex flex-col gap-4 border-2 border-black bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:flex-row sm:items-center sm:justify-between">
+           <article key={title} className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-4">
-              <div className="border-2 border-black bg-[#d8f5a9] p-2.5 text-black">
+               <div className="rounded-lg border border-border bg-accent p-2.5 text-white">
                 <Icon size={22} aria-hidden="true" />
               </div>
               <div>
-                <p className="font-mono text-[10px] font-black uppercase tracking-wider text-text-secondary">{type} · {date}</p>
-                <h2 className="mt-1 text-sm font-black tracking-wide uppercase text-text-primary">{title}</h2>
+                 <p className="font-mono text-[10px] font-medium text-text-secondary">{type} · {date}</p>
+                 <h2 className="mt-1 text-sm font-semibold text-text-primary">{title}</h2>
                 <p className="mt-1 text-xs font-semibold text-text-secondary">{description}</p>
               </div>
             </div>
             <button type="button" onClick={() => handleExportCSV(title, payload)}
-              className="inline-flex shrink-0 items-center justify-center gap-1.5 border-2 border-black dark:border-zinc-700 bg-black text-white dark:bg-[#d8f5a9] dark:text-black px-4 py-2 text-xs font-black uppercase tracking-wider hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+               className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border bg-accent text-white px-4 py-2 text-xs font-medium hover:opacity-90 transition-colors cursor-pointer">
               <Download size={14} /> EXPORT JSON/CSV
             </button>
           </article>
@@ -80,7 +80,7 @@ export default function ReportsPage() {
       </div>
 
       {downloadMsg && (
-        <div className="flex items-center gap-2 border-2 border-black bg-[#d8f5a9] p-3 text-xs font-black uppercase text-black">
+         <div className="flex items-center gap-2 rounded-lg border border-border bg-accent p-3 text-xs font-medium text-white">
           <CheckCircle2 size={16} /> {downloadMsg}
         </div>
       )}

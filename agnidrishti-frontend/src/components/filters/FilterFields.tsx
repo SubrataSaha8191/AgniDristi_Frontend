@@ -1,4 +1,4 @@
-const inputCls = 'mt-1 w-full rounded-none border-2 border-black dark:border-zinc-700 bg-surface px-3 py-2 text-xs font-bold font-mono text-text-primary outline-none focus:bg-zinc-100 dark:focus:bg-zinc-800 transition-colors'
+const inputCls = 'mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium font-mono text-text-primary outline-none focus:bg-bg transition-colors'
 
 type FilterInputProps = {
   label: string
@@ -11,7 +11,7 @@ type FilterInputProps = {
 
 export function FilterInput({ label, value, onChange, placeholder, type = 'text', colSpan }: FilterInputProps) {
   return (
-    <label className={`text-xs font-bold uppercase tracking-wider text-text-secondary${colSpan ? ' sm:col-span-2' : ''}`}>
+    <label className={`text-xs font-medium text-text-secondary${colSpan ? ' sm:col-span-2' : ''}`}>
       {label}
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={inputCls} />
     </label>
@@ -28,7 +28,7 @@ type FilterSelectProps = {
 
 export function FilterSelect({ label, value, onChange, options, allLabel = 'Any' }: FilterSelectProps) {
   return (
-    <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+    <label className="text-xs font-medium text-text-secondary">
       {label}
       <select value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>
         <option value="">{allLabel}</option>

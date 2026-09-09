@@ -3,8 +3,8 @@
   padding: 5px 10px;
   border-radius: 5px;
   color: var(--accent);
-  background: #d8f5a9;
-  border: 2px solid transparent;
+  background: var(--color-accent);
+  border: 1px solid transparent;
   transition: border-color 0.3s;
   margin-bottom: 24px;
 

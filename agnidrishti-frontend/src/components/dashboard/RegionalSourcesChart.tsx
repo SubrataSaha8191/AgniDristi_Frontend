@@ -36,27 +36,27 @@ export function RegionalSourcesChart({ expanded = false, showDetailsLink = true 
   const maxCount = Math.max(...regionCounts.map((r) => r.count), 1)
 
   return (
-    <section className="rounded-none border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-sm" aria-labelledby="regional-sources-heading">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-black dark:border-zinc-700 pb-3">
-        <h2 id="regional-sources-heading" className="text-sm font-black uppercase tracking-wider text-text-primary">Regional Thermal Sources</h2>
-        {showDetailsLink && <Link to="/assessment" className="text-xs font-bold uppercase tracking-wider text-text-primary hover:underline">View details →</Link>}
+    <section className="rounded-lg border border-border bg-surface p-5 shadow-sm" aria-labelledby="regional-sources-heading">
+      <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <h2 id="regional-sources-heading" className="text-sm font-semibold text-text-primary">Regional Thermal Sources</h2>
+        {showDetailsLink && <Link to="/assessment" className="text-xs font-semibold text-text-primary hover:underline">View details →</Link>}
       </div>
       {isLoading ? <div className="mt-5 h-40 animate-pulse bg-zinc-200 dark:bg-zinc-800" /> : (
         <div className={`mt-5 grid grid-cols-2 gap-x-5 ${expanded ? 'gap-y-6 sm:grid-cols-3' : 'gap-y-4'}`}>
           {regionCounts.map((r) => (
             <div key={r.region}>
               <div className="flex items-center justify-between gap-2 text-[10px]">
-                <span className="font-bold text-text-primary uppercase tracking-wider">{r.region}</span>
+                <span className="font-bold text-text-primary">{r.region}</span>
                 <span className="font-mono font-bold text-text-primary">{r.count}</span>
               </div>
-              <div className="mt-1.5 h-2.5 border border-black dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800">
-                <div className="h-full bg-black dark:bg-[#d8f5a9]" style={{ width: `${(r.count / maxCount) * 100}%` }} />
+              <div className="mt-1.5 h-2.5 border border-border bg-zinc-200 dark:bg-zinc-800">
+                <div className="h-full bg-accent" style={{ width: `${(r.count / maxCount) * 100}%` }} />
               </div>
             </div>
           ))}
         </div>
       )}
-      {!isLoading && <p className="mt-4 text-right font-mono text-[10px] font-bold text-text-secondary uppercase">{sources.length} SOURCES TOTAL</p>}
+      {!isLoading && <p className="mt-4 text-right font-mono text-[10px] font-bold text-text-secondary">{sources.length} SOURCES TOTAL</p>}
     </section>
   )
 }

@@ -27,8 +27,8 @@ export function MapLegend({ sources = [] }: { sources?: SourceSummary[] }) {
 
   if (isCollapsed) {
     return (
-      <div className="absolute bottom-4 left-4 z-[1000] border-2 border-black dark:border-zinc-700 bg-surface px-3 py-1.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-        <button type="button" onClick={() => setIsCollapsed(false)} className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-text-primary hover:text-accent">
+      <div className="absolute bottom-4 left-4 z-[1000] rounded-lg border border-border bg-surface px-3 py-1.5">
+        <button type="button" onClick={() => setIsCollapsed(false)} className="flex items-center gap-2 text-xs font-semibold text-text-primary hover:text-accent">
           <span>Categories ({sources.length})</span>
           <ChevronUp size={14} />
         </button>
@@ -37,16 +37,16 @@ export function MapLegend({ sources = [] }: { sources?: SourceSummary[] }) {
   }
 
   return (
-    <div className="absolute bottom-4 left-4 z-[1000] w-64 border-2 border-black dark:border-zinc-700 bg-surface p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-      <div className="flex items-center justify-between border-b-2 border-black dark:border-zinc-700 pb-2">
-        <span className="text-xs font-black uppercase tracking-wider text-text-primary">Categories ({sources.length})</span>
+    <div className="absolute bottom-4 left-4 z-[1000] w-64 rounded-lg border border-border bg-surface p-3">
+      <div className="flex items-center justify-between border-b border-border pb-2">
+        <span className="text-xs font-semibold text-text-primary">Categories ({sources.length})</span>
         <div className="flex items-center gap-1">
           {activeSourceType && (
             <button type="button" onClick={() => setSourceType('')} title="Clear category filter" className="p-1 text-xs font-bold text-danger hover:underline flex items-center gap-0.5">
               <FilterX size={12} /> Clear
             </button>
           )}
-          <button type="button" onClick={() => setIsCollapsed(true)} className="p-1 text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white transition-colors" aria-label="Minimize categories">
+          <button type="button" onClick={() => setIsCollapsed(true)} className="rounded-lg p-1 text-text-primary hover:bg-accent hover:text-text-primary transition-colors" aria-label="Minimize categories">
             <ChevronDown size={14} />
           </button>
         </div>
@@ -58,12 +58,12 @@ export function MapLegend({ sources = [] }: { sources?: SourceSummary[] }) {
           return (
             <li key={cat}>
               <button type="button" onClick={() => handleCategoryClick(cat)}
-                className={`group w-full flex items-center justify-between px-2 py-1 text-xs font-mono transition-colors cursor-pointer border ${isActive ? 'border-black bg-[#d8f5a9] text-black font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'border-transparent text-text-primary hover:bg-black hover:text-white dark:hover:bg-zinc-800 dark:hover:text-white'}`}>
+                className={`group w-full flex items-center justify-between rounded-lg px-2 py-1 text-xs font-mono transition-colors cursor-pointer border border-border ${isActive ? 'bg-accent text-text-primary font-semibold' : 'text-text-primary hover:bg-accent hover:text-text-primary'}`}>
                 <div className="flex items-center gap-2 truncate">
                   <span aria-hidden="true" className="h-3 w-3 shrink-0" style={{ backgroundColor: MAP_CATEGORY_COLORS[cat], clipPath: getShapeClipPath(MAP_CATEGORY_SHAPES[cat]) }} />
                   <span className="truncate">{MAP_CATEGORY_LABELS[cat]}</span>
                 </div>
-                <span className={`px-1.5 py-0.5 text-[10px] font-black rounded-none border ${isActive ? 'border-black bg-black text-[#d8f5a9]' : 'border-black/20 dark:border-zinc-700 bg-bg text-text-primary group-hover:border-white group-hover:bg-zinc-800 group-hover:text-white'}`}>
+                <span className={`rounded-lg border border-border px-1.5 py-0.5 text-[10px] font-semibold ${isActive ? 'bg-accent text-text-primary' : 'bg-bg text-text-primary'}`}>
                   {counts[cat]}
                 </span>
               </button>
@@ -71,7 +71,7 @@ export function MapLegend({ sources = [] }: { sources?: SourceSummary[] }) {
           )
         })}
       </ul>
-      <p className="mt-2 text-[9px] font-mono text-text-secondary uppercase text-center">Click category to filter map</p>
+      <p className="mt-2 text-center text-[9px] font-mono text-text-secondary">Click category to filter map</p>
     </div>
   )
 }

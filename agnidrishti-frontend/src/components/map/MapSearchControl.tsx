@@ -45,7 +45,7 @@ export function MapSearchControl({ position = 'left' }: { position?: 'left' | 'r
   const posClass = position === 'right' ? 'right-4 top-3' : 'left-4 top-4'
 
   return (
-    <div className={`absolute ${posClass} z-[1000] flex items-center gap-1 border-2 border-black dark:border-zinc-700 bg-surface p-1 shadow-md`}>
+    <div className={`absolute ${posClass} z-[1000] flex items-center gap-1 rounded-lg border border-border bg-surface p-1 shadow-md`}>
       <form onSubmit={handleSearch} className="flex items-center gap-1">
         <Search size={14} className="ml-1 text-text-secondary" aria-hidden="true" />
         <input
@@ -53,11 +53,11 @@ export function MapSearchControl({ position = 'left' }: { position?: 'left' | 'r
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search place or lat, lon..."
-          className="w-44 bg-transparent px-2 py-1 text-xs font-bold uppercase text-text-primary outline-none placeholder:text-zinc-500"
+          className="w-44 bg-transparent px-2 py-1 text-xs font-semibold text-text-primary outline-none placeholder:text-zinc-500"
         />
         <button
           type="submit"
-          className="border border-black dark:border-zinc-700 bg-black dark:bg-[#d8f5a9] px-2.5 py-1 text-xs font-black uppercase text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090]"
+          className="rounded-lg border border-border bg-accent px-2.5 py-1 text-xs font-semibold text-text-primary hover:bg-accent/80"
         >
           Go
         </button>

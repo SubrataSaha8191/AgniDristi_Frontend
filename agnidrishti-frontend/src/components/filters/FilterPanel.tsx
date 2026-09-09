@@ -35,15 +35,15 @@ export function FilterPanel() {
   }
 
   return (
-    <section className="rounded-none border-2 border-text-primary bg-surface p-5 shadow-sm" aria-label="Source filters">
+    <section className="rounded-lg border border-border bg-surface p-5 shadow-sm" aria-label="Source filters">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-text-primary pb-3">
         <div>
-          <h2 className="text-base font-black uppercase tracking-wider text-text-primary">Search &amp; Filters</h2>
+          <h2 className="text-base font-semibold text-text-primary">Search &amp; Filters</h2>
           <p className="mt-0.5 text-xs text-text-secondary font-medium">Narrow down spatial objects and filter query parameters</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={reset} className="rounded-none border-2 border-text-primary bg-surface px-3.5 py-1.5 text-xs font-black uppercase text-text-primary hover:bg-black hover:text-white dark:hover:bg-[#d8f5a9] dark:hover:text-black transition-colors">Reset</button>
-          <button type="button" onClick={apply} className="rounded-none border-2 border-text-primary bg-black dark:bg-[#d8f5a9] px-4 py-1.5 text-xs font-black uppercase text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-[#c9f090] transition-colors">Apply Filters</button>
+          <button type="button" onClick={reset} className="rounded-lg border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-text-primary hover:bg-bg transition-colors">Reset</button>
+          <button type="button" onClick={apply} className="rounded-lg border border-accent bg-accent px-4 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-colors">Apply Filters</button>
         </div>
 
       </div>
@@ -56,7 +56,7 @@ export function FilterPanel() {
         <FilterSelect label="Source type" value={d.sourceType} onChange={u('sourceType')} options={sourceTypes} allLabel="All source types" />
         <FilterInput label="Industry type" value={d.industryType} onChange={u('industryType')} placeholder="e.g. Steel Plant" />
         <FilterSelect label="Anomaly level" value={d.anomalyLevel} onChange={u('anomalyLevel')} options={anomalyOptions} allLabel="Any anomaly level" />
-        <label className="text-xs font-bold uppercase text-text-secondary">
+        <label className="text-xs font-semibold text-text-secondary">
           Confidence: {d.confidenceLevel ? `${d.confidenceLevel}% min` : 'Any'}
           <input type="range" min="0" max="100" step="1" value={d.confidenceLevel || '0'} onChange={(e) => u('confidenceLevel')(e.target.value === '0' ? '' : e.target.value)} className="mt-3 w-full accent-black" />
         </label>

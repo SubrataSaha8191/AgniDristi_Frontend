@@ -3,8 +3,8 @@ import type { SourceDetail } from '../../types/source'
 
 export function DetailField({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="border-b border-black/10 dark:border-zinc-800 py-2.5 last:border-b-0">
-      <dt className="text-[10px] font-black uppercase tracking-widest text-text-secondary">{label}</dt>
+    <div className="border-b border-border py-2.5 last:border-b-0">
+      <dt className="text-[10px] font-semibold text-text-secondary">{label}</dt>
       <dd className="mt-0.5 text-xs font-mono font-bold text-text-primary">{value}</dd>
     </div>
   )
@@ -12,8 +12,8 @@ export function DetailField({ label, value }: { label: string; value: string | n
 
 function StatusBadge({ label, color }: { label: string; color: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-none border-2 border-black dark:border-zinc-700 bg-surface px-2.5 py-1 text-[10px] font-mono font-black uppercase tracking-wider text-text-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-      <span className="h-2 w-2 border border-black shrink-0" style={{ backgroundColor: color }} aria-hidden="true" />
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1 text-[10px] font-mono font-semibold text-text-primary">
+      <span className="h-2 w-2 border border-border shrink-0" style={{ backgroundColor: color }} aria-hidden="true" />
       {label}
     </span>
   )

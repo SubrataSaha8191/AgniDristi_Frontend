@@ -120,9 +120,9 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
     vnfDetections.forEach((detection) => {
       const marker = L.circleMarker([detection.latitude, detection.longitude], {
         radius: 4,
-        color: '#3f3f46',
+        color: 'var(--color-border)',
         weight: 1.5,
-        fillColor: '#a1a1aa',
+        fillColor: 'var(--color-text-secondary)',
         fillOpacity: 0.9,
         pane: vnfPane,
       })
