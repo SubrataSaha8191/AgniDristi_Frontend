@@ -1,5 +1,7 @@
-import { Flame, Sparkles, X } from 'lucide-react'
+import { Sparkles, X } from 'lucide-react'
+import { Lottie } from 'lottie-react'
 import { useAssistantStore } from '../../stores/assistantStore'
+import agniAnimation from '../../assets/agni-assistant.json'
 
 export function AgniDevBubble() {
   const isOpen = useAssistantStore((state) => state.isOpen)
@@ -19,11 +21,16 @@ export function AgniDevBubble() {
         {/* Glow Ring Removed */}
 
         <div className="relative flex items-center justify-center">
-          <div className="relative flex items-center justify-center w-8 h-8 text-white border rounded-full shadow-md bg-gradient-to-tr from-red-600 via-orange-500 to-amber-400 border-amber-300/30">
+          <div className="relative flex h-10 w-10 items-center justify-center text-white border rounded-full shadow-md bg-gradient-to-tr from-red-600 via-orange-500 to-amber-400 border-amber-300/30">
             {isOpen ? (
               <X size={18} />
             ) : (
-              <Flame size={18} className="text-yellow-100 animate-pulse" />
+              <Lottie
+                src={agniAnimation}
+                loop={true}
+                autoplay={true}
+                style={{ width: 40, height: 40 }}
+              />
             )}
           </div>
           {!isOpen && (

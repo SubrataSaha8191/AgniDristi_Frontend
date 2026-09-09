@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, ExternalLink, Layers, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useDetectionsByState } from '../../services/dashboardService'
+import { sortStateDetections, type StateSortOption } from './stateDetectionUtils'
 
 export function StateDistrictDetectionsWidget() {
   const { data, isLoading, isError, refetch } = useDetectionsByState()
   const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>({})
   const [searchFilter, setSearchFilter] = useState('')
-  const [sortOption, setSortOption] = useState<'name-asc' | 'count-desc' | 'count-asc'>('name-asc')
+  const [sortOption, setSortOption] = useState<StateSortOption>('name-asc')
 
   const toggleState = (stateName: string) => {
     setExpandedStates((prev) => ({ ...prev, [stateName]: !prev[stateName] }))
@@ -16,22 +17,13 @@ export function StateDistrictDetectionsWidget() {
   const states = data?.states ?? []
   const maxDetections = Math.max(...states.map((s) => s.total_detection_count), 1)
 
-  const filteredStates = states
+  const filteredStates = sortStateDetections(states
     .filter((s) => {
       if (!searchFilter.trim()) return true
       const term = searchFilter.toLowerCase()
       if (s.state_name.toLowerCase().includes(term)) return true
       return s.districts.some((d) => d.district_name.toLowerCase().includes(term))
-    })
-    .sort((a, b) => {
-      if (sortOption === 'count-desc') {
-        return b.total_detection_count - a.total_detection_count
-      }
-      if (sortOption === 'count-asc') {
-        return a.total_detection_count - b.total_detection_count
-      }
-      return a.state_name.localeCompare(b.state_name)
-    })
+    }), sortOption)
 
   return (
     <section className="flex flex-col h-[32rem] max-h-[32rem] rounded-lg border border-border bg-surface p-5 shadow-sm overflow-hidden" aria-labelledby="state-district-heading">

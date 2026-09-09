@@ -4,6 +4,7 @@ import { KPICard } from '../components/kpi/KPICard'
 import { SectionHeading } from '../components/common/SectionHeading'
 import { IndustryDistributionChart } from '../components/dashboard/IndustryDistributionChart'
 import { RecentAlertsWidget } from '../components/dashboard/RecentAlertsWidget'
+import { TopStatesDetectionsWidget } from '../components/dashboard/TopStatesDetectionsWidget'
 import { ThermalObjectExplorer } from '../components/dashboard/ThermalObjectExplorer'
 import { useDashboardMap, useDashboardSummary, useMapDates } from '../services/dashboardService'
 
@@ -99,7 +100,7 @@ export default function DashboardPage() {
 
       <section aria-label="Spatial object explorer"><SectionHeading num="02" title="Spatial object explorer" subtitle="Switch between selected-date FIRMS matches and VNF source history" /><ThermalObjectExplorer requestedDate={requestedDate} selectedDate={selectedDate} datasetMode={datasetMode} onDatasetModeChange={setDatasetMode} /></section>
 
-      <section aria-label="Distribution and alerts"><SectionHeading num="03" title="Distribution and alerts" subtitle="Industry classifications and current operational alerts" /><div className="grid gap-6 items-stretch xl:grid-cols-[1.25fr_1fr]"><IndustryDistributionChart /><RecentAlertsWidget /></div></section>
+       <section aria-label="Distribution and alerts"><SectionHeading num="03" title="Distribution and alerts" subtitle="Industry classifications and current operational alerts" /><div className="grid items-stretch gap-6 xl:grid-cols-[1.25fr_1fr]"><div className="flex min-w-0 flex-col gap-4"><IndustryDistributionChart /><TopStatesDetectionsWidget /></div><RecentAlertsWidget /></div></section>
     </div>
   )
 }
