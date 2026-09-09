@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  Database,
   FileText,
   Flame,
   HelpCircle,
@@ -16,8 +12,7 @@ import {
   X,
 } from 'lucide-react'
 import { useAssistantStore } from '../../stores/assistantStore'
-import type { AssistantSource, RAGRoute } from '../../types/assistant'
-import { BlazingFireOrb } from './BlazingFireOrb'
+import type { RAGRoute } from '../../types/assistant'
 
 const EXAMPLE_QUESTION_GROUPS = [
   {
@@ -51,10 +46,9 @@ const EXAMPLE_QUESTION_GROUPS = [
 ]
 
 function RouteBadge({ route }: { route?: RAGRoute }) {
-  if (!route) return null
+  if (!route || route === 'database') return null
   const config = {
     documents: { label: 'DOCUMENTS RAG', color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30', icon: FileText },
-    database: { label: 'DATABASE QUERY', color: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30', icon: Database },
     hybrid: { label: 'HYBRID RAG', color: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30', icon: Layers },
   }[route]
 
@@ -65,45 +59,6 @@ function RouteBadge({ route }: { route?: RAGRoute }) {
       <Icon size={10} />
       {config.label}
     </span>
-  )
-}
-
-function SourcesDrawer({ sources }: { sources: AssistantSource[] }) {
-  const [expanded, setExpanded] = useState(false)
-  if (!sources || sources.length === 0) return null
-
-  return (
-    <div className="mt-2.5 rounded-lg border border-border/80 bg-surface/60 p-2 text-xs">
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between font-mono text-[10px] font-bold text-text-secondary hover:text-text-primary cursor-pointer"
-      >
-        <div className="flex items-center gap-1.5">
-          <BookOpen size={12} className="text-accent" />
-          <span>Cited Sources &amp; Knowledge Base ({sources.length})</span>
-        </div>
-        {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-      </button>
-
-      {expanded && (
-        <div className="mt-2 divide-y divide-border/60 border-t border-border/60 pt-1.5 space-y-1.5">
-          {sources.map((src, i) => (
-            <div key={i} className="pt-1 text-[11px] first:pt-0">
-              <div className="flex items-center justify-between font-semibold text-text-primary">
-                <span className="truncate max-w-[200px]">{src.title || src.name}</span>
-                {src.score != null && (
-                  <span className="font-mono text-[10px] text-accent font-bold">
-                    Score: {Math.round(src.score * 100)}%
-                  </span>
-                )}
-              </div>
-              <p className="font-mono text-[9px] text-text-secondary truncate mt-0.5">{src.name} {src.chunk_id != null ? `• Chunk ${src.chunk_id}` : ''}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
   )
 }
 
@@ -250,16 +205,6 @@ export function AgniDevChatWindow() {
         <div className="flex-1 p-4 space-y-4 overflow-y-auto source-panel-scroll bg-bg/40">
           {messages.length === 0 ? (
             <div className="space-y-4">
-              <div className="p-4 text-center border shadow-sm rounded-xl border-border bg-surface">
-                <div className="flex items-center justify-center my-2">
-                  <BlazingFireOrb isListening={isLoading} size="md" />
-                </div>
-                <h3 className="mt-2 text-sm font-semibold text-text-primary">Namaste! I am Agni Dev</h3>
-                <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-                  Your Geospatial &amp; Thermal Intelligence RAG Assistant. Ask me anything about FIRMS satellite data, VNF, gas flare detection, algorithms, or playbooks.
-                </p>
-              </div>
-
               {/* Sample Questions Menu */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -316,10 +261,6 @@ export function AgniDevChatWindow() {
                   )}
 
                   <FormattedContent text={msg.content} />
-
-                  {msg.sender === 'assistant' && msg.sources && msg.sources.length > 0 && (
-                    <SourcesDrawer sources={msg.sources} />
-                  )}
 
                   {msg.sender === 'user' && (
                     <div className="mt-1 text-right font-mono text-[9px] text-white/80">{msg.timestamp}</div>
