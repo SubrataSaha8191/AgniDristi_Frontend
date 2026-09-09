@@ -117,12 +117,6 @@ export function ClusteredMarkers({ objects, detections, vnfDetections }: { objec
       firmsLayer.addLayer(marker)
     })
 
-    map.addLayer(clustersGroup)
-    syncRadialVisibility()
-    return () => { map.off('zoomend', syncRadialVisibility); if (map.hasLayer(radialLayer)) map.removeLayer(radialLayer); map.removeLayer(clustersGroup) }
-  }, [map, objects, detections, openPanel])
-  return null
-}
     vnfDetections.forEach((detection) => {
       const marker = L.circleMarker([detection.latitude, detection.longitude], {
         radius: 4,
