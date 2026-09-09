@@ -21,8 +21,30 @@ export function generateMockHistory(sourceId: string): ActivityPoint[] {
 export interface BackendObjectDetail {
   classification?: { label?: string; confidence?: number }
   temperature?: { min?: number; max?: number; mean?: number }
+  temporal?: { detection_count?: number; active_months?: number }
+  activity?: {
+    detection_count?: number
+    active_months?: number
+    persistence_ratio?: number
+    source_persistence_ratio?: number
+    mean_temperature?: number
+    maximum_temperature?: number
+  }
+  monthly_detection_history?: {
+    month_count?: number
+    total_detections?: number
+    months?: Array<{
+      month?: string
+      detection_count?: number
+      average_temperature?: number
+      minimum_temperature?: number
+      maximum_temperature?: number
+    }>
+  }
   thermal_fingerprint?: Record<string, number> | null
   recent_firms?: Array<{ acq_date?: string; bright_ti4?: number; confidence?: number }>
+  recent_vnf?: Array<{ mscan_date?: string; temp_primary?: number }>
+  anomaly_history?: Array<{ date?: string; baseline?: number; current?: number }>
 }
 
 export function generateMockFingerprint(sourceId: string, industrySubtype?: string | null): ThermalFingerprint {
@@ -53,19 +75,28 @@ export function generateMockFingerprint(sourceId: string, industrySubtype?: stri
   }
 }
 
-export function parseBackendFingerprint(sourceId: string, d: BackendObjectDetail, subtype?: string | null): ThermalFingerprint {
+export function parseTemperatureBin(key: string): number | null {
+  const exactValue = Number(key)
+  if (Number.isFinite(exactValue)) return exactValue
+  const values = key.match(/\d+(?:\.\d+)?/g)?.map(Number).filter(Number.isFinite) ?? []
+  if (values.length === 0) return null
+  if (values.length === 1) return values[0]
+  return Math.round((values[0] + values[1]) / 2)
+}
+
+export function parseBackendFingerprint(d: BackendObjectDetail, subtype?: string | null): ThermalFingerprint | null {
   const cls = d.classification?.label ?? subtype
-  const conf = Math.round((d.classification?.confidence ?? 0.85) * 100)
-  const mock = generateMockFingerprint(sourceId, cls)
+  const confidence = d.classification?.confidence
+  const similarityScore = confidence == null ? 0 : Math.round(confidence * 100)
 
   if (d.thermal_fingerprint && Object.keys(d.thermal_fingerprint).length > 0) {
     const entries = Object.entries(d.thermal_fingerprint)
-    const maxVal = Math.max(...entries.map(([, v]) => Number(v) || 0), 1)
+    const totalFrequency = entries.reduce((sum, [, value]) => sum + Math.max(0, Number(value) || 0), 0)
     const bins = entries
-      .map(([key, val]) => ({ tempK: parseInt(key.replace(/[^\d]/g, ''), 10) || 1000, normalizedFreq: Math.round(((Number(val) || 0) / maxVal) * 100) }))
-      .filter((b) => !isNaN(b.tempK))
+      .map(([key, value]) => ({ tempK: parseTemperatureBin(key), normalizedFreq: totalFrequency > 0 ? Math.round((Math.max(0, Number(value) || 0) / totalFrequency) * 1000) / 10 : 0 }))
+      .filter((bin): bin is { tempK: number; normalizedFreq: number } => bin.tempK !== null)
       .sort((a, b) => a.tempK - b.tempK)
-    if (bins.length > 0) return { bestMatchIndustry: cls || mock.bestMatchIndustry, similarityScore: conf > 0 ? conf : mock.similarityScore, bins }
+    if (bins.length > 0) return { bestMatchIndustry: cls || 'Unclassified', similarityScore, bins }
   }
 
   const temps = (d.recent_firms ?? []).map((f) => f.bright_ti4).filter((t): t is number => typeof t === 'number' && t > 0)
@@ -74,13 +105,13 @@ export function parseBackendFingerprint(sourceId: string, d: BackendObjectDetail
     temps.forEach((t) => counts[Math.min(4, Math.max(0, Math.floor((t - minT) / binWidth)))]++)
     const maxCount = Math.max(...counts, 1)
     return {
-      bestMatchIndustry: cls || mock.bestMatchIndustry,
-      similarityScore: conf > 0 ? conf : mock.similarityScore,
+      bestMatchIndustry: cls || 'Unclassified',
+      similarityScore,
       bins: counts.map((c, i) => ({ tempK: Math.round(minT + i * binWidth + binWidth / 2), normalizedFreq: Math.round((c / maxCount) * 100) })),
     }
   }
 
-  return mock
+  return null
 }
 
 export function generateMockAnomaly(sourceId: string): AnomalyPoint[] {

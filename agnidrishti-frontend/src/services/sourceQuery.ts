@@ -61,34 +61,40 @@ export function useSourceDetail(sourceId?: string | null) {
     queryFn: async (): Promise<SourceDetail> => {
       if (!sourceId) throw new Error('Source ID is required')
       const now = new Date().toISOString()
-      try {
-        const res = await axiosClient.get<Record<string, unknown>>(`/dashboard/objects/${encodeURIComponent(sourceId)}`)
-        const d = res.data
-        const loc = d.location as { latitude: number; longitude: number } | undefined
-        const cls = d.classification as { label?: string; confidence?: number } | undefined
-        const temp = d.temporal as { persistence_ratio?: number; source_hint?: string } | undefined
-        const flare = d.gas_flare_assessment as { likelihood?: string; score?: number } | undefined
-        const conf = Math.round((cls?.confidence ?? 0.85) * 100)
-        const label = cls?.label ?? 'Thermal Source'
-        const catLabel = label.toLowerCase()
-        const category: SourceCategory = catLabel.includes('biomass') ? 'natural_biomass' : (temp?.persistence_ratio ?? 0.8) > 0.5 ? 'persistent' : 'industrial'
+      const res = await axiosClient.get<Record<string, unknown>>(`/dashboard/objects/${encodeURIComponent(sourceId)}`)
+      const d = res.data
+      const loc = d.location as { latitude?: number; longitude?: number; state?: string; district?: string } | undefined
+      const cls = d.classification as { label?: string; confidence?: number; temporal_source_hint?: string } | undefined
+      const activity = (d.activity ?? d.temporal) as { persistence_ratio?: number; source_persistence_ratio?: number; source_hint?: string } | undefined
+      const flare = (d.gas_flare ?? d.gas_flare_assessment) as { likelihood?: string; score?: number } | undefined
+      const confidence = Math.round((cls?.confidence ?? 0) * 100)
+      const label = cls?.label ?? 'Unclassified thermal source'
+      const categoryLabel = label.toLowerCase()
+      const temporalHint = cls?.temporal_source_hint ?? activity?.source_hint ?? ''
+      const persistence = activity?.source_persistence_ratio ?? activity?.persistence_ratio ?? 0
+      const category: SourceCategory = categoryLabel.includes('biomass')
+        ? 'natural_biomass'
+        : categoryLabel.includes('industrial') || temporalHint.toLowerCase().includes('industrial')
+          ? 'industrial'
+          : persistence > 0.5
+            ? 'persistent'
+            : 'unknown'
+      const flareLikelihood = (flare?.likelihood ?? '').toUpperCase()
+      const anomalyLevel = flareLikelihood === 'LIKELY' ? 'high' : flareLikelihood === 'POSSIBLE' ? 'medium' : 'low'
 
-        const flareLvl = (flare?.likelihood ?? '').toUpperCase()
-        const flareScore = flare?.score ?? 0
-        const anomalyLevel = flareLvl === 'LIKELY' || flareScore >= 0.7 ? 'high' : flareLvl === 'POSSIBLE' || flareScore >= 0.3 ? 'medium' : 'low'
-
-        return {
-          id: String(d.object_uid ?? sourceId), category, industrySubtype: label,
-          confidence: conf, status: (temp?.persistence_ratio ?? 0.8) > 0.5 ? 'persistent' : 'new',
-          anomalyLevel,
-          lat: loc?.latitude ?? 23.3441, lon: loc?.longitude ?? 85.6096, firstDetected: now, lastDetected: now,
-        }
-      } catch {
-        return {
-          id: String(sourceId), category: 'industrial', industrySubtype: 'Thermal Object',
-          confidence: 85, status: 'persistent', anomalyLevel: 'medium', lat: 23.3441, lon: 85.6096,
-          firstDetected: now, lastDetected: now,
-        }
+      return {
+        id: String(d.object_uid ?? sourceId),
+        category,
+        industrySubtype: label,
+        confidence,
+        status: persistence > 0.5 ? 'persistent' : 'new',
+        anomalyLevel,
+        lat: loc?.latitude ?? 0,
+        lon: loc?.longitude ?? 0,
+        state: loc?.state,
+        district: loc?.district,
+        firstDetected: now,
+        lastDetected: now,
       }
     },
   })

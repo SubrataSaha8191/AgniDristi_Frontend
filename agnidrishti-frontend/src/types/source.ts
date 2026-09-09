@@ -38,7 +38,10 @@ export interface KPISummary {
 export interface ActivityPoint {
   month: string
   detections: number
-  avgTempK: number
+  avgTempK: number | null
+  minTempK?: number | null
+  maxTempK?: number | null
+  scope?: 'complete' | 'sample'
 }
 
 export interface ThermalFingerprint {

@@ -54,7 +54,7 @@ export default function InvestigationPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><ActivityTimelineChart sourceId={source.id} /></div>
             <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><ThermalFingerprintChart sourceId={source.id} /></div>
-            <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><AnomalyDetectionChart sourceId={source.id} anomalyLevel={source.anomalyLevel} /></div>
+            <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><AnomalyDetectionChart sourceId={source.id} /></div>
           </div>
           <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><SatelliteContextViewer sourceId={source.id} /></div>
           <div className="border-2 border-black dark:border-zinc-700 bg-surface p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"><SourceHistoryTimeline source={source} /></div>
