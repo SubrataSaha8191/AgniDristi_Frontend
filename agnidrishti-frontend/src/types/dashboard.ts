@@ -143,6 +143,19 @@ export interface VnfDetectionsResponse {
   detections: VnfMapDetection[]
 }
 
+export interface VnfMonthlyCount {
+  month: string
+  detection_count: number
+  persistent_detection_count: number
+  transient_detection_count: number
+}
+
+export interface VnfMonthlyResponse {
+  count: number
+  total_detections: number
+  months: VnfMonthlyCount[]
+}
+
 export interface TimeRangeInfo {
   range: string
   from: string
