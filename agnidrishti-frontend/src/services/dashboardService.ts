@@ -3,7 +3,7 @@ import { apiGet, apiPost, uploadFile } from '../lib/apiClient'
 import type {
   ClassDistribution, DashboardMapResponse, DashboardSummary, DetectionActivityCalendarResponse, DetectionsByStateResponse, GasFlareLikelihood, LatestRunResponse,
   IndustryStatsResponse, MapDatesResponse, MapObjectScope, MonitoringRunsResponse, MonitoringState, RecentFirmsResponse, ThermalObjectDetail,
-  ThermalObjectsResponse, VnfDetectionsResponse, VnfPersistence, VnfUploadResult,
+  ThermalObjectsResponse, VnfDetectionsResponse, VnfMonthlyResponse, VnfPersistence, VnfUploadResult,
 } from '../types/dashboard'
 import type { IndustryCategory } from '../lib/industryCategories'
 
@@ -24,6 +24,7 @@ export const dashboardKeys = {
   map: (date: string | null, range: string | null, objectScope: MapObjectScope, vnfLimit: number) => ['dashboard', 'map', date, range, objectScope, vnfLimit] as const,
   vnfDetections: (persistence: VnfPersistence, limit: number, offset: number) => ['dashboard', 'vnf', 'detections', persistence, limit, offset] as const,
   allVnfDetections: (persistence: VnfPersistence) => ['dashboard', 'vnf', 'detections', persistence, 'all'] as const,
+  vnfMonthly: ['dashboard', 'vnf', 'monthly'] as const,
 }
 
 export interface GeographicCategoryFilters {
@@ -97,6 +98,14 @@ export function useIndustryStats(category: IndustryCategory) {
   return useQuery({
     queryKey: dashboardKeys.industryStats(category),
     queryFn: ({ signal }) => apiGet<IndustryStatsResponse>(`/dashboard/industries/${encodeURIComponent(category)}/stats`, { signal }),
+    staleTime: 5 * 60_000,
+  })
+}
+
+export function useVnfMonthlyCounts() {
+  return useQuery({
+    queryKey: dashboardKeys.vnfMonthly,
+    queryFn: ({ signal }) => apiGet<VnfMonthlyResponse>('/dashboard/vnf/monthly', { signal }),
     staleTime: 5 * 60_000,
   })
 }
